@@ -3,7 +3,8 @@ package archiv
 import (
 	"fmt"
 	"math"
-	"psl2/num"
+
+	"github.com/melias122/psl/num"
 )
 
 func (h *hrx) dbg() string {

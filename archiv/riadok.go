@@ -1,9 +1,10 @@
 package archiv
 
 import (
-	"psl2/komb"
 	"strconv"
 	"strings"
+
+	"github.com/melias122/psl/komb"
 )
 
 type uc struct {

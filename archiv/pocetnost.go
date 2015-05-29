@@ -4,7 +4,8 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"psl2/math"
+
+	"github.com/melias122/psl/math"
 )
 
 func (a *Archiv) PocetnostR() error {

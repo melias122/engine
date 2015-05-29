@@ -1,6 +1,6 @@
 package num
 
-import "psl2/math"
+import "github.com/melias122/psl/math"
 
 type ph struct {
 	p int

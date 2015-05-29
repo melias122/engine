@@ -4,9 +4,10 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"psl2/komb"
-	"psl2/num"
 	"strconv"
+
+	"github.com/melias122/psl/komb"
+	"github.com/melias122/psl/num"
 )
 
 var header = []string{

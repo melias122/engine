@@ -2,8 +2,9 @@ package komb
 
 import (
 	"math"
-	"psl2/num"
 	"strings"
+
+	"github.com/melias122/psl/num"
 )
 
 type K struct {

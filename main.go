@@ -8,6 +8,8 @@ import (
 	"os"
 	"runtime/pprof"
 	"time"
+
+	"github.com/melias122/psl/archiv"
 )
 
 func main() {
@@ -25,16 +27,16 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	// n, m := 20, 80
-	// f, err := os.Open(fmt.Sprintf("testdata/%d%d.csv", n, m))
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer f.Close()
-	// a := archiv.New(n, m)
-	// if err = a.Parse(f); err != nil {
-	// 	panic(err)
-	// }
+	n, m := 20, 80
+	f, err := os.Open(fmt.Sprintf("testdata/%d%d.csv", n, m))
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	a := archiv.New(n, m)
+	if err = a.Parse(f); err != nil {
+		panic(err)
+	}
 	// if err = a.PocetnostR(); err != nil {
 	// 	panic(err)
 	// }
@@ -42,30 +44,7 @@ func main() {
 	// 	panic(err)
 	// }
 
-	// SubsetSum(5, func(a []int) {
-	// 	fmt.Println(a)
-	// })
-
-	test()
-
-	// arr := make([]int, 5)
-	// for i := range arr {
-	// 	arr[i] = i + 1
-	// }
-	// perm(3, func(a []int) {
-	// 	comb(len(a), len(arr), func(x []int) {
-	// 		for _, i := range x {
-	// 			fmt.Print(arr[i])
-	// 		}
-	// 		fmt.Println("")
-	// 	})
-	// })
-
-	// a.PocetnostR()
-	// n := GenNtice(8)
-	// for _, e := range n {
-	// 	fmt.Println(e)
-	// }
+	// test()
 }
 
 type x struct {
