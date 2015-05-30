@@ -13,7 +13,7 @@ type K struct {
 	ptr  []*num.N
 	num  *num.N
 
-	ntica Tica
+	ntica Ntica
 	xtica Tica
 }
 
@@ -24,7 +24,7 @@ func New(n, m int) *K {
 		ptr: make([]*num.N, n+1),
 		num: num.Zero(n, m),
 
-		ntica: make(Tica, n),
+		ntica: Ntica{Tica: make(Tica, n), n: make([]int, n)},
 		xtica: make(Tica, ((m-1)/10)+1),
 	}
 }
@@ -45,21 +45,8 @@ func (k *K) Xtica() Tica {
 	return k.xtica
 }
 
-// TODO: priadat do push
 func (k *K) Ntica() Tica {
-	// var tica int
-	// k.ntica = make(Tica, k.n)
-	// for i := 1; i < k.Len(); i++ {
-	// 	if (k.At(i-1).Cislo() - k.At(i).Cislo()) == 1 {
-	// 		tica++
-	// 	} else if tica > 0 {
-	// 		k.ntica[tica]++
-	// 		tica = 0
-	// 	} else {
-	// 		k.ntica[0]++
-	// 	}
-	// }
-	return k.ntica
+	return k.ntica.Tica
 }
 
 func (k0 *K) Zh(k1 *K) int {
@@ -124,6 +111,7 @@ func (k *K) Push(n *num.N) {
 	k.num.Plus(n)
 	k.ptr[k.nptr] = n
 	k.xtica[(n.Cislo()-1)/10]++
+	k.ntica.push(n.Cislo())
 	k.nptr++
 }
 
@@ -132,6 +120,7 @@ func (k *K) Pop() *num.N {
 	n := k.ptr[k.nptr]
 	k.num.Minus(n)
 	k.xtica[(n.Cislo()-1)/10]--
+	k.ntica.pop()
 	return n
 }
 
