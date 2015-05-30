@@ -1,15 +1,36 @@
 package math
 
-import "math/big"
-
-var (
-	cache = make(map[key]float64, 2048)
-	zero  = big.NewInt(int64(0))
+import (
+	"math/big"
+	"sync"
 )
 
 type key struct {
 	p, x, y int
 }
+
+type c struct {
+	sync.RWMutex
+	c map[key]float64
+}
+
+func (c *c) get(k key) (v float64, ok bool) {
+	c.RLock()
+	v, ok = c.c[k]
+	c.RUnlock()
+	return
+}
+
+func (c *c) put(k key, v float64) {
+	c.Lock()
+	c.c[k] = v
+	c.Unlock()
+}
+
+var (
+	cache = c{c: make(map[key]float64, 2048)}
+	zero  = big.NewInt(int64(0))
+)
 
 func Value(p, x, y, n, m int) float64 {
 	if x > (m/2)+m%2 {
@@ -17,10 +38,10 @@ func Value(p, x, y, n, m int) float64 {
 		y = n - y + 1
 	}
 	k := key{p, x, y}
-	v, ok := cache[k]
+	v, ok := cache.get(k)
 	if !ok {
 		v = value(k, n, m)
-		cache[k] = v
+		cache.put(k, v)
 	}
 	return v
 }
