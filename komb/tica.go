@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type Tica []byte
+type Tica []int
 
 func (t Tica) String() string {
 	var buf bytes.Buffer
@@ -19,29 +19,30 @@ func (t Tica) String() string {
 }
 
 type Ntica struct {
-	Tica
+	t Tica
 	n []int
-	t int
+	p int
+}
+
+func newNtica(n int) *Ntica {
+	return &Ntica{
+		t: make(Tica, n),
+		n: make([]int, 0, n),
+	}
 }
 
 func (n *Ntica) push(x int) {
 	n.n = append(n.n, x)
 	len := len(n.n)
 	if len > 1 {
-		t := false
 		if x-n.n[len-2] == 1 {
-			t = true
-		}
-		if t {
-			n.Tica[n.t]--
-			n.t++
+			n.t[n.p]--
+			n.p++
 		} else {
-			n.t = 0
+			n.p = 0
 		}
-		n.Tica[n.t]++
-	} else {
-		n.Tica[n.t]++
 	}
+	n.t[n.p]++
 }
 
 func (n *Ntica) pop() {

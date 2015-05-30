@@ -24,7 +24,7 @@ func New(n, m int) *K {
 		ptr: make([]*num.N, n+1),
 		num: num.Zero(n, m),
 
-		ntica: Ntica{Tica: make(Tica, n), n: make([]int, n)},
+		ntica: *newNtica(n),
 		xtica: make(Tica, ((m-1)/10)+1),
 	}
 }
@@ -46,17 +46,19 @@ func (k *K) Xtica() Tica {
 }
 
 func (k *K) Ntica() Tica {
-	return k.ntica.Tica
+	return k.ntica.t
 }
 
 func (k0 *K) Zh(k1 *K) int {
 	zh, i, j := 0, 0, 0
 	for i < k0.Len() && j < k1.Len() {
-		if k0.ptr[i] == k1.ptr[i] {
+		x1 := k0.At(i).Cislo()
+		x2 := k1.At(j).Cislo()
+		if x1 == x2 {
 			zh++
 			i++
 			j++
-		} else if k0.At(i).Cislo() < k1.At(j).Cislo() {
+		} else if x1 < x2 {
 			i++
 		} else {
 			j++

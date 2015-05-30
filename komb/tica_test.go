@@ -1,6 +1,9 @@
 package komb
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestNticaPush(t *testing.T) {
 	tests := []struct {
@@ -34,12 +37,12 @@ func TestNticaPush(t *testing.T) {
 		{[]int{1, 3, 6, 16, 26}, "5 0 0 0 0"},
 	}
 	for _, test := range tests {
-		n := Ntica{n: []int{}, Tica: make(Tica, len(test.t))}
+		n := Ntica{n: []int{}, t: make(Tica, len(test.t))}
 		for _, x := range test.t {
 			n.push(x)
 		}
-		if n.String() != test.w {
-			t.Fatalf("test: %s; Excepted: (%s), Have: (%s)", test, test.w, n.String())
+		if n.t.String() != test.w {
+			t.Fatalf("test: %s; Excepted: (%s), Have: (%s)", fmt.Sprint(test.t), test.w, n.t.String())
 		}
 	}
 }
