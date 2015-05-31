@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type Tica []int
+type Tica []byte
 
 func (t Tica) String() string {
 	var buf bytes.Buffer
@@ -24,8 +24,8 @@ type Ntica struct {
 	p int
 }
 
-func newNtica(n int) *Ntica {
-	return &Ntica{
+func newNtica(n int) Ntica {
+	return Ntica{
 		t: make(Tica, n),
 		n: make([]int, 0, n),
 	}

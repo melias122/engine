@@ -37,7 +37,7 @@ func TestNticaPush(t *testing.T) {
 		{[]int{1, 3, 6, 16, 26}, "5 0 0 0 0"},
 	}
 	for _, test := range tests {
-		n := Ntica{n: []int{}, t: make(Tica, len(test.t))}
+		n := *newNtica(len(test.t))
 		for _, x := range test.t {
 			n.push(x)
 		}

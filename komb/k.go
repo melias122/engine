@@ -24,7 +24,7 @@ func New(n, m int) *K {
 		ptr: make([]*num.N, n+1),
 		num: num.Zero(n, m),
 
-		ntica: *newNtica(n),
+		ntica: newNtica(n),
 		xtica: make(Tica, ((m-1)/10)+1),
 	}
 }

@@ -27,7 +27,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	n, m := 5, 35
+	n, m := 20, 80
 	f, err := os.Open(fmt.Sprintf("testdata/%d%d.csv", n, m))
 	if err != nil {
 		panic(err)
