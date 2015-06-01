@@ -1,9 +1,6 @@
 package komb
 
-import (
-	"fmt"
-	"testing"
-)
+import "testing"
 
 func TestNticaPush(t *testing.T) {
 	tests := []struct {
@@ -37,16 +34,37 @@ func TestNticaPush(t *testing.T) {
 		{[]int{1, 3, 6, 16, 26}, "5 0 0 0 0"},
 	}
 	for _, test := range tests {
-		n := *newNtica(len(test.t))
+		n := newNtica(len(test.t))
 		for _, x := range test.t {
 			n.push(x)
 		}
 		if n.t.String() != test.w {
-			t.Fatalf("test: %s; Excepted: (%s), Have: (%s)", fmt.Sprint(test.t), test.w, n.t.String())
+			t.Fatalf("Excepted: (%s), Have: (%s)", test.w, n.t.String())
 		}
 	}
 }
 
-// func TestNticaPop(t *testing.T) {
-
-// }
+func TestNticaPop(t *testing.T) {
+	tests := []struct {
+		t []int
+		w []string
+	}{
+		{[]int{1, 3, 5}, []string{"3 0 0", "2 0 0", "1 0 0", "0 0 0"}},
+		{[]int{1, 2, 3}, []string{"0 0 1", "0 1 0", "1 0 0", "0 0 0"}},
+		{[]int{1, 2, 4}, []string{"1 1 0", "0 1 0", "1 0 0", "0 0 0"}},
+		{[]int{1, 2, 3, 5, 6}, []string{"1 2 0 0 0", "2 1 0 0 0", "1 1 0 0 0", "0 1 0 0 0", "1 0 0 0 0", "0 0 0 0 0"}},
+	}
+	for _, test := range tests {
+		n := newNtica(len(test.t))
+		for _, x := range test.t {
+			n.push(x)
+		}
+		t.Log(n)
+		for i := 0; i < len(test.t); i++ {
+			if n.t.String() != test.w[i] {
+				t.Fatalf("Excepted: (%s), Have: (%s)", test.w[i], n.t.String())
+			}
+			n.pop()
+		}
+	}
+}
