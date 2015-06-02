@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"runtime/pprof"
-	"time"
 
 	"github.com/melias122/psl/archiv"
 )
@@ -27,7 +26,7 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	n, m := 20, 80
+	n, m := 5, 35
 	f, err := os.Open(fmt.Sprintf("testdata/%d%d.csv", n, m))
 	if err != nil {
 		panic(err)
@@ -37,75 +36,15 @@ func main() {
 	if err = a.Parse(f); err != nil {
 		panic(err)
 	}
-	// if err = a.PocetnostR(); err != nil {
-	// 	panic(err)
-	// }
-	// if err = a.PocetnostS(); err != nil {
-	// 	panic(err)
-	// }
-
-	// test()
-}
-
-type x struct {
-	sk int
-	c  []int
-}
-
-var (
-	sk = []x{
-		{1, []int{26, 52, 61, 68, 69}},
-		{2, []int{7, 18, 21, 23, 27, 38, 46, 48, 55, 60, 63, 65, 70, 76}},
-		{3, []int{2, 15, 20, 25, 29, 32, 34, 41, 42, 43, 49, 50, 57, 59, 77, 79}},
-		{4, []int{4, 5, 6, 10, 11, 24, 30, 31, 33, 36, 40, 44, 47, 56, 62, 64, 66, 72, 75, 78, 80}},
-		{5, []int{17, 22, 45, 58, 67, 71, 74}},
-		{6, []int{3, 8, 19, 39, 51, 54}},
-		{7, []int{9, 13, 14, 16, 28, 53, 73}},
-		{8, []int{1, 35}},
-		{9, []int{37}},
-		{10, []int{12}},
+	if err = a.PocetnostR(); err != nil {
+		panic(err)
 	}
-)
-
-type w struct {
-	s, w int
-}
-
-var blb = [][]w{}
-var y = make([]w, 0, 30)
-var spolu int
-
-func ss(sk []x, n int) {
-	if len(sk) == 0 {
-		return
+	if err = a.PocetnostS(); err != nil {
+		panic(err)
 	}
-	var xx int
-	if n > len(sk[0].c) {
-		xx = len(sk[0].c)
-	} else {
-		xx = n
+	if err = a.HrxHHrx(); err != nil {
+		panic(err)
 	}
-	for i := xx; i > 0; i-- {
-		y = append(y, w{sk[0].sk, i})
-		if n-i > 0 {
-			ss(sk[1:], n-i)
-		} else {
-			// fmt.Println(y)
-			cp := make([]w, len(y))
-			copy(cp, y)
-			blb = append(blb, cp)
-			spolu++
-		}
-		y = y[:len(y)-1]
-	}
-	ss(sk[1:], n)
-}
-
-func test() {
-	ss(sk, 30)
-	fmt.Println(spolu)
-	fmt.Println(len(blb))
-	time.Sleep(10 * time.Second)
 }
 
 func perm(n int, emit func([]int)) {

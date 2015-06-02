@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/melias122/psl/hrx"
 	"github.com/melias122/psl/komb"
 	"github.com/melias122/psl/num"
 )
@@ -23,8 +24,8 @@ type Archiv struct {
 	n, m int
 	Riadok
 	Cisla map[int]*num.N
-	hrx   *hrx
-	hhrx  *hrx
+	Hrx   *hrx.H
+	HHrx  *hrx.H
 }
 
 func New(n, m int) *Archiv {
@@ -32,8 +33,8 @@ func New(n, m int) *Archiv {
 		n:     n,
 		m:     m,
 		Cisla: make(map[int]*num.N, m),
-		hrx:   newhrx(m, func(n *num.N) int { return n.PocR2() }),
-		hhrx:  newhrx(m, func(n *num.N) int { return n.PocR1() }),
+		Hrx:   hrx.New(m, func(n *num.N) int { return n.PocR2() }),
+		HHrx:  hrx.New(m, func(n *num.N) int { return n.PocR1() }),
 	}
 }
 
@@ -42,7 +43,7 @@ func (a *Archiv) add2Reverse(k [][]int) uc {
 		n, u int
 		v    = make(map[int]bool, a.m)
 	)
-	a.hrx = newhrx(a.m, func(n *num.N) int { return n.PocR2() })
+	a.Hrx = hrx.New(a.m, func(n *num.N) int { return n.PocR2() })
 	for _, c := range a.Cisla {
 		c.Reset2()
 	}
@@ -52,7 +53,7 @@ func (a *Archiv) add2Reverse(k [][]int) uc {
 		for y, x := range k[n-1] {
 			c := a.Cisla[x]
 			c.Inc2(y)
-			a.hrx.add(c)
+			a.Hrx.Add(c)
 			v[x] = true
 			if len(v) == a.m && !full {
 				u = x
@@ -74,7 +75,7 @@ func (a *Archiv) add2(k []int) bool {
 		}
 		c := a.Cisla[x]
 		c.Inc2(y)
-		a.hrx.add(c)
+		a.Hrx.Add(c)
 	}
 	return false
 }
@@ -92,10 +93,10 @@ func (a *Archiv) add1(k []int) (*komb.K, bool) {
 
 			ko.Push(c)
 			c.Inc1(y)
-			a.hhrx.add(c)
+			a.HHrx.Add(c)
 		} else {
 			c.Inc1(y)
-			a.hhrx.add(c)
+			a.HHrx.Add(c)
 			ko.Push(c)
 		}
 	}
@@ -125,10 +126,10 @@ func (a *Archiv) write(C [][]int) error {
 		}
 		if a.Pc > 1 {
 			r0 := a.Riadok
-			a.Riadok.add(k, a.hrx.hrx(), a.hhrx.hrx())
+			a.Riadok.add(k, a.Hrx.Get(), a.HHrx.Get())
 			a.Riadok.diff(r0)
 		} else {
-			a.Riadok.add(k, a.hrx.hrx(), a.hhrx.hrx())
+			a.Riadok.add(k, 100, 100)
 		}
 		if err := w.Write(a.Riadok.record()); err != nil {
 			return err
