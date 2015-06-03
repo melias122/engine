@@ -29,16 +29,19 @@ func main() {
 
 	n, m := 20, 80
 	path := fmt.Sprintf("testdata/%d%d.csv", n, m)
-	archiv.Make(path, n, m)
+	a, err := archiv.Make(path, n, m)
+	if err != nil {
+		panic(err)
+	}
 	// if err = a.PocetnostR(); err != nil {
 	// 	panic(err)
 	// }
 	// if err = a.PocetnostS(); err != nil {
 	// 	panic(err)
 	// }
-	// if err = a.HrxHHrx(); err != nil {
-	// 	panic(err)
-	// }
+	if err = a.HrxHHrx(); err != nil {
+		panic(err)
+	}
 	// archiv.MapaNtice([][]string{}, n)
 }
 
