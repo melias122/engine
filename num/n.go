@@ -1,6 +1,9 @@
 package num
 
-import "strconv"
+import (
+	"math/big"
+	"strconv"
+)
 
 type N struct {
 	c C
@@ -121,4 +124,11 @@ func (n *N) PocS2(y int) int {
 
 func (n *N) String() string {
 	return strconv.Itoa(n.x)
+}
+
+// func vrati maximalnu teoreticku
+// pocetnost cisla v stlpci
+func Max(x, y, n, m int) *big.Int {
+	var a, b big.Int
+	return a.Mul(a.Binomial(int64(m-x), int64(n-y)), b.Binomial(int64(x-1), int64(y-1)))
 }
