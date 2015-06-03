@@ -1,24 +1,22 @@
 package num
 
-import "github.com/melias122/psl/math"
+type IncFn func(int) float64
 
 type ph struct {
-	p int
-	h float64
-	f func()
+	p  int
+	h  float64
+	fn IncFn
 }
 
 func newph(x, y, n, m int) *ph {
-	var ph ph
-	ph.f = func() {
-		ph.p++
-		ph.h = math.Value(ph.p, x, y, n, m)
+	return &ph{
+		fn: func(p int) float64 { return Value(p, x, y, n, m) },
 	}
-	return &ph
 }
 
 func (p *ph) inc() {
-	p.f()
+	p.p++
+	p.h = p.fn(p.p)
 }
 
 func (p *ph) reset() {
