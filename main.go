@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"log"
@@ -10,6 +9,8 @@ import (
 
 	"github.com/melias122/psl/archiv"
 )
+
+// _ "net/http/pprof"
 
 func main() {
 
@@ -26,25 +27,19 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	n, m := 5, 35
-	f, err := os.Open(fmt.Sprintf("testdata/%d%d.csv", n, m))
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	a := archiv.New(n, m)
-	if err = a.Parse(f); err != nil {
-		panic(err)
-	}
-	if err = a.PocetnostR(); err != nil {
-		panic(err)
-	}
-	if err = a.PocetnostS(); err != nil {
-		panic(err)
-	}
-	if err = a.HrxHHrx(); err != nil {
-		panic(err)
-	}
+	n, m := 20, 80
+	path := fmt.Sprintf("testdata/%d%d.csv", n, m)
+	archiv.Make(path, n, m)
+	// if err = a.PocetnostR(); err != nil {
+	// 	panic(err)
+	// }
+	// if err = a.PocetnostS(); err != nil {
+	// 	panic(err)
+	// }
+	// if err = a.HrxHHrx(); err != nil {
+	// 	panic(err)
+	// }
+	// archiv.MapaNtice([][]string{}, n)
 }
 
 func perm(n int, emit func([]int)) {
@@ -76,52 +71,6 @@ func comb(n, m int, emit func([]int)) {
 		}
 	}
 	rc(0, 0)
-}
-
-func GenNtice(n int) [][]byte {
-
-	var ntice [][]byte
-
-	nt := make([]byte, n)
-	nt_end := make([]byte, n)
-
-	nt[0] = byte(n)
-	nt_end[n-1] = byte(1)
-
-	idx := 0
-	for !bytes.Equal(nt, nt_end) {
-
-		sum := 0
-		for i, e := range nt {
-			sum += int(e) * (i + 1)
-		}
-
-		if sum == n {
-
-			s := make([]byte, len(nt))
-			copy(s, nt)
-			ntice = append(ntice, s)
-
-			nt[idx]--
-			idx++
-		} else if sum < n {
-			nt[idx]++
-		} else {
-			nt[idx]--
-			idx++
-		}
-
-		if idx == len(nt) {
-			idx--
-			for nt[idx] == 0 {
-				idx--
-			}
-			nt[idx]--
-			idx++
-		}
-	}
-
-	return ntice
 }
 
 func ForwardLinearPrediction(coefs, x []float64) {

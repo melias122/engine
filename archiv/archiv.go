@@ -3,8 +3,10 @@ package archiv
 import (
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
-	"strconv"
+	"path/filepath"
+	"strings"
 
 	"github.com/melias122/psl/hrx"
 	"github.com/melias122/psl/komb"
@@ -26,31 +28,39 @@ type Archiv struct {
 	Cisla map[int]*num.N
 	Hrx   *hrx.H
 	HHrx  *hrx.H
+
+	Dir  string
+	Path string
 }
 
-func New(n, m int) *Archiv {
+func New(dir string, n, m int) *Archiv {
 	return &Archiv{
 		n:     n,
 		m:     m,
 		Cisla: make(map[int]*num.N, m),
 		Hrx:   hrx.New(m, func(n *num.N) int { return n.PocR2() }),
 		HHrx:  hrx.New(m, func(n *num.N) int { return n.PocR1() }),
+
+		Dir:  dir,
+		Path: filepath.Join(dir, "Archiv_"+dir+".csv"),
 	}
 }
 
-func (a *Archiv) add2Reverse(k [][]int) uc {
+func (a *Archiv) add2Reverse(k [][]byte) uc {
 	var (
-		n, u int
-		v    = make(map[int]bool, a.m)
+		u int
+		v = make(map[int]bool, a.m)
 	)
 	a.Hrx = hrx.New(a.m, func(n *num.N) int { return n.PocR2() })
 	for _, c := range a.Cisla {
 		c.Reset2()
 	}
-	n = len(k)
+	i := len(k)
 	full := false
 	for !full {
-		for y, x := range k[n-1] {
+		i--
+		for y := range k[i] {
+			x := int(k[i][y])
 			c := a.Cisla[x]
 			c.Inc2(y)
 			a.Hrx.Add(c)
@@ -60,16 +70,16 @@ func (a *Archiv) add2Reverse(k [][]int) uc {
 				full = true
 			}
 		}
-		n--
 	}
-	return uc{u, n + 1}
+	return uc{u, i + 1}
 }
 
-func (a *Archiv) add2(k []int) bool {
+func (a *Archiv) add2(k []byte) bool {
 	if a.uc.Cislo == 0 {
 		return true
 	}
-	for y, x := range k {
+	for y := range k {
+		x := int(k[y])
 		if x == a.uc.Cislo {
 			return true
 		}
@@ -80,13 +90,14 @@ func (a *Archiv) add2(k []int) bool {
 	return false
 }
 
-func (a *Archiv) add1(k []int) (*komb.K, bool) {
+func (a *Archiv) add1(k []byte) (*komb.K, bool) {
 	var (
 		ok bool
 		c  *num.N
 		ko *komb.K = komb.New(a.n, a.m)
 	)
-	for y, x := range k {
+	for y := range k {
+		x := int(k[y])
 		if c, ok = a.Cisla[x]; !ok {
 			c = num.New(x, a.n, a.m)
 			a.Cisla[x] = c
@@ -103,25 +114,26 @@ func (a *Archiv) add1(k []int) (*komb.K, bool) {
 	return ko, len(a.Cisla) == a.m
 }
 
-func (a *Archiv) write(C [][]int) error {
-	os.Mkdir(fmt.Sprintf("%d%d", a.n, a.m), 0755)
-	o, err := os.Create(fmt.Sprintf("%d%d/Archiv_%d%d.csv", a.n, a.m, a.n, a.m))
+func (a *Archiv) write(Kombinacie [][]byte) error {
+
+	file, err := os.Create(a.Path)
 	if err != nil {
 		return err
 	}
-	defer o.Close()
+	defer file.Close()
 
-	w := csv.NewWriter(o)
+	w := csv.NewWriter(file)
 	w.Comma = ';'
 	if err := w.Write(header); err != nil {
 		return err
 	}
-	for _, c := range C {
+
+	for _, c := range Kombinacie {
 		a.Pc++
 		k, is101 := a.add1(c)
 		if is101 {
 			if reverse := a.add2(c); reverse {
-				a.uc = a.add2Reverse(C[:a.Pc])
+				a.uc = a.add2Reverse(Kombinacie[:a.Pc])
 			}
 		}
 		if a.Pc > 1 {
@@ -139,39 +151,33 @@ func (a *Archiv) write(C [][]int) error {
 	return w.Error()
 }
 
-func (a *Archiv) Parse(f *os.File) error {
-	k, err := a.parse(f)
-	if err != nil {
-		return err
+func Make(path string, n, m int) (*Archiv, error) {
+
+	if path == "" {
+		return nil, fmt.Errorf("Nebola zadana cesta k súboru!")
 	}
-	return a.write(k)
-}
+	if n < 2 || n >= m || m > 99 {
+		return nil, fmt.Errorf("Nesprávny rozmer databázy: %d/%d", n, m)
+	}
+	base := filepath.Base(path)
+	dir := strings.Split(base, ".")[0]
 
-func (a *Archiv) parse(f *os.File) ([][]int, error) {
-	r := csv.NewReader(f)
-	r.Comma = rune(';')
-
-	records, err := r.ReadAll()
+	// parse csv
+	Kombinacie, err := Parse(path, n, m)
 	if err != nil {
 		return nil, err
 	}
 
-	var k [][]int
-	for i, r := range records[1:] {
-		if len(r) < a.n+3 {
-			return nil,
-				fmt.Errorf("%s: na riadku %d sa nepodarilo nacitat kombinaciu", f.Name(), i+1)
-		}
-		c := make([]int, a.n)
-		for i, x := range r[3 : a.n+3] {
-			cislo, err := strconv.ParseUint(x, 10, 0)
-			if err != nil {
-				return nil, err
-			}
-			c[i] = int(cislo)
-		}
-
-		k = append(k, c)
+	// Vytvorenie suboru
+	err = os.Mkdir(dir, 0755)
+	if err != nil {
+		log.Printf("%s\n", err)
 	}
-	return k, nil
+
+	a := New(dir, n, m)
+	err = a.write(Kombinacie)
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
 }

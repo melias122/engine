@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/melias122/psl/math"
+	"github.com/melias122/psl/num"
 )
 
 func (a *Archiv) PocetnostR() error {
@@ -25,7 +25,7 @@ func (a *Archiv) PocetnostR() error {
 	if err := w.Write(header); err != nil {
 		return err
 	}
-	max := math.Max(1, 1, a.n, a.m).String()
+	max := num.Max(1, 1, a.n, a.m).String()
 	for i := 1; i <= a.m; i++ {
 		c := a.Cisla[i]
 		r := make([]string, 0, len(header))
@@ -35,8 +35,8 @@ func (a *Archiv) PocetnostR() error {
 		}
 		r = append(r,
 			c.String(), max, "1",
-			itoa(c.PocR1()), ftoa(c.R1()), itoa(c.PocR1()+1), ftoa(math.Value(c.PocR1()+1, 1, 1, a.n, a.m)),
-			itoa(c.PocR2()), ftoa(c.R2()), itoa(c.PocR2()+1), ftoa(math.Value(c.PocR2()+1, 1, 1, a.n, a.m)),
+			itoa(c.PocR1()), ftoa(c.R1()), itoa(c.PocR1()+1), ftoa(num.Value(c.PocR1()+1, 1, 1, a.n, a.m)),
+			itoa(c.PocR2()), ftoa(c.R2()), itoa(c.PocR2()+1), ftoa(num.Value(c.PocR2()+1, 1, 1, a.n, a.m)),
 		)
 		if err := w.Write(r); err != nil {
 			return err
@@ -71,7 +71,7 @@ func (a *Archiv) PocetnostS() error {
 			for _, e := range c.C() {
 				r = append(r, itoa(int(e)))
 			}
-			teorPoc := math.Max(i, j, a.n, a.m)
+			teorPoc := num.Max(i, j, a.n, a.m)
 			r = append(r, fmt.Sprintf("stlchce(%d):%d", j, i), teorPoc.String())
 
 			var s1, s2, pocS1, pocS2 string
@@ -80,8 +80,8 @@ func (a *Archiv) PocetnostS() error {
 				s1, s2, pocS1, pocS2 = ftoa(0.0), ftoa(0.0), "0", "0"
 			} else {
 				r = append(r, "1")
-				s1, pocS1 = ftoa(math.Value(c.PocS1(j)+1, i, j, a.n, a.m)), itoa(c.PocS1(j)+1)
-				s2, pocS2 = ftoa(math.Value(c.PocS2(j)+1, i, j, a.n, a.m)), itoa(c.PocS2(j)+1)
+				s1, pocS1 = ftoa(num.Value(c.PocS1(j)+1, i, j, a.n, a.m)), itoa(c.PocS1(j)+1)
+				s2, pocS2 = ftoa(num.Value(c.PocS2(j)+1, i, j, a.n, a.m)), itoa(c.PocS2(j)+1)
 			}
 			r = append(r,
 				itoa(c.PocS1(j)), ftoa(c.S1(j)), pocS1, s1,

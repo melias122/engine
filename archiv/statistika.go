@@ -1,67 +1,80 @@
 package archiv
 
-// void statistikaZhoda(uint n, uint m, uint csvLength){
+// QHash<QString, int> nTice;
+// QHash<int, int> nZh;
+// QHash<int ,QHash<QString, int>> nZhTyp;
+// QHash<QString, QHash<QString, int>> nTiceTyp;
 
-//     CSV statZH;
-//     QStringList out_stringl;
-//     bigFloat cr;
+// type ZhTyp struct {
+// 	i int
+// 	s string
+// }
 
-//     // header
-//     out_stringl << "Zhoda" << "Pocetnost teor." << "Teoreticka moznost v %" << "Pocetnost" << "Realne dosiahnute %";
-//     statZH.append(out_stringl);
+// type NticKey struct {
+// 	i int
+// 	s string
+// }
 
-//     for(int i = n; i >= 0; --i){
+// var (
+// 	nZh      map[int]int
+// 	nZhTyp   map[int][]ZhTyp
+// 	nTice    map[string]int
+// 	nTiceTyp map[NticKey]int
+// )
 
-//         out_stringl.clear();
+// func statistikaZhoda(n, m, len int) {
 
-//         cr = nCm(i,n).convert_to<bigFloat>() * nCm(m-n-(n-i),m-n).convert_to<bigFloat>();
-//         out_stringl << QString::number(i)                       // ZH
-//                     << doubleToQString(cr.convert_to<double>()); // pocet teor
+// 	statZH := [][]string{
+// 		[]string{"Zhoda", "Pocetnost teor.", "Teoreticka moznost v %", "Pocetnost", "Realne dosiahnute %"},
+// 	}
+// 	for i := n; i >= i; i-- {
+// 		var (
+// 			a, b big.Int
+// 			r    big.Rat
+// 		)
+// 		a.Mul(a.Binomial(int64(n), int64(i)), b.Binomial(int64(m-n), int64(m+i-(2*n))))
+// 		r.SetFrac(a, b.Binomial(int64(m), int64(n)))
+// 		f, _ := r.Float64()
+// 		statZH = append(statZH, []string{
+// 			itoa(i),
+// 			a.String(),
+// 			ftoa(f * 100),
+// 			itoa(nZh[i]),
+// 			ftoa((nZh[i] / len) * 100),
+// 		})
+// 	}
+// 	statZH = append(statZH, []string{})
 
-//         cr /= nCm(n, m).convert_to<bigFloat>();
-//         out_stringl << doubleToQString(cr.convert_to<double>()*100)         // teor %
-//                     << QString::number(zhoda_pocet[i]);    // pocet
+// 	for i := 1; i <= n; i++ {
+// 		statZH = append(statZH,
+// 			[]string{
+// 				fmt.Sprintf("Zhoda %d", i),
+// 				"Pocetnost",
+// 				"Realne %",
+// 			},
+// 			[]string{
+// 				fmt.Sprintf("Zhoda %d", i),
+// 				itoa(nZh[i]),
+// 				ftoa((nZh[i] / len) * 100),
+// 			},
+// 		)
+// 		for poz := range nZhTyp[i] {
+// 			statZH = append(statZH, []string{
+// 				poz,
+// 				itoa(nZhTyp[i][poz]),
+// 				ftoa((nZhTyp[i][poz] / len) * 100),
+// 			})
+// 		}
+// 		statZH = append(statZH, []string{})
+// 	}
 
-//         out_stringl << doubleToQString(((double)zhoda_pocet[i]/csvLength)*100);     // real %
-
-//         statZH.append(out_stringl);
-//     }
-//     statZH.append({";"});
-
-//     for(uint i=1; i<=n; i++){
-
-//         out_stringl.clear();
-
-//         QString zhs = QString::number(i);
-
-//         // header
-//         out_stringl << QString("Zhoda ").append(zhs) << "Pocetnost" << QString("Realne %");
-//         statZH.append(out_stringl);
-//         out_stringl.clear();
-//         //
-
-//         // vsetky
-//         out_stringl << QString("Zhoda ").append(zhs) << QString::number(zhoda_pocet[i]) << doubleToQString(((double)zhoda_pocet[i]/csvLength)*100);
-//         statZH.append(out_stringl);
-//         //
-
-//         foreach (const QString &poz, zhoda_typ_pocet[i].keys()) {
-//             out_stringl.clear();
-//             out_stringl << poz // poz
-//                         << QString::number(zhoda_typ_pocet[i][poz]) // pocet
-//                         << doubleToQString(((double)zhoda_typ_pocet[i][poz]/csvLength)*100);
-//             statZH.append(out_stringl);
-//         }
-//         statZH.append({";"});
-//     }
-
-//     zhoda_pocet.clear();
-//     zhoda_typ_pocet.clear();
-
-//     zhoda_pocet.squeeze();
-//     zhoda_typ_pocet.squeeze();
-
-//     exportCsv(statZH, pwd() + "StatistikaZhoda_" + suborName() + ".csv");
+// 	f, err := os.Create(fmt.Spritf("%d%d/StatistikaZhoda_%d%d.csv", n, m, n, m))
+// 	if err != nil {
+// 		return err
+// 	}
+// 	w := csv.NewWriter(f)
+// 	w.Comma = ';'
+// 	return w.WriteAll(statZH)
 // }
 
 // void statistikaNtice(uint n, uint m, uint csvLength){
@@ -105,7 +118,7 @@ package archiv
 //         out_stringl << doubleToQString(cr.convert_to<double>()*100);
 
 //         //real dosiah
-//         out_stringl << doubleToQString((ntice_pocet[tica]/(double)csvLength)*100);
+//         out_stringl << doubleToQString((nTice[tica]/(double)csvLength)*100);
 
 //         statNtice.append(out_stringl);
 //         out_stringl.clear();
@@ -118,10 +131,10 @@ package archiv
 
 //     for(int i=ntice_pos.size()-1; i>=0; i--){
 //         QString tica = ntice_pos.key(i);
-//         QHash<QString, int> qmi = ntice_typ_pocet.value(tica);
+//         QHash<QString, int> qmi = nTiceTyp.value(tica);
 
 //         out_stringl.clear();
-//         out_stringl << tica << "vsetky" << QString::number(ntice_pocet.value(tica)) << doubleToQString(ntice_pocet[tica]/(double)csvLength*100);
+//         out_stringl << tica << "vsetky" << QString::number(nTice.value(tica)) << doubleToQString(nTice[tica]/(double)csvLength*100);
 //         statNtice.append(out_stringl);
 
 //         foreach (const QString &p, qmi.keys()) {
@@ -130,15 +143,10 @@ package archiv
 //             statNtice.append(out_stringl);
 //         }
 //     }
-
-//     ntice_pocet.clear();
-//     ntice_typ_pocet.clear();
-
 //     exportCsv(statNtice, pwd() + "StatistikaNtice_" + suborName() + ".csv");
 // }
 
 // void statArchiv(uint n,uint m, const Kombinacie &kombinacie){
-
 //     CSV csv;
 //     QStringList line;
 //     QVector<Cislovacky> _cislovacky;

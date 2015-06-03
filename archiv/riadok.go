@@ -96,6 +96,6 @@ func itoa(i int) string {
 }
 
 func ftoa(f float64) string {
-	s := strconv.FormatFloat(f, 'g', 15, 64)
+	s := strconv.FormatFloat(f, 'g', -1, 64)
 	return strings.Replace(s, ".", ",", 1)
 }
