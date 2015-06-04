@@ -25,9 +25,11 @@ var header = []string{
 type Archiv struct {
 	n, m int
 	Riadok
-	Cisla map[int]*num.N
-	Hrx   *hrx.H
-	HHrx  *hrx.H
+	Is101  bool
+	nCisla int
+	Cisla  []*num.N
+	Hrx    *hrx.H
+	HHrx   *hrx.H
 
 	Dir  string
 	Path string
@@ -37,7 +39,7 @@ func New(dir string, n, m int) *Archiv {
 	return &Archiv{
 		n:     n,
 		m:     m,
-		Cisla: make(map[int]*num.N, m),
+		Cisla: make([]*num.N, m),
 		Hrx:   hrx.New(m, func(n *num.N) int { return n.PocR2() }),
 		HHrx:  hrx.New(m, func(n *num.N) int { return n.PocR1() }),
 
@@ -61,7 +63,7 @@ func (a *Archiv) add2Reverse(k [][]byte) uc {
 		i--
 		for y := range k[i] {
 			x := int(k[i][y])
-			c := a.Cisla[x]
+			c := a.Cisla[x-1]
 			c.Inc2(y)
 			a.Hrx.Add(c)
 			v[x] = true
@@ -83,7 +85,7 @@ func (a *Archiv) add2(k []byte) bool {
 		if x == a.uc.Cislo {
 			return true
 		}
-		c := a.Cisla[x]
+		c := a.Cisla[x-1]
 		c.Inc2(y)
 		a.Hrx.Add(c)
 	}
@@ -92,26 +94,31 @@ func (a *Archiv) add2(k []byte) bool {
 
 func (a *Archiv) add1(k []byte) (*komb.K, bool) {
 	var (
-		ok bool
-		c  *num.N
+		// c  *num.N
 		ko *komb.K = komb.New(a.n, a.m)
 	)
 	for y := range k {
 		x := int(k[y])
-		if c, ok = a.Cisla[x]; !ok {
-			c = num.New(x, a.n, a.m)
-			a.Cisla[x] = c
+		if a.Cisla[x-1] == nil {
+			c := num.New(x, a.n, a.m)
+			a.Cisla[x-1] = c
+
+			a.nCisla++
+			if a.nCisla == a.m {
+				a.Is101 = true
+			}
 
 			ko.Push(c)
 			c.Inc1(y)
 			a.HHrx.Add(c)
 		} else {
+			c := a.Cisla[x-1]
 			c.Inc1(y)
 			a.HHrx.Add(c)
 			ko.Push(c)
 		}
 	}
-	return ko, len(a.Cisla) == a.m
+	return ko, a.Is101
 }
 
 func (a *Archiv) write(Kombinacie [][]byte) error {

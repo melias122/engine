@@ -10,8 +10,6 @@ import (
 	"github.com/melias122/psl/archiv"
 )
 
-// _ "net/http/pprof"
-
 func main() {
 
 	cpuprofile := flag.String("cpuprofile", "", "Write cpu profile to file")
@@ -29,7 +27,7 @@ func main() {
 
 	n, m := 20, 80
 	path := fmt.Sprintf("testdata/%d%d.csv", n, m)
-	a, err := archiv.Make(path, n, m)
+	_, err := archiv.Make(path, n, m)
 	if err != nil {
 		panic(err)
 	}
@@ -39,41 +37,10 @@ func main() {
 	// if err = a.PocetnostS(); err != nil {
 	// 	panic(err)
 	// }
-	if err = a.HrxHHrx(); err != nil {
-		panic(err)
-	}
-	// archiv.MapaNtice([][]string{}, n)
-}
+	// if err = a.HrxHHrx(); err != nil {
+	// 	panic(err)
+	// }
 
-func perm(n int, emit func([]int)) {
-	var rc func([]int, int, int)
-	rc = func(a []int, i, sum int) {
-		a[i] = sum
-		emit(a[:i+1])
-		for a[i]--; a[i] > 0; a[i]-- {
-			rc(a, i+1, sum-a[i])
-		}
-	}
-	rc(make([]int, n), 0, n)
-}
-
-func comb(n, m int, emit func([]int)) {
-	s := make([]int, n)
-	last := n - 1
-
-	var rc func(int, int)
-
-	rc = func(i, next int) {
-		for j := next; j < m; j++ {
-			s[i] = j
-			if i == last {
-				emit(s)
-			} else {
-				rc(i+1, j+1)
-			}
-		}
-	}
-	rc(0, 0)
 }
 
 func ForwardLinearPrediction(coefs, x []float64) {
