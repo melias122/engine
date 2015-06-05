@@ -48,80 +48,78 @@ func New(dir string, n, m int) *Archiv {
 	}
 }
 
-func (a *Archiv) add2Reverse(k [][]byte) uc {
+func (a *Archiv) add2Reverse(kombinacie [][]int) Uc {
 	var (
 		u int
 		v = make(map[int]bool, a.m)
 	)
 	a.Hrx = hrx.New(a.m, func(n *num.N) int { return n.PocR2() })
-	for _, c := range a.Cisla {
-		c.Reset2()
+	for _, N := range a.Cisla {
+		N.Reset2()
 	}
-	i := len(k)
-	full := false
-	for !full {
+	var (
+		is101 bool
+		i     = len(kombinacie)
+	)
+	for !is101 {
 		i--
-		for y := range k[i] {
-			x := int(k[i][y])
-			c := a.Cisla[x-1]
-			c.Inc2(y)
-			a.Hrx.Add(c)
+		for y, x := range kombinacie[i] {
+			N := a.Cisla[x-1]
+			N.Inc2(y)
+			a.Hrx.Add(N)
 			v[x] = true
-			if len(v) == a.m && !full {
+			if len(v) == a.m && !is101 {
 				u = x
-				full = true
+				is101 = true
 			}
 		}
 	}
-	return uc{u, i + 1}
+	return Uc{u, i}
 }
 
-func (a *Archiv) add2(k []byte) bool {
-	if a.uc.Cislo == 0 {
+func (a *Archiv) add2(kombinacia []int) bool {
+	if a.Uc.Cislo == 0 {
 		return true
 	}
-	for y := range k {
-		x := int(k[y])
-		if x == a.uc.Cislo {
+	for y, x := range kombinacia {
+		if x == a.Uc.Cislo {
 			return true
 		}
-		c := a.Cisla[x-1]
-		c.Inc2(y)
-		a.Hrx.Add(c)
+		N := a.Cisla[x-1]
+		N.Inc2(y)
+		a.Hrx.Add(N)
 	}
 	return false
 }
 
-func (a *Archiv) add1(k []byte) (*komb.K, bool) {
+func (a *Archiv) add1(kombinacia []int) (*komb.K, bool) {
 	var (
-		// c  *num.N
-		ko *komb.K = komb.New(a.n, a.m)
+		K *komb.K = komb.New(a.n, a.m)
 	)
-	for y := range k {
-		x := int(k[y])
+	for y, x := range kombinacia {
 		if a.Cisla[x-1] == nil {
-			c := num.New(x, a.n, a.m)
-			a.Cisla[x-1] = c
+			N := num.New(x, a.n, a.m)
+			a.Cisla[x-1] = N
 
 			a.nCisla++
 			if a.nCisla == a.m {
 				a.Is101 = true
 			}
 
-			ko.Push(c)
-			c.Inc1(y)
-			a.HHrx.Add(c)
+			K.Push(N)
+			N.Inc1(y)
+			a.HHrx.Add(N)
 		} else {
-			c := a.Cisla[x-1]
-			c.Inc1(y)
-			a.HHrx.Add(c)
-			ko.Push(c)
+			N := a.Cisla[x-1]
+			N.Inc1(y)
+			a.HHrx.Add(N)
+			K.Push(N)
 		}
 	}
-	return ko, a.Is101
+	return K, a.Is101
 }
 
-func (a *Archiv) write(Kombinacie [][]byte) error {
+func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 
 	file, err := os.Create(a.Path)
 	if err != nil {
@@ -134,21 +132,33 @@ func (a *Archiv) write(Kombinacie [][]byte) error {
 	if err := w.Write(header); err != nil {
 		return err
 	}
+	var (
+		kombinacie = make([][]int, 0, 64)
+	)
+	for errKomb := range chanErrKomb {
 
-	for _, c := range Kombinacie {
+		if errKomb.Err != nil {
+			return errKomb.Err
+		}
+		komb := errKomb.Komb
+		kombinacie = append(kombinacie, komb)
+
 		a.Pc++
-		k, is101 := a.add1(c)
+		K, is101 := a.add1(komb)
 		if is101 {
-			if reverse := a.add2(c); reverse {
-				a.uc = a.add2Reverse(Kombinacie[:a.Pc])
+			if reverse := a.add2(komb); reverse {
+				uc := a.add2Reverse(kombinacie)
+				a.Uc = Uc{Cislo: uc.Cislo, Riadok: uc.Riadok + a.Uc.Riadok}
+				kombinacie = kombinacie[uc.Riadok:]
 			}
 		}
 		if a.Pc > 1 {
 			r0 := a.Riadok
-			a.Riadok.add(k, a.Hrx.Get(), a.HHrx.Get())
+			a.Riadok.add(K, a.Hrx.Get(), a.HHrx.Get())
 			a.Riadok.diff(r0)
 		} else {
-			a.Riadok.add(k, 100, 100)
+			a.Uc.Riadok++ // TODO: nespravne ukazovanie uc predtym nez nastane 101
+			a.Riadok.add(K, 100, 100)
 		}
 		if err := w.Write(a.Riadok.record()); err != nil {
 			return err
@@ -169,22 +179,14 @@ func Make(path string, n, m int) (*Archiv, error) {
 	base := filepath.Base(path)
 	dir := strings.Split(base, ".")[0]
 
-	// parse csv
-	Kombinacie, err := Parse(path, n, m)
-	if err != nil {
-		return nil, err
-	}
-
 	// Vytvorenie suboru
-	err = os.Mkdir(dir, 0755)
-	if err != nil {
+	if err := os.Mkdir(dir, 0755); err != nil {
 		log.Printf("%s\n", err)
 	}
 
-	a := New(dir, n, m)
-	err = a.write(Kombinacie)
-	if err != nil {
+	archiv := New(dir, n, m)
+	if err := archiv.write(Parse(path, n, m)); err != nil {
 		return nil, err
 	}
-	return a, nil
+	return archiv, nil
 }

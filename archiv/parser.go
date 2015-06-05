@@ -3,43 +3,61 @@ package archiv
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 )
 
-func Parse(path string, n, m int) ([][]byte, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	return parse(f, n, m)
+type ErrKomb struct {
+	Komb []int
+	Err  error
 }
 
-func parse(f *os.File, n, m int) ([][]byte, error) {
-	r := csv.NewReader(f)
-	r.Comma = rune(';')
+func Parse(path string, n, m int) chan ErrKomb {
 
-	records, err := r.ReadAll()
-	if err != nil {
-		return nil, err
-	}
-	var k [][]byte
-	for i, rec := range records[1:] {
-		if len(rec) < n+3 {
-			return nil,
-				fmt.Errorf("%s: na riadku %d sa nepodarilo nacitat kombinaciu", f.Name(), i+1)
+	ch := make(chan ErrKomb, 8)
+	go func() {
+		defer close(ch)
+
+		file, err := os.Open(path)
+		if err != nil {
+			ch <- ErrKomb{Err: err}
+			return
 		}
-		c := make([]byte, n)
-		for i, x := range rec[3 : n+3] {
-			cislo, err := strconv.ParseUint(x, 10, 0)
-			if err != nil {
-				return nil, err
+		defer file.Close()
+
+		r := csv.NewReader(file)
+		r.Comma = rune(';')
+
+		// Skip Header
+		r.Read()
+
+		var nline int
+		for {
+			nline++
+			record, err := r.Read()
+			if err == io.EOF {
+				return
 			}
-			c[i] = byte(cislo)
+			if err != nil {
+				ch <- ErrKomb{Err: err}
+				return
+			}
+			if len(record) < n+3 {
+				ch <- ErrKomb{Err: fmt.Errorf("%s: riadku %d musi byt dlhsi ako %d", file.Name(), nline, n+3)}
+				return
+			}
+			komb := make([]int, n)
+			for i, field := range record[3 : n+3] {
+				cislo, err := strconv.Atoi(field)
+				if err != nil {
+					ch <- ErrKomb{Err: err}
+					return
+				}
+				komb[i] = cislo
+			}
+			ch <- ErrKomb{Komb: komb}
 		}
-
-		k = append(k, c)
-	}
-	return k, nil
+	}()
+	return ch
 }
