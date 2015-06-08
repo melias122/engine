@@ -47,7 +47,7 @@ func (a *Archiv) HrxHHrx() error {
 
 	m := map[int][]*num.N{}
 	for i := 1; i <= a.m; i++ {
-		c := a.Cisla[i]
+		c := a.Cisla[i-1]
 		m[c.PocR2()] = append(m[c.PocR2()], c)
 	}
 	mKeys := make([]int, 0, len(m))
@@ -79,8 +79,9 @@ func (a *Archiv) HrxHHrx() error {
 
 	i := 1
 	for p := range ch {
-		r := make([]string, 0, len(header))
 		hrx := a.Hrx.Simul(p)
+
+		r := make([]string, 0, len(header))
 		r = append(r,
 			itoa(i),                // pc
 			ftoa(hrx),              // hrx
@@ -91,7 +92,6 @@ func (a *Archiv) HrxHHrx() error {
 			sucetMinMax(m, p),      // sucet
 			pocetSucet(m, p),       // pocet suctov
 		)
-
 		if err := w.Write(r); err != nil {
 			return err
 		}

@@ -11,7 +11,6 @@ import (
 
 type H struct {
 	m   int
-	max int
 	sk  map[int]int      // pocetnost(skupina), pocet cisel
 	get func(*num.N) int // cislo -> pocet
 }
@@ -26,61 +25,40 @@ func New(m int, f func(*num.N) int) *H {
 	return h
 }
 
-func (h *H) add(sk, pocet int) {
-	// del := false
-	if sk > 0 {
-		hsk := h.sk[sk-1]
-		if hsk-pocet >= 1 {
-			h.sk[sk-1] = hsk - pocet
-		} else {
-			delete(h.sk, sk-1)
-			// del = true
-		}
-	}
-	h.sk[sk] = h.sk[sk] + pocet
-	if sk > h.max {
-		h.max = sk
-	}
-}
-
-func (h *H) del(sk, pocet int) {
-	// Z aktualnej sk odratam pocet
-	// ak je 0 zmazem sk, ak sk bola max
-	// treba preratat nove max
-	del := false
-	hsk := h.sk[sk]
-	if hsk-pocet >= 1 {
-		h.sk[sk] = hsk - pocet
-	} else {
-		delete(h.sk, sk)
-		del = true
-	}
-	// do predoslej sk priratam pocet
-	h.sk[sk-1] = h.sk[sk-1] + pocet
-	if del {
-		h.max = 0
-		for max := range h.sk {
-			if max > h.max {
-				h.max = max
-			}
-		}
-	}
-}
-
 func (h *H) Add(n *num.N) {
 	sk := h.get(n)
-	h.add(sk, 1)
+	h.move(1, sk-1, sk)
+}
+
+func (h *H) move(pocet, from, to int) {
+	if h.sk[from] > pocet {
+		h.sk[from] -= pocet
+	} else {
+		delete(h.sk, from)
+	}
+	h.sk[to] += pocet
+}
+
+func (h *H) max() int {
+	var max int
+	for sk := range h.sk {
+		if sk > max {
+			max = sk
+		}
+	}
+	return max
 }
 
 func (h *H) Get() float64 {
-	if h.max == 0 {
+	var (
+		hrx float64
+		max = float64(h.max())
+	)
+	if max == 0 {
 		return 100.0
 	}
-	var hrx float64
 	for k, v := range h.sk {
-
-		hrx += ((float64(v) / float64(h.m)) *
-			math.Pow((float64(h.max)-float64(k))/float64(h.max), 16))
+		hrx += ((float64(v) / float64(h.m)) * math.Pow((max-float64(k))/max, 16))
 	}
 	hrx = math.Pow(hrx, 0.25)
 	hrx *= 100
@@ -91,13 +69,13 @@ func (h *H) Simul(p Presun) float64 {
 	// z aktualnej skupiny potrebujem preniest t.Max
 	// do dalsej skupiny sk+1
 	for _, t := range p {
-		h.add(t.Sk+1, t.Max)
+		h.move(t.Max, t.Sk, t.Sk+1)
 	}
 	// Vypocitaj hrx pre zostavu p
 	hrx := h.Get()
 	// Obnov povodny stav
 	for _, t := range p {
-		h.del(t.Sk+1, t.Max)
+		h.move(t.Max, t.Sk+1, t.Sk)
 	}
 	return hrx
 }
