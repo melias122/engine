@@ -15,7 +15,7 @@ type ErrKomb struct {
 
 func Parse(path string, n, m int) chan ErrKomb {
 
-	ch := make(chan ErrKomb, 8)
+	ch := make(chan ErrKomb, 1)
 	go func() {
 		defer close(ch)
 

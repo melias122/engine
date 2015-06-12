@@ -7,34 +7,33 @@ import (
 	"github.com/melias122/psl/komb"
 )
 
-type uc struct {
+type Uc struct {
 	Cislo  int
 	Riadok int
 }
 
 type Riadok struct {
-	Pc      int
-	K       *komb.K
-	Zh      int
-	Sm      float64
-	Sm_dt   float64
-	Kk      float64
-	Kk_dt   float64
-	R1      float64
-	R1_dt   float64
-	HHrx    float64
-	HHrx_dt float64
-	R2      float64
-	R2_dt   float64
-	Hrx     float64
-	Hrx_dt  float64
-	// Sucet    int
+	Pc       int
+	K        komb.K
+	Zh       int
+	Sm       float64
+	Sm_dt    float64
+	Kk       float64
+	Kk_dt    float64
+	R1       float64
+	R1_dt    float64
+	HHrx     float64
+	HHrx_dt  float64
+	R2       float64
+	R2_dt    float64
+	Hrx      float64
+	Hrx_dt   float64
 	Sucet_dt int
-	uc
+	Uc
 }
 
 func (r *Riadok) add(k *komb.K, Hrx, HHrx float64) {
-	r.K = k
+	r.K = *k
 	r.Sm = k.Sm()
 	r.R1 = k.R1()
 	r.HHrx = HHrx
@@ -46,9 +45,9 @@ func (r *Riadok) add(k *komb.K, Hrx, HHrx float64) {
 // funkcia spravi rozdiel riadov r1 a r0
 // a vysledok ulozi do r1
 func (r1 *Riadok) diff(r0 Riadok) {
-	r1.Zh = r1.K.Zh(r0.K)
+	r1.Zh = r1.K.Zh(&r0.K)
 	r1.Sm_dt = r1.Sm - r0.Sm
-	r1.Kk = r1.K.Kk(r0.K)
+	r1.Kk = r1.K.Kk(&r0.K)
 	r1.Kk_dt = r1.Kk - r0.Kk
 	r1.R1_dt = r1.R1 - r0.R1
 	r1.HHrx_dt = r1.HHrx - r0.HHrx

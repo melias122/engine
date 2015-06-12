@@ -31,6 +31,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	// time.Sleep(time.Second * 5)
 	// if err = a.PocetnostR(); err != nil {
 	// 	panic(err)
 	// }
@@ -40,8 +41,57 @@ func main() {
 	// if err = a.HrxHHrx(); err != nil {
 	// 	panic(err)
 	// }
-
 }
+
+// func max101perioda(m int) {
+// 	var (
+// 		max101perioda, pocetPerioda int
+// 		pocetRiedka                 int
+// 		nKALKULUJ                   int
+// 		a101perioda                 []int
+// 		aRiedka                     [][]int
+// 	)
+// 	for kk := 1; kk <= pocetRiedka+nKALKULUJ; kk++ {
+// 		for i := 1; i <= m; i++ {
+// 			a101perioda[i] = 0
+// 		}
+// 		var (
+// 			kk_od                    = kk
+// 			boolSTOP, bool101perioda bool
+// 		)
+// 		for !boolSTOP {
+// 			bool101perioda = true
+// 			for i := 1; i <= m; i++ {
+// 				a101perioda[i] += aRiedka[kk_od][i]
+// 				if a101perioda[i] < 1 {
+// 					bool101perioda = false
+// 				}
+// 			}
+// 			if bool101perioda {
+// 				boolSTOP = true
+// 			}
+
+// 			kk_od--
+// 			if kk_od == 0 {
+// 				boolSTOP = true
+// 			}
+// 		}
+
+// 		if bool101perioda || (kk_od == 0) {
+// 			if bool101perioda {
+// 				pocetPerioda++
+// 			}
+// 			kk_od++
+// 			for i := 1; i <= m; i++ {
+// 				if a101perioda[i] > max101perioda {
+// 					max101perioda = a101perioda[i]
+// 				}
+// 			}
+// 		}
+// 	}
+// 	max101perioda++
+// 	fmt.Println(max101perioda)
+// }
 
 func ForwardLinearPrediction(coefs, x []float64) {
 	// GET SIZE FROM INPUT VECTORS

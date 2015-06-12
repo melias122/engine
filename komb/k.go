@@ -29,6 +29,17 @@ func New(n, m int) *K {
 	}
 }
 
+// func (k *K) Nil() {
+// 	for i := range k.ptr {
+// 		k.ptr[i] = nil
+// 	}
+// 	k.ptr = nil
+// 	k.num = nil
+// 	k.ntica.n = nil
+// 	k.ntica.t = nil
+// 	k.xtica = nil
+// }
+
 func (k *K) R1() float64 {
 	return k.num.R1()
 }
