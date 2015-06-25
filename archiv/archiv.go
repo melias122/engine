@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/melias122/psl/hrx"
-	"github.com/melias122/psl/komb"
 	"github.com/melias122/psl/num"
 )
 
@@ -25,25 +24,30 @@ var header = []string{
 type Archiv struct {
 	n, m int
 	Riadok
-	Cisla map[int]*num.N
-	Hrx   *hrx.H
-	HHrx  *hrx.H
+	Hrx  *hrx.H
+	HHrx *hrx.H
 
 	Dir  string
 	Path string
+
+	riadky []Riadok
 }
 
 func New(dir string, n, m int) *Archiv {
-	return &Archiv{
-		n:     n,
-		m:     m,
-		Cisla: make(map[int]*num.N, m),
-		Hrx:   hrx.NewHrx(m),
-		HHrx:  hrx.NewHHrx(m),
+	archiv := &Archiv{
+		n: n,
+		m: m,
+		Riadok: Riadok{
+			n: n,
+			m: m,
+		},
+		Hrx:  hrx.New(n, m),
+		HHrx: hrx.New(n, m),
 
 		Dir:  dir,
 		Path: filepath.Join(dir, "Archiv_"+dir+".csv"),
 	}
+	return archiv
 }
 
 func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
@@ -60,8 +64,7 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 		return err
 	}
 	var (
-		kombinacie = make([][]int, 0, 64)
-		K          *komb.K
+		kombinacie = make([][]byte, 0, 64)
 	)
 	for errKomb := range chanErrKomb {
 		a.Pc++
@@ -74,24 +77,14 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 		// dohladaniu Uc
 		kombinacie = append(kombinacie, errKomb.Komb)
 
-		// Vytvorenie kombinacie pre aktualny Riadok
-		K = komb.New(a.n, a.m)
-
 		// Prechadzame kombinaciu na riadku
 		// a inkrementujeme pocetnost cisla R1-Do
 		for y, x := range errKomb.Komb {
-			N, ok := a.Cisla[x]
-			// Ak cislo neexistuje, treba ho vytvorit
-			// Nastava pri kazdom cisle prave 1
-			if !ok {
-				N = num.New(x, a.n, a.m)
-				a.Cisla[x] = N
-			}
-			N.Inc1(y)
-			a.HHrx.Add(N)
+			a.HHrx.Add(int(x), y)
 		}
-		// Ak mame plnu databazu(nastala udalost 101)
-		if len(a.Cisla) == a.m {
+		// Ak sa v hhrx vyskytli vsetky cisla 1..m
+		// nastala udalost 101
+		if a.HHrx.Is101() {
 			// Ked narazime na Uc cislo na riadku Roddo
 			// potrebuje spatne dohladat Uc cislo
 			var reverse bool
@@ -100,43 +93,30 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 			if a.Uc.Cislo == 0 {
 				reverse = true
 			} else {
-				// Incrementovanie cisla Roddo
+				// Incrementovanie cisla Roddo, resp. Hrx
 				for y, x := range errKomb.Komb {
 					// Ak na riadku narazime na Uc Cislo
 					// porebujeme ho spatne dohladat
 					if x == a.Uc.Cislo {
 						reverse = true
 					}
-					N := a.Cisla[x]
-					N.Inc2(y)
-					a.Hrx.Add(N)
+					a.Hrx.Add(int(x), y)
 				}
 			}
 			// Spatne dohladanie Uc cisla a riadku a inrementovanie cisiel Roddo
 			if reverse {
 				// Nova hrx zostava a resetovanie cisiel Roddo
-				a.Hrx = hrx.NewHrx(a.m)
-				for _, N := range a.Cisla {
-					N.Reset2()
-				}
-				var (
-					is101  = false
-					vyskyt = make(map[int]bool, a.m)
-					uc     = Uc{Riadok: len(kombinacie)}
-				)
+				a.Hrx = hrx.New(a.n, a.m)
+				uc := Uc{Riadok: len(kombinacie)}
 				// Spatne nacitava kombinacie a incremtuje Roddo
 				// a Hrx az pokial nenastane udalost 101
 				// udalost 101 nastava ked sa kazde cislo vyskytne aspon 1
-				for !is101 {
+				for !a.Hrx.Is101() {
 					uc.Riadok--
 					for y, x := range kombinacie[uc.Riadok] {
-						N := a.Cisla[x]
-						N.Inc2(y)
-						a.Hrx.Add(N)
-						vyskyt[x] = true
-						if len(vyskyt) == a.m && !is101 {
+						a.Hrx.Add(int(x), y)
+						if a.Hrx.Is101() && uc.Cislo == 0 {
 							uc.Cislo = x
-							is101 = true
 						}
 					}
 				}
@@ -148,20 +128,28 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 				// a zaujimaju nas uz len od posledneho Uc riadku
 				kombinacie = kombinacie[uc.Riadok:]
 			}
-			// Vytvorenie kombinacie
-			for _, c := range errKomb.Komb {
-				K.Push(a.Cisla[c].Copy(a.n, a.m))
+		}
+
+		// Vytvorenie kombinacie
+		var (
+			n1 = num.Zero(a.n, a.m)
+			n2 = num.Zero(a.n, a.m)
+		)
+		if a.HHrx.Is101() {
+			for _, x := range errKomb.Komb {
+				n1.Plus(a.HHrx.GetN(int(x)))
+				n2.Plus(a.Hrx.GetN(int(x)))
 			}
 		} else {
 			// Ak databaza este nie je naplnena
 			// cisla s pocetnostou 1 sa tvaria ako 0
 			// kvoli tomu aby hodnoty R1-DO v archive zacinali od 0,0
-			for _, c := range errKomb.Komb {
-				N := a.Cisla[c]
-				if N.PocR1() > 1 {
-					K.Push(N.Copy(a.n, a.m))
+			for _, x := range errKomb.Komb {
+				N := a.HHrx.GetN(int(x))
+				if N.PocetR() > 1 {
+					n1.Plus(a.HHrx.GetN(int(x)))
 				} else {
-					K.Push(num.New(N.Cislo(), a.n, a.m))
+					n1.Plus(num.New(int(x), a.n, a.m))
 				}
 			}
 		}
@@ -169,13 +157,13 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 		// Zostavenie Riadkov pre Archiv
 		// pre 2 a viac riadkov robime rozdiel(diff) vybranych hodnot
 		if a.Pc > 1 {
-			r0 := a.Riadok
-			a.Riadok.add(K, a.Hrx.Get(), a.HHrx.Get())
-			a.Riadok.diff(r0)
+			a.Add(errKomb.Komb, n1, n2, a.Hrx.Value(), a.HHrx.Value())
 		} else {
-			a.Uc.Riadok++             // TODO: nespravne ukazovanie uc predtym nez nastane 101
-			a.Riadok.add(K, 100, 100) // V prvom riadku hodnoty hrx a hhrx su nastavene natvrdo 100
+			a.Uc.Riadok++                         // TODO: nespravne ukazovanie uc predtym nez nastane 101
+			a.Add(errKomb.Komb, n1, n2, 100, 100) // V prvom riadku hodnoty hrx a hhrx su nastavene natvrdo 100
 		}
+		a.riadky = append(a.riadky, a.Riadok)
+
 		if err := w.Write(a.Riadok.record()); err != nil {
 			return err
 		}
@@ -201,8 +189,27 @@ func Make(path string, n, m int) (*Archiv, error) {
 	}
 
 	archiv := New(dir, n, m)
-	if err := archiv.write(Parse(path, n, m)); err != nil {
+	chanErrKomb := Parse(path, n, m)
+
+	// Archiv.csv
+	if err := archiv.write(chanErrKomb); err != nil {
 		return nil, err
 	}
+
+	// PocetnostR.csv
+	// if err := archiv.PocetnostR(); err != nil {
+	// return nil, err
+	// }
+
+	// PocetnostS.csv
+	// if err := archiv.PocetnostS(); err != nil {
+	// 	return nil, err
+	// }
+
+	// Mapa Ntice
+	// if err := archiv.MapaNtice(); err != nil {
+	// 	return nil, err
+	// }
+
 	return archiv, nil
 }

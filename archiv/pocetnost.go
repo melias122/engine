@@ -1,9 +1,12 @@
 package archiv
 
 import (
+	"bytes"
 	"encoding/csv"
 	"fmt"
+	"math/big"
 	"os"
+	"path/filepath"
 
 	"github.com/melias122/psl/num"
 )
@@ -15,7 +18,7 @@ func (a *Archiv) PocetnostR() error {
 		"Pocet R1-DO", "% R1-DO", "Pocet R1-DO (r+1)", "% R1-DO (r+1)",
 		"Pocet ROD-DO", "% ROD-DO", "Pocet ROD-DO (r+1)", "% ROD-DO (r+1)",
 	}
-	f, err := os.Create(fmt.Sprintf("%d%d/PocetnostR_%d%d.csv", a.n, a.m, a.n, a.m))
+	f, err := os.Create(filepath.Join(a.Dir, "PocetnostR_"+a.Dir+".csv"))
 	if err != nil {
 		return err
 	}
@@ -25,20 +28,43 @@ func (a *Archiv) PocetnostR() error {
 	if err := w.Write(header); err != nil {
 		return err
 	}
-	max := num.Max(1, 1, a.n, a.m).String()
+	var (
+		max    = big.NewInt(0).Binomial(int64(a.m-1), int64(a.n-1)).String()
+		riadok = make([]string, 0, len(header))
+	)
 	for i := 1; i <= a.m; i++ {
-		c := a.Cisla[i]
-		r := make([]string, 0, len(header))
-		r = append(r, c.String(), itoa(a.K.Contains(c)))
-		for _, e := range c.C() {
-			r = append(r, itoa(int(e)))
+		riadok = riadok[:0]
+
+		N1 := a.HHrx.GetN(i)
+		N2 := a.Hrx.GetN(i)
+
+		// Cislo
+		riadok = append(riadok, N1.String())
+
+		// Zhoda s r
+		if bytes.Contains(a.K, []byte{byte(N1.Cislo())}) {
+			riadok = append(riadok, "1")
+		} else {
+			riadok = append(riadok, "0")
 		}
-		r = append(r,
-			c.String(), max, "1",
-			itoa(c.PocR1()), ftoa(c.R1()), itoa(c.PocR1()+1), ftoa(num.Value(c.PocR1()+1, 1, 1, a.n, a.m)),
-			itoa(c.PocR2()), ftoa(c.R2()), itoa(c.PocR2()+1), ftoa(num.Value(c.PocR2()+1, 1, 1, a.n, a.m)),
+
+		// Cislovacky
+		for _, e := range N1.C() {
+			riadok = append(riadok, itoa(int(e)))
+		}
+		riadok = append(riadok,
+			N1.String(), max, "1",
+			itoa(N1.PocetR()),
+			ftoa(N1.R()),
+			itoa(N1.PocetR()+1),
+			ftoa(num.Value(N1.PocetR()+1, 1, 1, a.n, a.m)),
+
+			itoa(N2.PocetR()),
+			ftoa(N2.R()),
+			itoa(N2.PocetR()+1),
+			ftoa(num.Value(N2.PocetR()+1, 1, 1, a.n, a.m)),
 		)
-		if err := w.Write(r); err != nil {
+		if err := w.Write(riadok); err != nil {
 			return err
 		}
 	}
@@ -52,7 +78,8 @@ func (a *Archiv) PocetnostS() error {
 		"Teor. pocet", "Teor. %", "Pocet STL1-DO", "% STL1-DO", "Pocet STL1-DO (r+1)", "% STL1-DO (r+1)",
 		"Pocet STLOD-DO", "% STLOD-DO", "Pocet STLOD-DO (r+1)", "% STLOD-DO (r+1)",
 	}
-	f, err := os.Create(fmt.Sprintf("%d%d/PocetnostSTL_%d%d.csv", a.n, a.m, a.n, a.m))
+	// fmt.Sprintf("%d%d/PocetnostSTL_%d%d.csv", a.n, a.m, a.n, a.m)
+	f, err := os.Create(filepath.Join(a.Dir, "PocetnostS_"+a.Dir+".csv"))
 	if err != nil {
 		return err
 	}
@@ -62,30 +89,58 @@ func (a *Archiv) PocetnostS() error {
 	if err := w.Write(header); err != nil {
 		return err
 	}
+
+	var (
+		teorPocet, bi big.Int
+	)
 	for i := 1; i <= a.m; i++ {
+		N1 := a.HHrx.GetN(i)
+		N2 := a.Hrx.GetN(i)
 		for j := 1; j <= a.n; j++ {
-			c := a.Cisla[i]
 
 			r := make([]string, 0, len(header))
-			r = append(r, c.String(), itoa(a.K.Contains(c)))
-			for _, e := range c.C() {
+
+			// Cislo
+			r = append(r, N1.String())
+
+			// Zhoda s r
+			if bytes.Contains(a.K, []byte{byte(N1.Cislo())}) {
+				r = append(r, "1")
+			} else {
+				r = append(r, "0")
+			}
+
+			// Cislovacky
+			for _, e := range N1.C() {
 				r = append(r, itoa(int(e)))
 			}
-			teorPoc := num.Max(i, j, a.n, a.m)
-			r = append(r, fmt.Sprintf("stlchce(%d):%d", j, i), teorPoc.String())
+			// teorPoc := num.Max(i, j, a.n, a.m)
+
+			teorPocet.Mul(teorPocet.Binomial(int64(a.m-i), int64(a.n-j)), bi.Binomial(int64(i-1), int64(j-1)))
+			r = append(r,
+				fmt.Sprintf("stlchce(%d):%d", j, i),
+				teorPocet.String(),
+			)
 
 			var s1, s2, pocS1, pocS2 string
-			if teorPoc.String() == "0" {
+			if teorPocet.String() == "0" {
 				r = append(r, "0")
 				s1, s2, pocS1, pocS2 = ftoa(0.0), ftoa(0.0), "0", "0"
 			} else {
 				r = append(r, "1")
-				s1, pocS1 = ftoa(num.Value(c.PocS1(j)+1, i, j, a.n, a.m)), itoa(c.PocS1(j)+1)
-				s2, pocS2 = ftoa(num.Value(c.PocS2(j)+1, i, j, a.n, a.m)), itoa(c.PocS2(j)+1)
+				s1, pocS1 = ftoa(num.Value(N1.PocetS(j)+1, i, j, a.n, a.m)), itoa(N1.PocetS(j)+1)
+				s2, pocS2 = ftoa(num.Value(N2.PocetS(j)+1, i, j, a.n, a.m)), itoa(N2.PocetS(j)+1)
 			}
 			r = append(r,
-				itoa(c.PocS1(j)), ftoa(c.S1(j)), pocS1, s1,
-				itoa(c.PocS2(j)), ftoa(c.S2(j)), pocS2, s2,
+				itoa(N1.PocetS(j)),
+				ftoa(N1.S(j)),
+				pocS1,
+				s1,
+
+				itoa(N2.PocetS(j)),
+				ftoa(N2.S(j)),
+				pocS2,
+				s2,
 			)
 			if err := w.Write(r); err != nil {
 				return err

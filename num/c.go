@@ -9,7 +9,7 @@ var cFuns = []func(int) bool{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc
 
 type C [10]byte
 
-func newC(cislo int) C {
+func NewC(cislo int) C {
 	var c C
 	if cislo <= 0 {
 		return c
@@ -55,7 +55,7 @@ func IsN(c int) bool {
 
 func IsPr(c int) bool {
 	switch c {
-	case 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89:
+	case 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97:
 		return true
 	default:
 		return false

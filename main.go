@@ -8,11 +8,14 @@ import (
 	"runtime/pprof"
 
 	"github.com/melias122/psl/archiv"
+	"github.com/melias122/psl/hrx"
 )
 
 func main() {
 
-	cpuprofile := flag.String("cpuprofile", "", "Write cpu profile to file")
+	var (
+		cpuprofile = flag.String("cpuprofile", "", "Write cpu profile to file")
+	)
 
 	flag.Parse()
 
@@ -25,22 +28,16 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
+	// n, m := 5, 35
 	n, m := 20, 80
 	path := fmt.Sprintf("testdata/%d%d.csv", n, m)
-	_, err := archiv.Make(path, n, m)
+	a, err := archiv.Make(path, n, m)
 	if err != nil {
 		panic(err)
 	}
-	// time.Sleep(time.Second * 5)
-	// if err = a.PocetnostR(); err != nil {
-	// 	panic(err)
-	// }
-	// if err = a.PocetnostS(); err != nil {
-	// 	panic(err)
-	// }
-	// if err = a.HrxHHrx(); err != nil {
-	// 	panic(err)
-	// }
+
+	htab := hrx.NewHrxTab(a.Hrx, a.HHrx, n, m)
+	htab.Make()
 }
 
 // func max101perioda(m int) {

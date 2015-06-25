@@ -9,7 +9,7 @@ import (
 )
 
 type ErrKomb struct {
-	Komb []int
+	Komb []byte
 	Err  error
 }
 
@@ -47,14 +47,14 @@ func Parse(path string, n, m int) chan ErrKomb {
 				ch <- ErrKomb{Err: fmt.Errorf("%s: riadku %d musi byt dlhsi ako %d", file.Name(), nline, n+3)}
 				return
 			}
-			komb := make([]int, n)
+			komb := make([]byte, n)
 			for i, field := range record[3 : n+3] {
 				cislo, err := strconv.Atoi(field)
 				if err != nil {
 					ch <- ErrKomb{Err: err}
 					return
 				}
-				komb[i] = cislo
+				komb[i] = byte(cislo)
 			}
 			ch <- ErrKomb{Komb: komb}
 		}
