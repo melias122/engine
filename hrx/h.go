@@ -6,14 +6,6 @@ import (
 	"github.com/melias122/psl/num"
 )
 
-type skupina struct {
-	pocet int8
-}
-
-func (s *skupina) isZero() bool {
-	return s.pocet == 0
-}
-
 type H struct {
 	n, m    int
 	max     int
@@ -56,6 +48,7 @@ func (h *H) Is101() bool {
 	return h.Cisla.Is101()
 }
 
+// Presun
 func (h *H) Move(pocet, from, to int) {
 	// keby som odrataval napr z 2->1 (5) je to iste ako 1->2 (-5)
 	if from > to {
@@ -75,10 +68,9 @@ func (h *H) Move(pocet, from, to int) {
 	} else if to > h.max {
 		h.max = to
 	}
-
-	// fmt.Println("Move:", from, to)
 }
 
+// Vrati N
 func (h *H) GetN(x int) *num.N {
 	if x <= 0 {
 		panic("x <= 0")
@@ -96,26 +88,21 @@ func (h *H) value(skupina, pocet, max, m float64) float64 {
 	return (pocet / m) * x
 }
 
-// var x int
-
+// Hodnota aktualnej zostavy Hrx
 func (h *H) Value() float64 {
 	if h.max == 0 {
 		return 100.0
 	}
 	var hrx float64
-	// var nSk int
 	for skupina, pocet := range h.skupiny {
-		// for i := h.max; i >= 0 && nSk != h.m; i-- {
-		// skupina := i
-		// pocet := h.skupiny[i]
 		if pocet > 0 {
-			// nSk += int(pocet)
 			hrx += h.value(float64(skupina), float64(pocet), float64(h.max), float64(h.m))
 		}
 	}
 	return math.Sqrt(math.Sqrt(hrx)) * 100
 }
 
+//Vypocita hodnotu Presun p
 func (h *H) ValuePresun(p Presun) float64 {
 	// z aktualnej skupiny potrebujem preniest t.Max
 	// do dalsej skupiny sk+1
@@ -138,6 +125,5 @@ func (h *H) Presun() Presun {
 			p = append(p, Tab{sk, int(max)})
 		}
 	}
-	// sort.Sort(p)
 	return p
 }

@@ -48,7 +48,6 @@ func (old *N) MakeCopy() *N {
 		new.s[i] = old.s[i]
 	}
 	return new
-
 }
 
 func (n *N) C() C {
@@ -121,4 +120,6 @@ type ByPocetR struct {
 	Nums
 }
 
-func (by ByPocetR) Less(i, j int) bool { return by.Nums[i].PocetR() < by.Nums[j].PocetR() }
+func (by ByPocetR) Less(i, j int) bool {
+	return by.Nums[i].PocetR() < by.Nums[j].PocetR()
+}

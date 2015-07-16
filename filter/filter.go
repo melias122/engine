@@ -1,4 +1,5 @@
 package filter
 
-type Filter struct {
+type Filter interface {
+	Check([]int) bool
 }

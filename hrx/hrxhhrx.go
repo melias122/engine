@@ -20,6 +20,8 @@ type HrxTab struct {
 	Hrx  *H
 	HHrx *H
 
+	skupiny Skupiny
+
 	skupinyN1 map[int][]*num.N
 	skupinyN2 map[int][]*num.N
 
@@ -128,7 +130,6 @@ func (h *HrxTab) sMinMax() (float64, float64, float64, float64) {
 		}
 		n1 := h.HHrx.GetN(n2.Cislo())
 		for j := from; j < to; j++ {
-
 			//STL1-DO
 			s[j][0] = min(n1.S(j+1), s[j][0])
 			s[j][1] = max(n1.S(j+1), s[j][1])
@@ -167,18 +168,19 @@ func (h *HrxTab) hhrxMinMax() (float64, float64) {
 	// presun v HHrx (HHrx max)
 	for _, t := range h.r1 {
 		c := h.skupinyN2[t.Sk]
+		lastIndex := len(c) - 1
 		for i := 0; i < t.Max; i++ {
-			h.HHrx.Move(1, c[len(c)-1-i].PocetR(), c[len(c)-1-i].PocetR()+1)
+			h.HHrx.Move(1, c[lastIndex-i].PocetR(), c[lastIndex-i].PocetR()+1)
 		}
 	}
 	hhrxMax := h.HHrx.Value()
 	for _, t := range h.r1 {
 		c := h.skupinyN2[t.Sk]
+		lastIndex := len(c) - 1
 		for i := 0; i < t.Max; i++ {
-			h.HHrx.Move(1, c[len(c)-1-i].PocetR()+1, c[len(c)-1-i].PocetR())
+			h.HHrx.Move(1, c[lastIndex-i].PocetR()+1, c[lastIndex-i].PocetR())
 		}
 	}
-
 	return hhrxMin, hhrxMax
 }
 
@@ -192,6 +194,12 @@ func (h *HrxTab) record() []string {
 	// Treba mat 2 kopie HHrx
 	// Jedna na min, druha na max
 	hhrxMin, hhrxMax := h.hhrxMinMax()
+
+	h.skupiny = append(h.skupiny, Skupina{
+		Hrx:    hrx,
+		HHrx:   [2]float64{hhrxMin, hhrxMax},
+		Presun: h.r1.copyNonZero(),
+	})
 
 	r := make([]string, 0, len(h.header))
 	r = append(r,
@@ -292,12 +300,12 @@ func (h *HrxTab) make(r0 Presun, n int) error {
 	return h.make(r0[1:], n)
 }
 
-func (h *HrxTab) Make() error {
+func (h *HrxTab) Make() (Skupiny, error) {
 
 	// vytvorenie suboru
 	f, err := os.Create(fmt.Sprintf("%d%d/HrxHHrx_%d%d.csv", h.n, h.m, h.n, h.m))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer f.Close()
 	w := csv.NewWriter(f)
@@ -346,7 +354,7 @@ func (h *HrxTab) Make() error {
 	}
 	PreHeader = append(PreHeader, h.header)
 	if err = w.WriteAll(PreHeader); err != nil {
-		return err
+		return nil, err
 	}
 
 	// Prepocitanie znamych hodnot
@@ -387,11 +395,11 @@ func (h *HrxTab) Make() error {
 	}
 
 	if err := h.make(h.r0, h.n); err != nil {
-		return err
+		return nil, err
 	}
 
 	w.Flush()
-	return w.Error()
+	return h.skupiny, w.Error()
 }
 
 type Tab struct {
@@ -402,11 +410,21 @@ type Tab struct {
 type Presun []Tab
 
 func (p Presun) copy() Presun {
-	cp := make(Presun, len(p))
+	presun := make(Presun, len(p))
 	for i := range p {
-		cp[i] = p[i]
+		presun[i] = p[i]
 	}
-	return cp
+	return presun
+}
+
+func (p Presun) copyNonZero() Presun {
+	var presun Presun
+	for i := range p {
+		if p[i].Max > 0 {
+			presun = append(presun, p[i])
+		}
+	}
+	return presun
 }
 
 func (p Presun) Len() int           { return len(p) }
@@ -436,4 +454,12 @@ func itoa(i int) string {
 func ftoa(f float64) string {
 	s := strconv.FormatFloat(f, 'g', -1, 64)
 	return strings.Replace(s, ".", ",", 1)
+}
+
+type Skupiny []Skupina
+
+type Skupina struct {
+	Hrx    float64
+	HHrx   [2]float64
+	Presun Presun
 }

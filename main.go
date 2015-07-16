@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-
 	var (
 		cpuprofile = flag.String("cpuprofile", "", "Write cpu profile to file")
 	)
@@ -28,8 +27,8 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	// n, m := 5, 35
-	n, m := 20, 80
+	n, m := 5, 35
+	// n, m := 20, 80
 	path := fmt.Sprintf("testdata/%d%d.csv", n, m)
 	a, err := archiv.Make(path, n, m)
 	if err != nil {
@@ -37,7 +36,17 @@ func main() {
 	}
 
 	htab := hrx.NewHrxTab(a.Hrx, a.HHrx, n, m)
-	htab.Make()
+	skupiny, err := htab.Make()
+	if err != nil {
+		panic(err)
+	}
+	filter(skupiny)
+}
+
+func filter(skupiny hrx.Skupiny) {
+	for i, sk := range skupiny {
+		fmt.Println(i, sk)
+	}
 }
 
 // func max101perioda(m int) {
@@ -90,47 +99,47 @@ func main() {
 // 	fmt.Println(max101perioda)
 // }
 
-func ForwardLinearPrediction(coefs, x []float64) {
-	// GET SIZE FROM INPUT VECTORS
-	N := len(x) - 1
-	m := len(coefs)
-
-	// INITIALIZE R WITH AUTOCORRELATION COEFFICIENTS
-	R := make([]float64, m+1)
-	for i := 0; i <= m; i++ {
-		for j := 0; j <= N-i; j++ {
-			R[i] += x[j] * x[j+i]
-		}
-	}
-
-	// INITIALIZE Ak
-	Ak := make([]float64, m+1)
-	Ak[0] = 1.0
-
-	// INITIALIZE Ek
-	Ek := R[0]
-
-	// LEVINSON-DURBIN RECURSION
-	for i := 0; i < m; i++ {
-		// COMPUTE LAMBDA
-		lambda := 0.0
-		for j := 0; j <= i; j++ {
-			lambda -= Ak[j] * R[i+1-j] //7
-		}
-		lambda /= Ek
-
-		// UPDATE Ak
-		for k := 0; k <= (i+1)/2; k++ {
-			temp := Ak[i+1-k] + lambda*Ak[k]
-			Ak[k] = Ak[k] + lambda*Ak[i+1-k]
-			Ak[i+1-k] = temp
-		}
-
-		// UPDATE Ek
-		Ek *= 1.0 - lambda*lambda
-	}
-
-	// TODO: assisgn...
-	// ASSIGN COEFFICIENTS
-	// coeffs.assign( ++Ak.begin(), Ak.end() );
-}
+// func ForwardLinearPrediction(coefs, x []float64) {
+// 	// GET SIZE FROM INPUT VECTORS
+// 	N := len(x) - 1
+// 	m := len(coefs)
+//
+// 	// INITIALIZE R WITH AUTOCORRELATION COEFFICIENTS
+// 	R := make([]float64, m+1)
+// 	for i := 0; i <= m; i++ {
+// 		for j := 0; j <= N-i; j++ {
+// 			R[i] += x[j] * x[j+i]
+// 		}
+// 	}
+//
+// 	// INITIALIZE Ak
+// 	Ak := make([]float64, m+1)
+// 	Ak[0] = 1.0
+//
+// 	// INITIALIZE Ek
+// 	Ek := R[0]
+//
+// 	// LEVINSON-DURBIN RECURSION
+// 	for i := 0; i < m; i++ {
+// 		// COMPUTE LAMBDA
+// 		lambda := 0.0
+// 		for j := 0; j <= i; j++ {
+// 			lambda -= Ak[j] * R[i+1-j] //7
+// 		}
+// 		lambda /= Ek
+//
+// 		// UPDATE Ak
+// 		for k := 0; k <= (i+1)/2; k++ {
+// 			temp := Ak[i+1-k] + lambda*Ak[k]
+// 			Ak[k] = Ak[k] + lambda*Ak[i+1-k]
+// 			Ak[i+1-k] = temp
+// 		}
+//
+// 		// UPDATE Ek
+// 		Ek *= 1.0 - lambda*lambda
+// 	}
+//
+// 	// TODO: assisgn...
+// 	// ASSIGN COEFFICIENTS
+// 	// coeffs.assign( ++Ak.begin(), Ak.end() );
+// }

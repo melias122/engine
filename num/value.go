@@ -19,7 +19,6 @@ type key struct {
 // Value vracia hodnotu cisla x v stlpci y
 // podla pocetnosti p.. n a m je rozmer databazy
 // Vzorec: hodnota = pocetnostCisla / (binom(m-x nad n-y) * binom(x-1 nad y-1))
-
 func Value(pocet, x, y, n, m int) float64 {
 	return value(key{byte(x), byte(y), byte(n), byte(m), uint32(pocet)})
 }

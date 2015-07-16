@@ -197,14 +197,14 @@ func Make(path string, n, m int) (*Archiv, error) {
 	}
 
 	// PocetnostR.csv
-	// if err := archiv.PocetnostR(); err != nil {
-	// return nil, err
-	// }
+	if err := archiv.PocetnostR(); err != nil {
+		return nil, err
+	}
 
 	// PocetnostS.csv
-	// if err := archiv.PocetnostS(); err != nil {
-	// 	return nil, err
-	// }
+	if err := archiv.PocetnostS(); err != nil {
+		return nil, err
+	}
 
 	// Mapa Ntice
 	// if err := archiv.MapaNtice(); err != nil {

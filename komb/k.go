@@ -46,24 +46,6 @@ type K struct {
 // 	return k.ntica.t
 // }
 
-// func (k0 *K) Zh(k1 *K) int {
-// 	zh, i, j := 0, 0, 0
-// 	for i < k0.Len() && j < k1.Len() {
-// 		x1 := k0.At(i).Cislo()
-// 		x2 := k1.At(j).Cislo()
-// 		if x1 == x2 {
-// 			zh++
-// 			i++
-// 			j++
-// 		} else if x1 < x2 {
-// 			i++
-// 		} else {
-// 			j++
-// 		}
-// 	}
-// 	return zh
-// }
-
 // func (k0 *K) Kk(k1 *K) float64 {
 // 	kk := 0.0
 
