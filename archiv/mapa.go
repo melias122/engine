@@ -125,7 +125,7 @@ func (a *Archiv) MapaNtice() error {
 		akt := akt_r.K
 
 		ntica_anl := make([]string, len(ntice_pos)+a.n+3)
-		ntica_anl[0] = kombToString(akt)
+		// ntica_anl[0] = kombToString(akt)
 
 		if ntica_anl[0] != ntice_pos[0] { // ak neni "n 0 0 0 ...
 			start, end := -1, -1

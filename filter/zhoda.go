@@ -2,24 +2,24 @@ package filter
 
 import "github.com/melias122/psl/komb"
 
-func NewZhoda(combination []int, n, min, max int) Filter {
+func NewZhoda(n, min, max int, kombinacia komb.Kombinacia) Filter {
 	return zhoda{
-		n:           n,
-		min:         min,
-		max:         max,
-		combination: combination,
+		n:          n,
+		min:        min,
+		max:        max,
+		kombinacia: kombinacia,
 	}
 }
 
 type zhoda struct {
 	n, min, max int
-	combination []int
+	kombinacia  komb.Kombinacia
 }
 
-func (z zhoda) Check(combination []int) bool {
-	count := komb.Zhoda(z.combination, combination)
+func (z zhoda) Check(kombinacia komb.Kombinacia) bool {
+	count := komb.Zhoda(z.kombinacia, kombinacia)
 
-	if len(combination) == z.n {
+	if len(kombinacia) == z.n {
 		if !(count >= z.min && count <= z.max) {
 			return false
 		}

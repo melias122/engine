@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/melias122/psl/filter"
+	"github.com/melias122/psl/komb"
 )
 
 type Generator struct {
@@ -21,41 +22,41 @@ func NewGenerator(n, m int) *Generator {
 
 func (g *Generator) Generate() {
 	var (
-		numbers     = make([]int, g.m)
-		combination = make([]int, 0, g.n)
+		cisla      = make(komb.Kombinacia, g.m)
+		kombinacia = make(komb.Kombinacia, 0, g.n)
 	)
-	for i := range numbers {
-		numbers[i] = i + 1
+	for i := range cisla {
+		cisla[i] = byte(i + 1)
 	}
-	g.generate(numbers, combination)
+	g.generate(cisla, kombinacia)
 }
 
-func (g *Generator) check(combination []int) bool {
+func (g *Generator) check(k komb.Kombinacia) bool {
 	for _, filter := range g.filters {
-		if !filter.Check(combination) {
+		if !filter.Check(k) {
 			return false
 		}
 	}
 	return true
 }
 
-func (g *Generator) generate(numbers, combination []int) {
-	lenNumbers := len(numbers)
-	lenCombination := len(combination)
-	for i, number := range numbers {
-		if g.n-lenCombination > lenNumbers-i {
+func (g *Generator) generate(cisla, kombinacia komb.Kombinacia) {
+	lenCisla := len(cisla)
+	lenKombinacia := len(kombinacia)
+	for i, cislo := range cisla {
+		if g.n-lenKombinacia > lenCisla-i {
 			break
 		}
-		combination = append(combination, number)
-		if g.check(combination) {
-			if len(combination) == g.n {
+		kombinacia = append(kombinacia, cislo)
+		if g.check(kombinacia) {
+			if len(kombinacia) == g.n {
 				// Found
-				fmt.Println(combination)
+				fmt.Println(kombinacia)
 			} else {
-				g.generate(numbers[i+1:], combination)
+				g.generate(cisla[i+1:], kombinacia)
 			}
 		}
-		// _ = combination[lenCombination]
-		combination = combination[:lenCombination]
+		// _ = kombinacia[lenCombination]
+		kombinacia = kombinacia[:lenKombinacia]
 	}
 }

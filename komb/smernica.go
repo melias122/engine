@@ -1,6 +1,10 @@
 package komb
 
-func Smernica(n, m int, k []int) float64 {
+func Smernica(n, m int, k Kombinacia) float64 {
+	return smernica(n, m, k)
+}
+
+func smernica(n, m int, k Kombinacia) float64 {
 	var (
 		sm  float64
 		nSm int

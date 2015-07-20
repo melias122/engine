@@ -1,11 +1,10 @@
 package archiv
 
 import (
-	"bytes"
-	"math"
 	"strconv"
 	"strings"
 
+	"github.com/melias122/psl/komb"
 	"github.com/melias122/psl/num"
 )
 
@@ -18,13 +17,13 @@ type Riadok struct {
 	n, m int
 
 	Pc             uint16
-	K              []byte
+	K              komb.Kombinacia
 	C              num.C
 	Zh             int
 	Sm, DtSm       float64
 	Kk, DtKk       float64
-	Ntica          []byte
-	Xtica          []byte
+	Ntica          komb.Tica
+	Xtica          komb.Tica
 	R1, DtR1       float64
 	HHrx, DtHHrx   float64
 	R2, DtR2       float64
@@ -33,13 +32,13 @@ type Riadok struct {
 	Uc
 }
 
-func (r *Riadok) Add(k []byte, n1, n2 *num.N, hrx, hhrx float64) {
+func (r *Riadok) Add(k komb.Kombinacia, n1, n2 *num.N, hrx, hhrx float64) {
 
-	Sm := smernica(r.n, r.m, k)
+	Sm := komb.Smernica(r.n, r.m, k)
 
 	if r.K != nil {
-		r.Zh = zhoda(r.K, k)
-		Kk := korelacia(r.n, r.m, r.K, k)
+		r.Zh = komb.Zhoda(r.K, k)
+		Kk := komb.Korelacia(r.n, r.m, r.K, k)
 		r.DtKk = Kk - r.Kk
 		r.Kk = Kk
 
@@ -59,11 +58,13 @@ func (r *Riadok) Add(k []byte, n1, n2 *num.N, hrx, hhrx float64) {
 
 	r.K = k
 	r.C = n1.C()
+	r.Ntica = komb.Ntica(k)
+	r.Xtica = komb.Xtica(r.m, k)
 }
 
 func (r Riadok) record() []string {
 	rec := make([]string, 0, len(header))
-	rec = append(rec, itoa(int(r.Pc)), kombToString(r.K))
+	rec = append(rec, itoa(int(r.Pc)), r.K.String())
 	for _, c := range r.C {
 		rec = append(rec, itoa(int(c)))
 	}
@@ -73,8 +74,8 @@ func (r Riadok) record() []string {
 		ftoa(r.DtSm),
 		ftoa(r.Kk),
 		ftoa(r.DtKk),
-		"", // ntica
-		"", // xtica
+		r.Ntica.String(),
+		r.Xtica.String(),
 		ftoa(r.R1),
 		ftoa(r.DtR1),
 		ftoa(r.HHrx),
@@ -98,73 +99,4 @@ func itoa(i int) string {
 func ftoa(f float64) string {
 	s := strconv.FormatFloat(f, 'g', -1, 64)
 	return strings.Replace(s, ".", ",", 1)
-}
-
-func smernica(n, m int, k []byte) float64 {
-	if len(k) != n {
-		return 0
-	}
-	var (
-		sm  float64
-		nSm int
-	)
-	for i := 0; i < n-1; i++ {
-		// for i, ki := range k[:len(k)-1] {
-		for j := i + 1; j < n; j++ {
-			// for j, kj := range k[i+1:] {
-			p1 := float64(k[j]) - float64(k[i])
-			p2 := float64(j) - float64(i)
-
-			p1 /= float64(m - 1)
-			p2 /= float64(n - 1)
-			p1 /= p2
-
-			sm += p1
-			nSm++
-		}
-	}
-	if nSm > 0 {
-		sm /= float64(nSm)
-	}
-	return sm
-}
-
-func zhoda(k0, k1 []byte) int {
-	var zh, i, j int
-	for i < len(k0) && j < len(k1) {
-		if k0[i] == k1[j] {
-			zh++
-			i++
-			j++
-		} else if k0[i] < k1[j] {
-			i++
-		} else {
-			j++
-		}
-	}
-	return zh
-}
-
-func korelacia(n, m int, k0, k1 []byte) float64 {
-	if len(k0) == 0 || len(k1) == 0 {
-		return 0
-	}
-	var kk float64
-	for i := 0; i < n; i++ {
-		a := float64(k1[i])
-		p := float64(k0[i])
-		kk += math.Pow((a-p)/float64(m), 4) / float64(n)
-	}
-	return math.Pow(float64(1)-math.Sqrt(kk), 8)
-}
-
-func kombToString(k []byte) string {
-	var buf bytes.Buffer
-	for i, el := range k {
-		if i > 0 {
-			buf.WriteString(" ")
-		}
-		buf.WriteString(strconv.Itoa(int(el)))
-	}
-	return buf.String()
 }

@@ -1,95 +1,6 @@
 package filter
 
-import "github.com/melias122/psl/num"
-
-func NewP(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsP,
-	}
-}
-
-func NewN(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsN,
-	}
-}
-
-func NewPr(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsPr,
-	}
-}
-
-func NewMc(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsMc,
-	}
-}
-
-func NewVc(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsVc,
-	}
-}
-
-func NewC19(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsC19,
-	}
-}
-
-func NewC0(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsC0,
-	}
-}
-
-func NewcC(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IscC,
-	}
-}
-func NewCc(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsCc,
-	}
-}
-
-func NewCC(n, min, max int) Filter {
-	return cislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		fun: num.IsCC,
-	}
-}
+import "github.com/melias122/psl/komb"
 
 type cislovacky struct {
 	n        int
@@ -97,10 +8,19 @@ type cislovacky struct {
 	fun      func(int) bool
 }
 
-func (c cislovacky) Check(combination []int) bool {
+func NewCislovacky(n, min, max int, fun func(int) bool) Filter {
+	return cislovacky{
+		n:   n,
+		min: min,
+		max: max,
+		fun: fun,
+	}
+}
+
+func (c cislovacky) Check(combination komb.Kombinacia) bool {
 	var count int
 	for _, number := range combination {
-		if c.fun(number) {
+		if c.fun(int(number)) {
 			count++
 		}
 	}

@@ -1,130 +1,19 @@
 package komb
 
-import "github.com/melias122/psl/num"
+import (
+	"bytes"
+	"strconv"
+)
 
-type K struct {
-	n, m byte
-	// nptr int
-	// ptr  []*num.N
+type Kombinacia []byte
 
-	num1 *num.N
-	num2 *num.N
-
-	// ntica Ntica
-	// xtica XTica
+func (k Kombinacia) String() string {
+	var buf bytes.Buffer
+	for i, n := range k {
+		if i > 0 {
+			buf.WriteString(" ")
+		}
+		buf.WriteString(strconv.Itoa(int(n)))
+	}
+	return buf.String()
 }
-
-// func New(n, m int) *K {
-// 	return &K{
-// 		n:   n,
-// 		m:   m,
-// 		ptr: make([]*num.N, n+1),
-// 		num: num.Zero(n, m),
-
-// 		ntica: newNtica(n),
-// 		xtica: make(Tica, ((m-1)/10)+1),
-// 	}
-// }
-
-// func (k *K) R1() float64 {
-// 	return k.num.R1()
-// }
-
-// func (k *K) R2() float64 {
-// 	return k.num.R2()
-// }
-
-// func (k *K) Sucet() int {
-// 	return k.num.Cislo()
-// }
-
-// func (k *K) Xtica() Tica {
-// 	return k.xtica
-// }
-
-// func (k *K) Ntica() Tica {
-// 	return k.ntica.t
-// }
-
-// func (k0 *K) Kk(k1 *K) float64 {
-// 	kk := 0.0
-
-// 	for i := 0; i < k0.n; i++ {
-// 		a := float64(k1.At(i).Cislo())
-// 		p := float64(k0.At(i).Cislo())
-// 		kk += math.Pow((a-p)/float64(k0.m), 4) / float64(k0.n)
-// 	}
-
-// 	return math.Pow(float64(1)-math.Sqrt(kk), 8)
-// }
-
-// func (k *K) Sm() float64 {
-// 	var (
-// 		sm  float64
-// 		nSm int
-// 	)
-// 	for i := 0; i < k.n-1; i++ {
-// 		for j := i + 1; j < k.n; j++ {
-// 			p1 := float64(k.At(j).Cislo()) - float64(k.At(i).Cislo())
-// 			p2 := float64(j) - float64(i)
-
-// 			p1 /= float64(k.m - 1)
-// 			p2 /= float64(k.n - 1)
-// 			p1 /= p2
-
-// 			sm += p1
-// 			nSm++
-// 		}
-// 	}
-
-// 	if nSm > 0 {
-// 		sm /= float64(nSm)
-// 	}
-// 	return sm
-// }
-
-// func (k *K) C() num.C {
-// 	return k.num.C()
-// }
-
-// func (k *K) Push(n *num.N) {
-// 	k.num.Plus(n)
-// 	k.ptr[k.nptr] = n
-// 	k.xtica[(n.Cislo()-1)/10]++
-// 	k.ntica.push(n.Cislo())
-// 	k.nptr++
-// }
-
-// func (k *K) Pop() *num.N {
-// 	k.nptr--
-// 	n := k.ptr[k.nptr]
-// 	k.num.Minus(n)
-// 	k.xtica[(n.Cislo()-1)/10]--
-// 	k.ntica.pop()
-// 	return n
-// }
-
-// func (k *K) Len() int {
-// 	return k.nptr
-// }
-
-// func (k *K) At(i int) *num.N {
-// 	return k.ptr[i]
-// }
-
-// func (k *K) Contains(n *num.N) int {
-// 	for _, c := range k.ptr {
-// 		if n == c {
-// 			return 1
-// 		}
-// 	}
-// 	return 0
-// }
-
-// func (k *K) String() string {
-// 	s := make([]string, k.nptr)
-// 	for i := 0; i < k.nptr; i++ {
-// 		s[i] = k.ptr[i].String()
-// 	}
-// 	return strings.Join(s, " ")
-// }

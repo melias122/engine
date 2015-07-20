@@ -8,7 +8,6 @@ import (
 	"runtime/pprof"
 
 	"github.com/melias122/psl/archiv"
-	"github.com/melias122/psl/hrx"
 )
 
 func main() {
@@ -30,74 +29,17 @@ func main() {
 	n, m := 5, 35
 	// n, m := 20, 80
 	path := fmt.Sprintf("testdata/%d%d.csv", n, m)
-	a, err := archiv.Make(path, n, m)
+	_, err := archiv.Make(path, n, m)
 	if err != nil {
 		panic(err)
 	}
 
-	htab := hrx.NewHrxTab(a.Hrx, a.HHrx, n, m)
-	skupiny, err := htab.Make()
-	if err != nil {
-		panic(err)
-	}
-	filter(skupiny)
+	// htab := hrx.NewHrxTab(a.Hrx, a.HHrx, n, m)
+	// _, err = htab.Make()
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
-
-func filter(skupiny hrx.Skupiny) {
-	for i, sk := range skupiny {
-		fmt.Println(i, sk)
-	}
-}
-
-// func max101perioda(m int) {
-// 	var (
-// 		max101perioda, pocetPerioda int
-// 		pocetRiedka                 int
-// 		nKALKULUJ                   int
-// 		a101perioda                 []int
-// 		aRiedka                     [][]int
-// 	)
-// 	for kk := 1; kk <= pocetRiedka+nKALKULUJ; kk++ {
-// 		for i := 1; i <= m; i++ {
-// 			a101perioda[i] = 0
-// 		}
-// 		var (
-// 			kk_od                    = kk
-// 			boolSTOP, bool101perioda bool
-// 		)
-// 		for !boolSTOP {
-// 			bool101perioda = true
-// 			for i := 1; i <= m; i++ {
-// 				a101perioda[i] += aRiedka[kk_od][i]
-// 				if a101perioda[i] < 1 {
-// 					bool101perioda = false
-// 				}
-// 			}
-// 			if bool101perioda {
-// 				boolSTOP = true
-// 			}
-
-// 			kk_od--
-// 			if kk_od == 0 {
-// 				boolSTOP = true
-// 			}
-// 		}
-
-// 		if bool101perioda || (kk_od == 0) {
-// 			if bool101perioda {
-// 				pocetPerioda++
-// 			}
-// 			kk_od++
-// 			for i := 1; i <= m; i++ {
-// 				if a101perioda[i] > max101perioda {
-// 					max101perioda = a101perioda[i]
-// 				}
-// 			}
-// 		}
-// 	}
-// 	max101perioda++
-// 	fmt.Println(max101perioda)
-// }
 
 // func ForwardLinearPrediction(coefs, x []float64) {
 // 	// GET SIZE FROM INPUT VECTORS
