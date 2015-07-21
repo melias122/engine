@@ -10,9 +10,11 @@ type korelacia struct {
 
 func NewKorelacia(n, m int, min, max float64, k0 komb.Kombinacia) Filter {
 	return korelacia{
-		n:  n,
-		m:  m,
-		k0: k0,
+		n:   n,
+		m:   m,
+		min: min,
+		max: max,
+		k0:  k0,
 	}
 }
 

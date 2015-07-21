@@ -7,16 +7,16 @@ import (
 )
 
 // TODO: stlNtica
-type stlNtica struct {
-}
-
-func NewStlNtica() Filter {
-	return nil
-}
-
-func (s stlNtica) Check(k komb.Kombinacia) bool {
-	return true
-}
+// type stlNtica struct {
+// }
+//
+// func NewStlNtica() Filter {
+// 	return nil
+// }
+//
+// func (s stlNtica) Check(k komb.Kombinacia) bool {
+// 	return true
+// }
 
 type ntica struct {
 	n     int
@@ -25,6 +25,7 @@ type ntica struct {
 
 func NewNtica(n int, tica komb.Tica) Filter {
 	return ntica{
+		n:     n,
 		ntica: tica,
 	}
 }

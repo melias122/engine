@@ -154,14 +154,14 @@ func (h *HrxTab) hhrxMinMax() (float64, float64) {
 	for _, t := range h.r1 {
 		c := h.skupinyN2[t.Sk]
 		for i := 0; i < t.Max; i++ {
-			h.HHrx.Move(1, c[i].PocetR(), c[i].PocetR()+1)
+			h.HHrx.move(1, c[i].PocetR(), c[i].PocetR()+1)
 		}
 	}
 	hhrxMin := h.HHrx.Value()
 	for _, t := range h.r1 {
 		c := h.skupinyN2[t.Sk]
 		for i := 0; i < t.Max; i++ {
-			h.HHrx.Move(1, c[i].PocetR()+1, c[i].PocetR())
+			h.HHrx.move(1, c[i].PocetR()+1, c[i].PocetR())
 		}
 	}
 
@@ -170,7 +170,7 @@ func (h *HrxTab) hhrxMinMax() (float64, float64) {
 		c := h.skupinyN2[t.Sk]
 		lastIndex := len(c) - 1
 		for i := 0; i < t.Max; i++ {
-			h.HHrx.Move(1, c[lastIndex-i].PocetR(), c[lastIndex-i].PocetR()+1)
+			h.HHrx.move(1, c[lastIndex-i].PocetR(), c[lastIndex-i].PocetR()+1)
 		}
 	}
 	hhrxMax := h.HHrx.Value()
@@ -178,7 +178,7 @@ func (h *HrxTab) hhrxMinMax() (float64, float64) {
 		c := h.skupinyN2[t.Sk]
 		lastIndex := len(c) - 1
 		for i := 0; i < t.Max; i++ {
-			h.HHrx.Move(1, c[lastIndex-i].PocetR()+1, c[lastIndex-i].PocetR())
+			h.HHrx.move(1, c[lastIndex-i].PocetR()+1, c[lastIndex-i].PocetR())
 		}
 	}
 	return hhrxMin, hhrxMax
@@ -231,7 +231,7 @@ func (h *HrxTab) append(t Tab) {
 	h.r1 = append(h.r1, t)
 
 	// presun v Hrx
-	h.Hrx.Move(t.Max, t.Sk, t.Sk+1)
+	h.Hrx.move(t.Max, t.Sk, t.Sk+1)
 
 	// pocet suctov
 	h.pocetSucet.Mul(&h.pocetSucet, h.psCache[t])
@@ -256,7 +256,7 @@ func (h *HrxTab) delete() {
 	h.r1 = h.r1[:len(h.r1)-1]
 
 	// presun v Hrx
-	h.Hrx.Move(t.Max, t.Sk+1, t.Sk)
+	h.Hrx.move(t.Max, t.Sk+1, t.Sk)
 
 	// pocet suctov
 	h.pocetSucet.Div(&h.pocetSucet, h.psCache[t])

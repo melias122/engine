@@ -25,7 +25,7 @@ func (c cislovacky) Check(combination komb.Kombinacia) bool {
 		}
 	}
 	if len(combination) == c.n {
-		if !(count >= c.min && count <= c.max) {
+		if count < c.min || count > c.max {
 			return false
 		}
 	} else {

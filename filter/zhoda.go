@@ -20,7 +20,7 @@ func (z zhoda) Check(kombinacia komb.Kombinacia) bool {
 	count := komb.Zhoda(z.kombinacia, kombinacia)
 
 	if len(kombinacia) == z.n {
-		if !(count >= z.min && count <= z.max) {
+		if count < z.min || count > z.max {
 			return false
 		}
 	} else {

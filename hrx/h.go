@@ -3,6 +3,7 @@ package hrx
 import (
 	"math"
 
+	"github.com/melias122/psl/komb"
 	"github.com/melias122/psl/num"
 )
 
@@ -38,7 +39,7 @@ func (h *H) Add(x, y int) {
 	}
 
 	// Presun Hrx/HHrx zo skupiny PocetR, do skupiny aktualnej pocetnosti cisla N
-	h.Move(1, N.PocetR(), N.PocetR()+1)
+	h.move(1, N.PocetR(), N.PocetR()+1)
 
 	// Incrementuj pocetnost cisla x
 	N.Inc(y)
@@ -49,7 +50,7 @@ func (h *H) Is101() bool {
 }
 
 // Presun
-func (h *H) Move(pocet, from, to int) {
+func (h *H) move(pocet, from, to int) {
 	// keby som odrataval napr z 2->1 (5) je to iste ako 1->2 (-5)
 	if from > to {
 		from, to = to, from
@@ -70,11 +71,7 @@ func (h *H) Move(pocet, from, to int) {
 	}
 }
 
-// Vrati N
 func (h *H) GetN(x int) *num.N {
-	if x <= 0 {
-		panic("x <= 0")
-	}
 	return h.Cisla[x-1]
 }
 
@@ -102,18 +99,27 @@ func (h *H) Value() float64 {
 	return math.Sqrt(math.Sqrt(hrx)) * 100
 }
 
+func (h *H) ValueKombinacia(k komb.Kombinacia) float64 {
+	var p Presun
+	for _, cislo := range k {
+		N := h.GetN(int(cislo))
+		p = append(p, Tab{N.PocetR(), 1})
+	}
+	return h.valuePresun(p)
+}
+
 //Vypocita hodnotu Presun p
-func (h *H) ValuePresun(p Presun) float64 {
+func (h *H) valuePresun(p Presun) float64 {
 	// z aktualnej skupiny potrebujem preniest t.Max
 	// do dalsej skupiny sk+1
 	for _, t := range p {
-		h.Move(t.Max, t.Sk, t.Sk+1)
+		h.move(t.Max, t.Sk, t.Sk+1)
 	}
 	// Vypocitaj hrx pre zostavu p
-	hrx := h.Value()
 	// Obnov povodny stav
+	hrx := h.Value()
 	for _, t := range p {
-		h.Move(t.Max, t.Sk+1, t.Sk)
+		h.move(t.Max, t.Sk+1, t.Sk)
 	}
 	return hrx
 }
