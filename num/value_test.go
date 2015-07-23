@@ -15,7 +15,7 @@ func BenchmarkValue(b *testing.B) {
 
 func makekey(x, y, n, m, p int) key {
 	k := newph(x, y, n, m).key
-	k.pocet = uint16(p)
+	k.pocet = uint32(p)
 	return k
 }
 

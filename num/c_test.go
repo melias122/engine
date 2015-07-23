@@ -40,7 +40,7 @@ func TestNewC(t *testing.T) {
 		{21, "0 1 0 1 0 0 0 0 1 0"},
 	}
 	for _, test := range tests {
-		r := newC(test.x).String()
+		r := NewC(test.x).String()
 		if r != test.w {
 			t.Fatalf("Expected: (%s), Have: (%s)", test.w, r)
 		}

@@ -31,20 +31,3 @@ func NewPovinneStl(cisla [][]bool) Filter {
 func (p povinneStl) Check(k komb.Kombinacia) bool {
 	return true
 }
-
-// bool GLimits::checkPovinne(){
-//     uint p_size = povinne.size();
-//     uint r_size = result.size();
-//     for(uint lev=0; lev < p_size && lev < r_size; ++lev){
-//         if(result[lev] > povinne[lev])
-//             return false;
-//     }
-//
-//     if(level == r_size){
-//         foreach (const uint &pov, povinne) {
-//             if(!result.contains(pov))
-//                 return false;
-//         }
-//     }
-//     return true;
-// }

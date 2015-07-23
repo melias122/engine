@@ -1,6 +1,9 @@
 package num
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestZero(t *testing.T) {
 	n := Zero(5, 35)
@@ -20,35 +23,18 @@ func TestNew(t *testing.T) {
 	}
 }
 
-// func TestInc1(t *testing.T) {
-// 	n := New(1, 5, 35)
-// }
+func TestMakeCopy(t *testing.T) {
+	n := New(1, 5, 35)
+	n.Inc(1)
+	copy := n.MakeCopy()
+	if !reflect.DeepEqual(n, copy) {
+		t.Error("Copy excepted to be equal")
+	}
+}
 
-// func TestInc2(t *testing.T) {
-// 	n := New(1, 5, 35)
-// }
-
-// func TestReset2(t *testing.T) {
-// 	n := New(1, 5, 35)
-// }
-
-// func TestMax(t *testing.T) {
-// 	tests := []struct {
-// 		x, y, n, m int
-// 		w          string
-// 	}{
-// 		{1, 1, 5, 35, "46376"},
-// 		{1, 2, 5, 35, "0"},
-// 		{5, 1, 5, 35, "27405"},
-// 		{5, 2, 5, 35, "16240"},
-// 		{5, 3, 5, 35, "2610"},
-// 		{5, 4, 5, 35, "120"},
-// 		{5, 5, 5, 35, "1"},
-// 	}
-// 	for _, x := range tests {
-// 		r := Max(x.x, x.y, x.n, x.m).String()
-// 		if r != x.w {
-// 			t.Fatalf("Expected: (%s), Have: (%s)", x.w, r)
-// 		}
-// 	}
-// }
+func TestCislo(t *testing.T) {
+	N := New(23, 4, 10)
+	if N.Cislo() != 23 {
+		t.Errorf("Excepted (23), Got: (%d)", N.Cislo())
+	}
+}
