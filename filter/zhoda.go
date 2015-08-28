@@ -1,8 +1,19 @@
 package filter
 
-import "github.com/melias122/psl/komb"
+import (
+	"fmt"
+
+	"github.com/melias122/psl/hrx"
+	"github.com/melias122/psl/komb"
+)
 
 func NewZhoda(n, min, max int, kombinacia komb.Kombinacia) Filter {
+	if min < 0 {
+		min = 0
+	}
+	if max > n {
+		max = n
+	}
 	return zhoda{
 		n:          n,
 		min:        min,
@@ -14,6 +25,10 @@ func NewZhoda(n, min, max int, kombinacia komb.Kombinacia) Filter {
 type zhoda struct {
 	n, min, max int
 	kombinacia  komb.Kombinacia
+}
+
+func (z zhoda) String() string {
+	return fmt.Sprintf("Zh: %d-%d", z.min, z.max)
 }
 
 func (z zhoda) Check(kombinacia komb.Kombinacia) bool {
@@ -28,5 +43,9 @@ func (z zhoda) Check(kombinacia komb.Kombinacia) bool {
 			return false
 		}
 	}
+	return true
+}
+
+func (z zhoda) CheckSkupina(skupina hrx.Skupina) bool {
 	return true
 }

@@ -3,13 +3,13 @@ package num
 import "math/big"
 
 var (
-	bcache = make(map[bkey]big.Int)
+	// bcache = make(map[bkey]*big.Int)
 	fcache = make(map[key]float64)
 )
 
-type bkey struct {
-	a, b byte
-}
+// type bkey struct {
+// 	a, b byte
+// }
 
 type key struct {
 	x, y, n, m byte
@@ -20,41 +20,59 @@ type key struct {
 // podla pocetnosti p.. n a m je rozmer databazy
 // Vzorec: hodnota = pocetnostCisla / (binom(m-x nad n-y) * binom(x-1 nad y-1))
 func Value(pocet, x, y, n, m int) float64 {
-	return value(key{byte(x), byte(y), byte(n), byte(m), uint32(pocet)})
-}
-
-func value(k key) float64 {
-
-	if v, ok := fcache[k]; ok {
-		return v
-	}
-	var (
-		c, d big.Int
-		r    big.Rat
-	)
-	b, ok := bcache[bkey{k.m - k.x, k.n - k.y}]
+	var key = key{byte(x), byte(y), byte(n), byte(m), uint32(pocet)}
+	v, ok := fcache[key]
 	if !ok {
-		b.Binomial(int64(k.m-k.x), int64(k.n-k.y))
-		bcache[bkey{k.m - k.x, k.n - k.y}] = b
-	}
-	a, ok := bcache[bkey{k.x - 1, k.y - 1}]
-	if !ok {
-		a.Binomial(int64(k.x-1), int64(k.y-1))
-		bcache[bkey{k.x - 1, k.y - 1}] = a
-	}
-	c.Mul(&b, &a)
-	d.SetInt64(int64(0))
-	if c.Cmp(&d) > 0 {
-		d.SetInt64(int64(k.pocet))
-		r.SetFrac(&d, &c)
-		v, _ := r.Float64()
-
-		fcache[k] = v
+		v = value(pocet, x, y, n, m)
+		fcache[key] = v
 		return v
 	} else {
-		return 0
+		return v
 	}
 }
+
+func value(pocet, x, y, n, m int) float64 {
+	var (
+		a, b  big.Int
+		value float64
+	)
+	a.Binomial(int64(x-1), int64(y-1))
+	b.Binomial(int64(m-x), int64(n-y))
+
+	if a.Int64() != 0 && b.Int64() != 0 {
+		a.Mul(&a, &b)
+		b.SetInt64(int64(pocet))
+		value, _ = new(big.Rat).SetFrac(&b, &a).Float64()
+	}
+	return value
+}
+
+// func value(pocet, x, y, n, m int) float64 {
+// 	var (
+// 		a, b  big.Int
+// 		value float64
+// 	)
+// 	aCachedKey := bkey{byte(x - 1), byte(y - 1)}
+// 	aCached, ok := bcache[aCachedKey]
+// 	if !ok {
+// 		aCached = a.Binomial(int64(x-1), int64(y-1))
+// 		bcache[aCachedKey] = aCached
+// 	}
+//
+// 	bCachedKey := bkey{byte(m - x), byte(n - y)}
+// 	bCached, ok := bcache[bCachedKey]
+// 	if !ok {
+// 		bCached = b.Binomial(int64(m-x), int64(n-y))
+// 		bcache[bCachedKey] = bCached
+// 	}
+//
+// 	if aCached.Int64() != 0 && bCached.Int64() != 0 {
+// 		a.Mul(aCached, bCached)
+// 		b.SetInt64(int64(pocet))
+// 		value, _ = new(big.Rat).SetFrac(&b, &a).Float64()
+// 	}
+// 	return value
+// }
 
 // func vrati maximalnu teoreticku
 // pocetnost cisla v stlpci

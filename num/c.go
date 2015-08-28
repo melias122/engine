@@ -10,10 +10,10 @@ var cFuns = []func(int) bool{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc
 type C [10]byte
 
 func NewC(cislo int) C {
-	var c C
 	if cislo <= 0 {
-		return c
+		panic("num.NewC: cislo <= 0")
 	}
+	var c C
 	for i, f := range cFuns {
 		if f(cislo) {
 			c[i]++
@@ -43,6 +43,14 @@ func (c1 C) String() string {
 		buf.WriteString(strconv.Itoa(int(c)))
 	}
 	return buf.String()
+}
+
+func (c C) ToStringSlice() []string {
+	ss := make([]string, len(c))
+	for i, cislo := range c {
+		ss[i] = strconv.Itoa(int(cislo))
+	}
+	return ss
 }
 
 func IsP(c int) bool {

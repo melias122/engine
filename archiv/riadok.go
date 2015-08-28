@@ -25,16 +25,24 @@ type Riadok struct {
 	Ntica          komb.Tica
 	Xtica          komb.Tica
 	R1, DtR1       float64
+	Rp1            float64
+	S1, DtS1       float64
+	Sp1            float64
+	R1mS1          float64
 	HHrx, DtHHrx   float64
 	R2, DtR2       float64
+	S2, DtS2       float64
+	R2mS2          float64
 	Hrx, DtHrx     float64
 	Sucet, DtSucet int
 	Uc
 }
 
-func (r *Riadok) Add(k komb.Kombinacia, n1, n2 *num.N, hrx, hhrx float64) {
+func (r *Riadok) Add(k komb.Kombinacia, n1, n2 num.Nums, hrx, hhrx float64) {
 
 	Sm := komb.Smernica(r.n, r.m, k)
+	R1, S1 := k.SucetRS(n1)
+	R2, S2 := k.SucetRS(n2)
 
 	if r.K != nil {
 		r.Zh = komb.Zhoda(r.K, k)
@@ -42,22 +50,32 @@ func (r *Riadok) Add(k komb.Kombinacia, n1, n2 *num.N, hrx, hhrx float64) {
 		r.DtKk = Kk - r.Kk
 		r.Kk = Kk
 
-		r.DtR1 = n1.R() - r.R1
-		r.DtR2 = n2.R() - r.R2
+		// Dt
+		r.DtR1 = R1 - r.R1
+		r.DtS1 = S1 - r.S1
+		r.DtR2 = R2 - r.R2
+		r.DtS2 = S2 - r.S2
 		r.DtHrx = hrx - r.Hrx
 		r.DtHHrx = hhrx - r.HHrx
 		r.DtSm = Sm - r.Sm
-		r.DtSucet = n1.Cislo() - r.Sucet
+		r.DtSucet = k.Sucet() - r.Sucet
 	}
 	r.Sm = Sm
-	r.R1 = n1.R()
-	r.R2 = n2.R()
+	r.R1 = R1
+	// r.Rp1 = n1.RNext()
+	r.S1 = S1
+	// r.Sp1 = sumSnext(k, n1)
+	r.Rp1, r.Sp1 = k.SucetRSNext(n1)
+	r.R1mS1 = R1 - S1
+	r.R2 = R2
+	r.S2 = S2
+	r.R2mS2 = R2 - S2
 	r.Hrx = hrx
 	r.HHrx = hhrx
-	r.Sucet = n1.Cislo()
+	r.Sucet = k.Sucet()
 
 	r.K = k
-	r.C = n1.C()
+	r.C = k.Cislovacky()
 	r.Ntica = komb.Ntica(k)
 	r.Xtica = komb.Xtica(r.m, k)
 }
@@ -78,10 +96,18 @@ func (r Riadok) record() []string {
 		r.Xtica.String(),
 		ftoa(r.R1),
 		ftoa(r.DtR1),
+		ftoa(r.Rp1),
+		ftoa(r.S1),
+		ftoa(r.DtS1),
+		ftoa(r.Sp1),
+		ftoa(r.R1mS1),
 		ftoa(r.HHrx),
 		ftoa(r.DtHHrx),
 		ftoa(r.R2),
 		ftoa(r.DtR2),
+		ftoa(r.S2),
+		ftoa(r.DtS2),
+		ftoa(r.R2mS2),
 		ftoa(r.Hrx),
 		ftoa(r.DtHrx),
 		itoa(r.Sucet),
@@ -91,6 +117,22 @@ func (r Riadok) record() []string {
 	)
 	return rec
 }
+
+// func sumS(k komb.Kombinacia, n *num.N) float64 {
+// 	var s float64
+// 	for i := range k {
+// 		s += n.S(i + 1)
+// 	}
+// 	return s
+// }
+//
+// func sumSnext(k komb.Kombinacia, n *num.N) float64 {
+// 	var s float64
+// 	for i := range k {
+// 		s += n.SNext(i + 1)
+// 	}
+// 	return s
+// }
 
 func itoa(i int) string {
 	return strconv.Itoa(i)

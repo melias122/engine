@@ -1,33 +1,66 @@
 package filter
 
 import (
-	Hrx "github.com/melias122/psl/hrx"
+	"fmt"
+
+	"github.com/melias122/psl/hrx"
 	"github.com/melias122/psl/komb"
 )
 
-type hrx struct {
+type hrxfilter struct {
 	n        int
 	min, max float64
-	hrx      *Hrx.H
+	hrx      *hrx.H
+	fname    string
 }
 
-func NewHrx(n int, min, max float64, h *Hrx.H) Filter {
-	return hrx{
-		n:   n,
-		min: min,
-		max: max,
-		hrx: h,
+func NewHrx(n int, min, max float64, h *hrx.H, fname string) Filter {
+	if min < 0 {
+		min = 0
+	}
+	if max > 100 {
+		max = 99.99999999999
+	}
+	return hrxfilter{
+		n:     n,
+		min:   nextLSS(min),
+		max:   nextGRT(max),
+		hrx:   h,
+		fname: fname,
 	}
 }
 
-func (h hrx) Check(k komb.Kombinacia) bool {
-	value := h.hrx.ValueKombinacia(k)
-	if len(k) == h.n {
-		if value < h.min || value > h.max {
+func (h hrxfilter) String() string {
+	return fmt.Sprintf("%s: %f-%f", h.fname, h.min, h.max)
+}
+
+func (h hrxfilter) Check(k komb.Kombinacia) bool {
+	switch h.fname {
+	case "HRX":
+		return true
+	case "HHRX":
+		value := h.hrx.ValueKombinacia(k)
+		if len(k) == h.n {
+			if value < h.min || value > h.max {
+				return false
+			}
+		} else if value < h.min {
 			return false
 		}
-	} else if value > h.max {
-		return false
+	}
+	return true
+}
+
+func (h hrxfilter) CheckSkupina(skupina hrx.Skupina) bool {
+	switch h.fname {
+	case "HRX":
+		if skupina.Hrx > h.max || skupina.Hrx < h.min {
+			return false
+		}
+	case "HHRX":
+		if skupina.HHrx[0] > h.max || skupina.HHrx[1] < h.min {
+			return false
+		}
 	}
 	return true
 }

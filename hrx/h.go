@@ -8,27 +8,25 @@ import (
 )
 
 type H struct {
-	n, m    int
-	max     int
-	skupiny []int8
-	Cisla   num.Nums
+	n, m   int
+	xcisla Presun
+	Cisla  num.Nums
 }
 
 func New(n, m int) *H {
 	h := &H{
-		n:       n,
-		m:       m,
-		skupiny: make([]int8, m),
-		Cisla:   make(num.Nums, m),
+		n:      n,
+		m:      m,
+		xcisla: NewPresun(m),
+		Cisla:  make(num.Nums, m),
 	}
-	h.skupiny[0] = int8(m)
 	return h
 }
 
 func (h *H) Add(x, y int) {
 
-	if x <= 0 {
-		panic("x <= 0")
+	if x <= 0 || y < 0 {
+		panic("hrx.Add: x <= 0")
 	}
 
 	// Ak N nie je v vytvorene
@@ -39,7 +37,7 @@ func (h *H) Add(x, y int) {
 	}
 
 	// Presun Hrx/HHrx zo skupiny PocetR, do skupiny aktualnej pocetnosti cisla N
-	h.move(1, N.PocetR(), N.PocetR()+1)
+	h.xcisla.move(1, N.PocetR(), N.PocetR()+1)
 
 	// Incrementuj pocetnost cisla x
 	N.Inc(y)
@@ -49,34 +47,20 @@ func (h *H) Is101() bool {
 	return h.Cisla.Is101()
 }
 
-// Presun
-func (h *H) move(pocet, from, to int) {
-	// keby som odrataval napr z 2->1 (5) je to iste ako 1->2 (-5)
-	if from > to {
-		from, to = to, from
-		pocet = -pocet
-	}
-
-	if to >= len(h.skupiny) {
-		h.skupiny = append(h.skupiny, make([]int8, h.m)...)
-	}
-	// priratanie odratanie do danej skupiny
-	h.skupiny[from] -= int8(pocet)
-	h.skupiny[to] += int8(pocet)
-
-	if to == h.max && h.skupiny[to] == 0 {
-		h.max = from
-	} else if to > h.max {
-		h.max = to
-	}
-}
-
 func (h *H) GetN(x int) *num.N {
-	return h.Cisla[x-1]
+	N := h.Cisla[x-1]
+	if N == nil {
+		return num.New(x, h.n, h.m)
+	} else {
+		return h.Cisla[x-1]
+	}
 }
 
 // Squaring je asi 10x rychlejsi ako math.Pow ...
-func (h *H) value(skupina, pocet, max, m float64) float64 {
+func (h *H) value(skupina, pocet, max float64) float64 {
+	var (
+		m = float64(h.m)
+	)
 	x := (max - skupina) / max
 	x *= x // x^2
 	x *= x // x^4
@@ -87,49 +71,33 @@ func (h *H) value(skupina, pocet, max, m float64) float64 {
 
 // Hodnota aktualnej zostavy Hrx
 func (h *H) Value() float64 {
-	if h.max == 0 {
-		return 100.0
-	}
-	var hrx float64
-	for skupina, pocet := range h.skupiny {
-		if pocet > 0 {
-			hrx += h.value(float64(skupina), float64(pocet), float64(h.max), float64(h.m))
-		}
-	}
-	return math.Sqrt(math.Sqrt(hrx)) * 100
+	return h.valuePresun(h.xcisla)
 }
 
 func (h *H) ValueKombinacia(k komb.Kombinacia) float64 {
-	var p Presun
+	p := h.xcisla.copy()
 	for _, cislo := range k {
-		N := h.GetN(int(cislo))
-		p = append(p, Tab{N.PocetR(), 1})
+		sk := h.GetN(int(cislo)).PocetR()
+		p.move(1, sk, sk+1)
 	}
 	return h.valuePresun(p)
 }
 
 //Vypocita hodnotu Presun p
 func (h *H) valuePresun(p Presun) float64 {
-	// z aktualnej skupiny potrebujem preniest t.Max
-	// do dalsej skupiny sk+1
-	for _, t := range p {
-		h.move(t.Max, t.Sk, t.Sk+1)
+	var (
+		max = float64(p.Max())
+		hrx float64
+	)
+	if max == .0 {
+		return 100
 	}
-	// Vypocitaj hrx pre zostavu p
-	// Obnov povodny stav
-	hrx := h.Value()
-	for _, t := range p {
-		h.move(t.Max, t.Sk+1, t.Sk)
+	for _, p := range p {
+		hrx += h.value(float64(p.Sk), float64(p.Max), max)
 	}
-	return hrx
+	return math.Sqrt(math.Sqrt(hrx)) * 100
 }
 
 func (h *H) Presun() Presun {
-	p := Presun{}
-	for sk, max := range h.skupiny {
-		if max > 0 {
-			p = append(p, Tab{sk, int(max)})
-		}
-	}
-	return p
+	return h.xcisla.copy()
 }

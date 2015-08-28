@@ -31,45 +31,37 @@ func xtica(m int, k Kombinacia) Tica {
 }
 
 func Ntica(kombinacia Kombinacia) Tica {
-	return ntica(kombinacia)
+	tica, _ := ntica(kombinacia)
+	return tica
 }
 
-func ntica(kombinacia Kombinacia) Tica {
-	if len(kombinacia) == 0 {
-		return Tica{}
+func NticaPozicie(kombinacia Kombinacia) []byte {
+	_, pozicie := ntica(kombinacia)
+	return pozicie
+}
+
+func ntica(k Kombinacia) (Tica, []byte) {
+	if len(k) == 0 {
+		return Tica{}, []byte{}
+	}
+	if len(k) == 1 {
+		return Tica{1}, []byte{0}
 	}
 	var (
-		tice   = make(Tica, len(kombinacia))
-		result = kombinacia
-		tica   int
+		n       int
+		tica    = make(Tica, len(k))
+		pozicie = make([]byte, len(k))
 	)
-	result = append(result, 0)
-	for i := 0; i < len(result); i++ {
-		if i == len(result)-2 {
-			if tica > 0 {
-				tice[tica]++
-			} else {
-				tice[0]++
-			}
-			break
-		}
-		c := int(int(result[i]) - int(result[i+1]))
-		if c == int(result[i]) {
-			if tica > 0 {
-				tice[tica]++
-			}
-			break
-		}
-		if c < -1 {
-			if tica == 0 {
-				tice[0]++
-			} else {
-				tice[tica]++
-				tica = 0
-			}
+	for i := range k[:len(k)-1] {
+		if k[i]+1 == k[i+1] {
+			n++
+			pozicie[i] = 1
+			pozicie[i+1] = 1
 		} else {
-			tica++
+			tica[n]++
+			n = 0
 		}
 	}
-	return tice
+	tica[n]++
+	return tica, pozicie
 }

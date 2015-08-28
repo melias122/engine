@@ -1,6 +1,11 @@
 package filter
 
-import "github.com/melias122/psl/komb"
+import (
+	"fmt"
+
+	"github.com/melias122/psl/hrx"
+	"github.com/melias122/psl/komb"
+)
 
 type korelacia struct {
 	n, m     int
@@ -9,13 +14,23 @@ type korelacia struct {
 }
 
 func NewKorelacia(n, m int, min, max float64, k0 komb.Kombinacia) Filter {
+	if min < -1 {
+		min = -1
+	}
+	if max > 1 {
+		max = 1
+	}
 	return korelacia{
 		n:   n,
 		m:   m,
-		min: min,
-		max: max,
+		min: nextLSS(min),
+		max: nextGRT(max),
 		k0:  k0,
 	}
+}
+
+func (k korelacia) String() string {
+	return fmt.Sprintf("Kk: %f-%f", k.min, k.max)
 }
 
 func (k korelacia) Check(k1 komb.Kombinacia) bool {
@@ -25,5 +40,9 @@ func (k korelacia) Check(k1 komb.Kombinacia) bool {
 			return false
 		}
 	}
+	return true
+}
+
+func (k korelacia) CheckSkupina(skupina hrx.Skupina) bool {
 	return true
 }

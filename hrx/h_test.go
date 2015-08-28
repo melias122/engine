@@ -2,6 +2,7 @@ package hrx
 
 import (
 	"math"
+	"strconv"
 	"testing"
 )
 
@@ -24,203 +25,142 @@ func BenchmarkPow16Multi(b *testing.B) {
 	}
 }
 
-func TestPow(t *testing.T) {
-	x := 1.1234567890
-	t.Log(math.Pow(x, 16))
-	x *= x
-	x *= x
-	x *= x
-	x *= x
-	t.Log(x)
+func TestNewHrx(t *testing.T) {
+	const n, m = 5, 35
+	hrx := New(n, m)
+	if hrx.n != n {
+		t.Errorf("Excepted: (5), Got: (%d)", hrx.n)
+	}
+	if hrx.m != m {
+		t.Errorf("Excepted: (5), Got: (%d)", hrx.m)
+	}
+	if len(hrx.Cisla) != m {
+		t.Errorf("Excepted: (%d), Got: (%d)", m, len(hrx.Cisla))
+	}
 }
 
-// func TestG(t *testing.T) {
-// 	p := Presun{
-// 		{0, 0},
-// 		{1, 1},
-// 		{2, 6},
-// 		{3, 10},
-// 		{4, 4},
-// 		{5, 5},
-// 		{6, 3},
-// 		{7, 2},
-// 		{8, 3},
-// 		{9, 0},
-// 		{10, 1},
+// func TestAdd(t *testing.T) {
+// 	const n, m = 2, 4
+// 	hrx := New(n, m)
+//
+// 	tests := []struct {
+// 		x, y int
+// 		w    []int8
+// 	}{
+// 		{1, 0, []int8{3, 1, 0, 0}},
+// 		{1, 0, []int8{3, 0, 1, 0}},
+// 		{2, 0, []int8{2, 1, 1, 0}},
+// 		{3, 0, []int8{1, 2, 1, 0}},
+// 		{4, 0, []int8{0, 3, 1, 0}},
+// 		{4, 0, []int8{0, 2, 2, 0}},
+// 		{1, 0, []int8{0, 2, 1, 1}},
 // 	}
-// 	h := NewHrxTab(p, 5)
-// 	h.Make()
-// }
-
-// func TestGenerujPresun(t *testing.T) {
-// 	// sk := []Tab{
-// 	// 	{1, []int{8}},
-// 	// 	{2, []int{6, 13, 16, 18, 31, 35}},
-// 	// 	{4, []int{2, 14, 33, 34}},
-// 	// 	{3, []int{1, 9, 12, 15, 17, 21, 22, 24, 25, 26}},
-// 	// 	{5, []int{5, 10, 19, 27, 30}},
-// 	// 	{6, []int{4, 11, 29}},
-// 	// 	{7, []int{23, 28}},
-// 	// 	{8, []int{3, 20, 32}},
-// 	// 	{10, []int{7}},
-// 	// }
-// 	n := 5
-// 	sk := Presun{
-// 		{0, 0},
-// 		{1, 1},
-// 		{2, 6},
-// 		// {3, 10},
-// 		// {4, 4},
-// 		// {5, 5},
-// 		// {6, 3},
-// 		// {7, 2},
-// 		// {8, 3},
-// 		// {9, 0},
-// 		// {10, 1},
-// 	}
-// 	sums := 0
-// 	p := Presun{}
-// 	i := 0
-// 	for {
-
-// 		max := sk[i].Max
-// 		if max > n {
-// 			max = n
+// 	for _, test := range tests {
+// 		hrx.Add(test.x, test.y)
+// 		if !reflect.DeepEqual(hrx.skupiny, test.w) {
+// 			t.Errorf("Excepted: (%v), Got: (%v)", test.w, hrx.skupiny)
 // 		}
-
-// 		n -= max
-// 		if n > 0 {
-// 			p = append(p, Tab{i, max})
-// 			i++
-// 			continue
-// 		} else {
-// 			p = append(p, Tab{i, max})
-// 		}
-
-// 		fmt.Println(p)
-
-// 		sums++
-// 		if sums == 10 {
-// 			break
-// 		}
-
-// 		if i == len(sk)-1 {
-// 			n += sk[i].Max
-// 			sk[i].Max = 0
-// 			p = p[:i]
-// 			i--
-// 		}
-
-// 		for i > 0 {
-// 			if p[i].Max > 0 {
-// 				p[i].Max--
-// 				n++
-// 			}
-// 			if p[i].Max == 0 {
-// 				p = p[:i]
-// 				i--
-// 				continue
-// 			} else {
-// 				break
-// 			}
-// 		}
-
-// 		// if i < len(sk)-1 {
-// 		// 	i++
-// 		// }
 // 	}
 // }
 
-// var (
-// 	//Hrx
-// 	h *H = &H{
-// 		m:   35,
-// 		max: 10,
-// 		sk: map[int]int{
-// 			1:  1,
-// 			2:  6,
-// 			3:  10,
-// 			4:  4,
-// 			5:  5,
-// 			6:  3,
-// 			7:  2,
-// 			8:  3,
-// 			10: 1,
-// 		}}
-// 	//HHrx
-// 	h2 *H = &H{
-// 		m:   35,
-// 		max: 182,
-// 		sk: map[int]int{
-// 			122: 1,
-// 			131: 2,
-// 			132: 2,
-// 			135: 1,
-// 			137: 1,
-// 			138: 3,
-// 			139: 1,
-// 			140: 1,
-// 			141: 1,
-// 			142: 2,
-// 			144: 2,
-// 			147: 1,
-// 			148: 2,
-// 			149: 1,
-// 			150: 1,
-// 			152: 1,
-// 			154: 3,
-// 			155: 1,
-// 			157: 1,
-// 			158: 1,
-// 			159: 1,
-// 			166: 1,
-// 			167: 1,
-// 			169: 1,
-// 			170: 1,
-// 			182: 1,
-// 		}}
-// )
+func TestIs101(t *testing.T) {
+	const n, m = 2, 4
+	hrx := New(n, m)
 
-// func TestHrx(t *testing.T) {
+	tests := []struct {
+		x, y  int
+		is101 bool
+	}{
+		{1, 0, false},
+		{2, 0, false},
+		{3, 0, false},
+		{4, 0, true},
+		{1, 0, true},
+	}
+	for _, test := range tests {
+		hrx.Add(test.x, test.y)
+		if hrx.Is101() != test.is101 {
+			t.Errorf("Excepted: (%v), Got: (%v)", test.is101, hrx.Is101())
+		}
+	}
+}
 
-// p := Presun{
-// 	Tab{10, 1},
-// 	Tab{8, 3},
-// 	Tab{7, 1},
-// }
-// t.Log(h.Simul(p))
-// }
+func TestValue(t *testing.T) {
+	const n, m = 5, 35
+	hrx := New(n, m)
 
-// func GenerujPresun(t []Tab, n int) chan Presun {
-// 	ch := make(chan Presun)
-// 	go func() {
-// 		defer close(ch)
-// 		generujPresun(t,
-// 			n,
-// 			make(Presun, 0, len(t)),
-// 			ch)
-// 	}()
-// 	return ch
-// }
+	if strconv.FormatFloat(hrx.Value(), 'f', 2, 64) != "100.00" {
+		t.Errorf("Excepted: (%s), Got: (%.2f)", "100.00", hrx.Value())
+	}
 
-// func generujPresun(t []Tab, n int, p Presun, ch chan Presun) {
-// 	if len(t) == 0 {
-// 		return
-// 	}
+	tests := []struct {
+		k     []int
+		value string
+	}{
+		{[]int{2, 7, 13, 32, 35}, "96.219545819576"},
+		{[]int{1, 14, 15, 17, 19}, "91.932271522492"},
+		{[]int{4, 9, 10, 25, 27}, "86.944174388998"},
+		{[]int{1, 2, 13, 21, 31}, "84.684202839784"},
+		{[]int{17, 21, 29, 32, 34}, "82.226978235840"},
+	}
+	for _, test := range tests {
+		for y, x := range test.k {
+			hrx.Add(x, y)
+		}
+		if strconv.FormatFloat(hrx.Value(), 'f', 12, 64) != test.value {
+			t.Errorf("Excepted: (%s), Got: (%.12f)", test.value, hrx.Value())
+		}
+	}
+}
 
-// 	max := t[0].Max
-// 	if max > n {
-// 		max = n
-// 	}
-// 	for max > 0 {
-// 		p = append(p, Tab{t[0].Sk, max})
-// 		if n-max > 0 {
-// 			generujPresun(t[1:], n-max, p, ch)
-// 		} else {
-// 			ch <- p.copy()
-// 		}
-// 		p = p[:len(p)-1]
-// 		max--
-// 	}
-// 	generujPresun(t[1:], n, p, ch)
-// }
+func TestValueKombinacia(t *testing.T) {
+	const n, m = 5, 35
+	hrx := New(n, m)
+
+	for _, a := range [][]int{
+		[]int{2, 7, 13, 32, 35},
+		[]int{1, 14, 15, 17, 19},
+		[]int{4, 9, 10, 25, 27},
+		[]int{1, 2, 13, 21, 31},
+	} {
+		for y, x := range a {
+			hrx.Add(x, y)
+		}
+	}
+
+	tests := []struct {
+		k     []byte
+		value string
+	}{
+		{[]byte{2}, "84.709009486369"},
+		{[]byte{2, 7}, "84.707220404804"},
+		{[]byte{2, 7, 13}, "84.707220377503"},
+		{[]byte{2, 7, 13, 32}, "84.705431182569"},
+		{[]byte{17, 21, 29, 32, 34}, "82.226978235840"},
+	}
+	for _, test := range tests {
+		vk := hrx.ValueKombinacia(test.k)
+		if strconv.FormatFloat(vk, 'f', 12, 64) != test.value {
+			t.Errorf("Excepted: (%s), Got: (%.12f)", test.value, vk)
+		}
+	}
+}
+
+func TestHrx(t *testing.T) {
+	k_hrx := [][]int{
+		[]int{1, 3, 5},
+		[]int{2, 4, 6},
+	}
+	// k_hhrx := [][]int{
+	// 	[]int{1, 5, 6},
+	// 	[]int{1, 3, 5},
+	// 	[]int{2, 4, 6},
+	// }
+	hrx := New(3, 6)
+	for _, i := range k_hrx {
+		for y, x := range i {
+			hrx.Add(x, y)
+		}
+	}
+	// t.Log(hrx)
+}

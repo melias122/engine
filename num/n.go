@@ -3,31 +3,19 @@ package num
 import "strconv"
 
 type N struct {
-	n byte
-	m byte
-	c C
-	x uint32
-	r ph
-	s []ph
-}
-
-func Zero(n, m int) *N {
-	zero := &N{
-		n: byte(n),
-		m: byte(m),
-		s: make([]ph, n),
-	}
-	return zero
+	n, m  byte
+	cislo byte
+	r     ph
+	s     []ph
 }
 
 func New(x, n, m int) *N {
 	new := &N{
-		n: byte(n),
-		m: byte(m),
-		c: NewC(x),
-		x: uint32(x),
-		r: newph(1, 1, n, m),
-		s: make([]ph, n),
+		n:     byte(n),
+		m:     byte(m),
+		cislo: byte(x),
+		r:     newph(1, 1, n, m),
+		s:     make([]ph, n),
 	}
 	for i := range new.s {
 		new.s[i] = newph(x, i+1, n, m)
@@ -35,45 +23,8 @@ func New(x, n, m int) *N {
 	return new
 }
 
-func (old *N) MakeCopy() *N {
-	new := &N{
-		n: old.n,
-		m: old.m,
-		c: old.c,
-		x: old.x,
-		r: old.r,
-		s: make([]ph, int(old.n)),
-	}
-	for i := range old.s {
-		new.s[i] = old.s[i]
-	}
-	return new
-}
-
-func (n *N) C() C {
-	return n.c
-}
-
 func (n *N) Cislo() int {
-	return int(n.x)
-}
-
-func (n *N) Plus(m *N) {
-	n.c.Plus(m.c)
-	n.x += m.x
-	n.r.plus(m.r)
-	for i := range n.s {
-		n.s[i].plus(m.s[i])
-	}
-}
-
-func (n *N) Minus(m *N) {
-	n.c.Minus(m.c)
-	n.x -= m.x
-	n.r.minus(m.r)
-	for i := range n.s {
-		n.s[i].minus(m.s[i])
-	}
+	return int(n.cislo)
 }
 
 func (n *N) Inc(i int) {
@@ -85,8 +36,26 @@ func (n *N) R() float64 {
 	return n.r.Hodnota()
 }
 
+func (n *N) RNext() float64 {
+	return n.r.HodnotaNext()
+}
+
+func (n *N) HasSTL(i int) bool {
+	if n.Cislo() < int(n.n) {
+		return i < n.Cislo()
+	}
+	if n.Cislo() > int(n.m)-int(n.n)+1 {
+		return i+1 >= int(n.m)-n.Cislo()-1
+	}
+	return true
+}
+
 func (n *N) S(i int) float64 {
 	return n.s[i-1].Hodnota()
+}
+
+func (n *N) SNext(i int) float64 {
+	return n.s[i-1].HodnotaNext()
 }
 
 func (n *N) PocetR() int {

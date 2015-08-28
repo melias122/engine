@@ -1,6 +1,11 @@
 package filter
 
-import "github.com/melias122/psl/komb"
+import (
+	"fmt"
+
+	"github.com/melias122/psl/hrx"
+	"github.com/melias122/psl/komb"
+)
 
 type sucet struct {
 	n        int
@@ -8,11 +13,18 @@ type sucet struct {
 }
 
 func NewSucet(n int, min, max int) Filter {
+	if min < 0 {
+		min = 0
+	}
 	return sucet{
 		n:   n,
 		min: min,
 		max: max,
 	}
+}
+
+func (s sucet) String() string {
+	return fmt.Sprintf("Sucet: %d-%d", s.min, s.max)
 }
 
 func (s sucet) Check(k komb.Kombinacia) bool {
@@ -28,4 +40,12 @@ func (s sucet) Check(k komb.Kombinacia) bool {
 		return false
 	}
 	return true
+}
+
+func (s sucet) CheckSkupina(skupina hrx.Skupina) bool {
+	if int(skupina.Sucet[0]) > s.max || int(skupina.Sucet[1]) < s.min {
+		return false
+	} else {
+		return true
+	}
 }

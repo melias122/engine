@@ -3,6 +3,7 @@ package filter
 import (
 	"bytes"
 
+	"github.com/melias122/psl/hrx"
 	"github.com/melias122/psl/komb"
 )
 
@@ -19,6 +20,10 @@ func NewXtica(n, m int, tica komb.Tica) Filter {
 	}
 }
 
+func (x xtica) String() string {
+	return "Xtica: " + x.xtica.String()
+}
+
 func (x xtica) Check(k komb.Kombinacia) bool {
 	cmp := bytes.Compare(komb.Xtica(x.m, k), x.xtica)
 	if len(k) == x.n && cmp != 0 {
@@ -28,4 +33,8 @@ func (x xtica) Check(k komb.Kombinacia) bool {
 	} else {
 		return true
 	}
+}
+
+func (x xtica) CheckSkupina(skupina hrx.Skupina) bool {
+	return true
 }

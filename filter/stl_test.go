@@ -18,10 +18,10 @@ func TestStl(t *testing.T) {
 		f Filter
 		w bool
 	}{
-		{komb.Kombinacia{1, 2, 3}, NewStl(3, 0.0, 1.0, cisla), true},
-		{komb.Kombinacia{1, 2}, NewStl(3, 0, -0.99, cisla), false},
-		{komb.Kombinacia{1, 2}, NewStl(3, 0.1, 1, cisla), true},
-		{komb.Kombinacia{1, 2, 3}, NewStl(3, 0.1, 1, cisla), false},
+		{komb.Kombinacia{1, 2, 3}, NewStl(3, 0.0, 1.0, cisla, ""), true},
+		{komb.Kombinacia{1, 2}, NewStl(3, 0, -0.99, cisla, ""), false},
+		{komb.Kombinacia{1, 2}, NewStl(3, 0.1, 1, cisla, ""), true},
+		{komb.Kombinacia{1, 2, 3}, NewStl(3, 0.101, 1, cisla, ""), false},
 	}
 	for _, test := range tests {
 		ok := test.f.Check(test.k)

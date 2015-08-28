@@ -44,11 +44,41 @@ func TestNtica(t *testing.T) {
 		{[]byte{1, 3, 4, 5, 9}, "2 0 1 0 0"},
 		{[]byte{1, 3, 4, 6, 7}, "1 2 0 0 0"},
 		{[]byte{1, 3, 5, 7, 8}, "3 1 0 0 0"},
+		{[]byte{1, 3, 5, 7, 8, 10, 12, 13, 14, 15}, "4 1 0 1 0 0 0 0 0 0"},
 	}
 	for _, test := range tests {
 		tica := Ntica(test.t)
 		if tica.String() != test.w {
 			t.Fatalf("Excepted: (%s), Have: (%s)", test.w, tica)
+		}
+	}
+}
+
+func TestNticaPozicie(t *testing.T) {
+	tests := []struct {
+		t Kombinacia
+		w string
+	}{
+		{Kombinacia{}, ""},
+		{Kombinacia{1}, "0"},
+		{Kombinacia{1, 3}, "0 0"},
+		{Kombinacia{1, 3, 5}, "0 0 0"},
+		{Kombinacia{1, 3, 5, 7}, "0 0 0 0"},
+		{Kombinacia{1, 3, 5, 7, 9}, "0 0 0 0 0"},
+
+		{Kombinacia{1, 2, 3, 4, 5}, "1 1 1 1 1"},
+		{Kombinacia{1, 2, 3, 4, 7}, "1 1 1 1 0"},
+		{Kombinacia{1, 2, 3, 5, 6}, "1 1 1 1 1"},
+		{Kombinacia{1, 3, 4, 5, 9}, "0 1 1 1 0"},
+		{Kombinacia{1, 3, 4, 6, 7}, "0 1 1 1 1"},
+		{Kombinacia{1, 3, 5, 7, 8}, "0 0 0 1 1"},
+		{Kombinacia{1, 2, 4, 6, 7, 8, 10, 12, 13, 14}, "1 1 0 1 1 1 0 1 1 1"},
+	}
+
+	for _, test := range tests {
+		p := Kombinacia(NticaPozicie(test.t))
+		if p.String() != test.w {
+			t.Fatalf("Excepted: (%s), Have: (%s) Kombinacia: (%s)", test.w, p, test.t)
 		}
 	}
 }

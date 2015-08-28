@@ -1,64 +1,40 @@
 package num
 
-// func TestInc(t *testing.T) {
-// 	ph := newph(1, 1, 5, 35)
-// 	for i := 1; i <= 122; i++ {
-// 		ph.inc()
-// 	}
+import (
+	"strconv"
+	"testing"
+)
 
-// 	r := fmt.Sprintf("%d", ph.p)
-// 	w := "122"
-// 	if r != w {
-// 		t.Fatalf("Expected: (%s), Have: (%s)", w, r)
-// 	}
+func TestNewPh(t *testing.T) {
+	ph := newph(1, 1, 5, 35)
+	if ph.Pocet() != 0 {
+		t.Errorf("Excepted: (0), Got: (%d)", ph.Pocet())
+	}
+	if ph.PocetNext() != 1 {
+		t.Errorf("Excepted: (1), Got: (%d)", ph.PocetNext())
+	}
+	if ph.Hodnota() != 0.0 {
+		t.Errorf("Excepted: (0.0), Got: (%f)", ph.Hodnota())
+	}
+	if strconv.FormatFloat(ph.HodnotaNext(), 'f', 10, 64) != "0.0000215629" {
+		t.Errorf("Excepted: (0.0000215629), Got: (%.10f)", ph.HodnotaNext())
+	}
+}
 
-// 	r = fmt.Sprintf("%.10f", ph.h)
-// 	w = "0.0026306710"
-// 	if r != w {
-// 		t.Fatalf("Expected: (%s), Have: (%s)", w, r)
-// 	}
-// }
+func TestInc(t *testing.T) {
+	ph := newph(1, 1, 5, 35)
+	ph.inc()
 
-// func TestReset(t *testing.T) {
-// 	ph := newph(1, 1, 5, 35)
-// 	for i := 1; i <= 10; i++ {
-// 		ph.inc()
-// 	}
-// 	ph.reset()
-
-// 	r := ph.p
-// 	w := 0
-// 	if r != w {
-// 		t.Fatalf("Expected: (%d), Have: (%d)", w, r)
-// 	}
-
-// 	r2 := ph.h
-// 	w2 := 0.0
-// 	if r != w {
-// 		t.Fatalf("Expected: (%f), Have: (%f)", w2, r2)
-// 	}
-// }
-
-// func BenchmarkStruct(b *testing.B) {
-// 	m := make(map[key]float64, 256)
-// 	e := key{1, 2, 3}
-// 	for i := 0; i < b.N; i++ {
-// 		m[e] = float64(i)
-// 	}
-// }
-
-// func BenchmarkArr(b *testing.B) {
-// 	m := make(map[[3]int]float64, 256)
-// 	e := [3]int{1, 2, 3}
-// 	for i := 0; i < b.N; i++ {
-// 		m[e] = float64(i)
-// 	}
-// }
-
-// func BenchmarkInt(b *testing.B) {
-// 	m := make(map[int]float64, 256)
-// 	// e := [3]int{1, 2, 3}
-// 	for i := 0; i < b.N; i++ {
-// 		m[0] = float64(i)
-// 	}
-// }
+	if ph.Pocet() != 1 {
+		t.Errorf("Excepted: (1), Got: (%d)", ph.Pocet())
+	}
+	if ph.PocetNext() != 2 {
+		t.Errorf("Excepted: (2), Got: (%d)", ph.PocetNext())
+	}
+	if strconv.FormatFloat(ph.Hodnota(), 'f', 10, 64) != "0.0000215629" {
+		t.Errorf("Excepted: (0.0000215629), Got: (%f)", ph.Hodnota())
+	}
+	if strconv.FormatFloat(ph.HodnotaNext(), 'f', 10, 64) != "0.0000431258" {
+		t.Errorf("Excepted: (0.0000431258), Got: (%.10f)", ph.HodnotaNext())
+	}
+}

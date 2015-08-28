@@ -6,11 +6,39 @@ import (
 	"io"
 	"os"
 	"strconv"
+	"strings"
+
+	"github.com/melias122/psl/komb"
 )
 
 type ErrKomb struct {
-	Komb []byte
+	Komb komb.Kombinacia
 	Err  error
+}
+
+func parse(record []string, n int) (komb.Kombinacia, error) {
+	var (
+		komb  = make([]byte, n)
+		err   error
+		cislo int
+	)
+	for i, field := range record[3 : n+3] {
+		if strings.ContainsAny(field, ".,") {
+			field = strings.Replace(field, ",", ".", -1)
+			f, err := strconv.ParseFloat(field, 64)
+			if err != nil {
+				return nil, err
+			}
+			cislo = int(f)
+		} else {
+			cislo, err = strconv.Atoi(field)
+			if err != nil {
+				return nil, err
+			}
+		}
+		komb[i] = byte(cislo)
+	}
+	return komb, nil
 }
 
 func Parse(path string, n, m int) chan ErrKomb {
@@ -47,16 +75,12 @@ func Parse(path string, n, m int) chan ErrKomb {
 				ch <- ErrKomb{Err: fmt.Errorf("%s: riadku %d musi byt dlhsi ako %d", file.Name(), nline, n+3)}
 				return
 			}
-			komb := make([]byte, n)
-			for i, field := range record[3 : n+3] {
-				cislo, err := strconv.Atoi(field)
-				if err != nil {
-					ch <- ErrKomb{Err: err}
-					return
-				}
-				komb[i] = byte(cislo)
+			komb, err := parse(record, n)
+			if err != nil {
+				ch <- ErrKomb{Err: err}
+			} else {
+				ch <- ErrKomb{Komb: komb}
 			}
-			ch <- ErrKomb{Komb: komb}
 		}
 	}()
 	return ch

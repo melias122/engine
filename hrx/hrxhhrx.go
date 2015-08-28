@@ -1,16 +1,13 @@
 package hrx
 
 import (
-	"encoding/csv"
-	"fmt"
-	"math"
 	"math/big"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/melias122/psl/num"
+	"github.com/melias122/psl/rw"
 )
 
 type HrxTab struct {
@@ -20,10 +17,12 @@ type HrxTab struct {
 	Hrx  *H
 	HHrx *H
 
+	hhrxMin, hhrxMax Presun
+
 	skupiny Skupiny
 
-	skupinyN1 map[int][]*num.N
-	skupinyN2 map[int][]*num.N
+	skupinyN1 map[int]num.Nums
+	skupinyN2 map[int]num.Nums
 
 	header []string
 
@@ -40,7 +39,7 @@ type HrxTab struct {
 	sMM   [][4]float64
 	sNums num.Nums
 
-	w *csv.Writer
+	w *rw.CsvMaxWriter
 
 	psCache  map[Tab]*big.Int
 	mmCache  map[Tab][2]int
@@ -58,17 +57,19 @@ func NewHrxTab(Hrx, HHrx *H, n, m int) *HrxTab {
 		"∑%STL1-DO (min)", "∑%STL1-DO (max)",
 	}
 
-	r0 := Hrx.Presun()
 	return &HrxTab{
 		n:          n,
 		m:          m,
-		r0:         r0,
-		r1:         make(Presun, 0, len(r0)+1),
+		r0:         Hrx.Presun(),
+		r1:         make(Presun, 0, n),
 		Hrx:        Hrx,
 		HHrx:       HHrx,
 		riadokHrx:  Hrx.Value(),
 		riadokHHrx: HHrx.Value(),
 		pocetSucet: *big.NewInt(1),
+
+		hhrxMin: HHrx.Presun(),
+		hhrxMax: HHrx.Presun(),
 
 		sMM:   make([][4]float64, n),
 		sNums: make(num.Nums, 0, m),
@@ -82,123 +83,93 @@ func NewHrxTab(Hrx, HHrx *H, n, m int) *HrxTab {
 	}
 }
 
-func max(a, b float64) float64 {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-func min(a, b float64) float64 {
-	if a < b {
-		return a
-	}
-	return b
-}
-
 // TODO: Najst lepsi sposob hladania min, max v STL
 // pozn: spravit kontrolu, toto je asi nekorektne
 func (h *HrxTab) sMinMax() (float64, float64, float64, float64) {
 	var (
-		s        = h.sMM
-		nums     = h.sNums[:0]
-		sums     [4]float64
-		from, to int
+		sums [4]float64
+
+		nums          = make(num.Nums, 0, h.m)
+		kombinaciaMin = make([]int, h.n)
+		kombinaciaMax = make([]int, h.n)
+
+		zS2min = make(map[int]bool)
+		zS2max = make(map[int]bool)
+		zS1min = make(map[int]bool)
+		zS1max = make(map[int]bool)
 	)
-	for i := 0; i < h.n; i++ {
-		s[i][0] = math.MaxFloat64
-		s[i][1] = 0
-		s[i][2] = math.MaxFloat64
-		s[i][3] = 0
-	}
 
 	for _, t := range h.r1 {
 		nums = append(nums, h.skupinyN1[t.Sk]...)
 	}
 	sort.Sort(nums)
-
-	for i, n2 := range nums {
-		if i < h.n-1 { // zaciatok pyramidy
-			from = 0
-			to = i + 1
-		} else if i > len(nums)-h.n-1 { // vrch pyramidy
-			from = h.n - (len(nums) - i)
-			to = h.n
-		} else { // stred
-			from = 0
-			to = h.n
-		}
-		n1 := h.HHrx.GetN(n2.Cislo())
-		for j := from; j < to; j++ {
-			//STL1-DO
-			s[j][0] = min(n1.S(j+1), s[j][0])
-			s[j][1] = max(n1.S(j+1), s[j][1])
-
-			//STLOD-DO
-			s[j][2] = min(n2.S(j+1), s[j][2])
-			s[j][3] = max(n2.S(j+1), s[j][3])
-		}
+	for i := 0; i < h.n; i++ {
+		kombinaciaMin[i] = nums[i].Cislo()
+		kombinaciaMax[h.n-1-i] = nums[len(nums)-1-i].Cislo()
 	}
 
 	for i := 0; i < h.n; i++ {
-		sums[0] += s[i][0]
-		sums[1] += s[i][1]
-		sums[2] += s[i][2]
-		sums[3] += s[i][3]
+		var (
+			z     [4]int
+			s1Min float64 = 1
+			s1Max float64
+			s2Min float64 = 1
+			s2Max float64
+		)
+		for _, n2 := range nums {
+			if !n2.HasSTL(i) {
+				continue
+			}
+			if n2.Cislo() >= kombinaciaMin[i] && n2.Cislo() <= kombinaciaMax[i] {
+				// STL OD-DO
+				if n2.SNext(i+1) < s2Min && !zS2min[n2.Cislo()] {
+					s2Min = n2.SNext(i + 1)
+					z[2] = n2.Cislo()
+				}
+				if n2.SNext(i+1) > s2Max && !zS2max[n2.Cislo()] {
+					s2Max = n2.SNext(i + 1)
+					z[3] = n2.Cislo()
+				}
+
+				n1 := h.HHrx.GetN(n2.Cislo())
+				if n1.SNext(i+1) < s1Min && !zS1min[n2.Cislo()] {
+					s1Min = n1.SNext(i + 1)
+					z[0] = n2.Cislo()
+				}
+				if n1.SNext(i+1) > s1Max && !zS1max[n2.Cislo()] {
+					s1Max = n1.SNext(i + 1)
+					z[1] = n2.Cislo()
+				}
+			}
+		}
+		zS1min[z[0]] = true
+		zS1max[z[1]] = true
+		zS2min[z[2]] = true
+		zS2max[z[3]] = true
+
+		sums[0] += s1Min
+		sums[1] += s1Max
+		sums[2] += s2Min
+		sums[3] += s2Max
 	}
 	return sums[0], sums[1], sums[2], sums[3]
 }
 
-func (h *HrxTab) hhrxMinMax() (float64, float64) {
-	// presun v HHrx (HHrx min)
-	for _, t := range h.r1 {
-		c := h.skupinyN2[t.Sk]
-		for i := 0; i < t.Max; i++ {
-			h.HHrx.move(1, c[i].PocetR(), c[i].PocetR()+1)
-		}
-	}
-	hhrxMin := h.HHrx.Value()
-	for _, t := range h.r1 {
-		c := h.skupinyN2[t.Sk]
-		for i := 0; i < t.Max; i++ {
-			h.HHrx.move(1, c[i].PocetR()+1, c[i].PocetR())
-		}
-	}
-
-	// presun v HHrx (HHrx max)
-	for _, t := range h.r1 {
-		c := h.skupinyN2[t.Sk]
-		lastIndex := len(c) - 1
-		for i := 0; i < t.Max; i++ {
-			h.HHrx.move(1, c[lastIndex-i].PocetR(), c[lastIndex-i].PocetR()+1)
-		}
-	}
-	hhrxMax := h.HHrx.Value()
-	for _, t := range h.r1 {
-		c := h.skupinyN2[t.Sk]
-		lastIndex := len(c) - 1
-		for i := 0; i < t.Max; i++ {
-			h.HHrx.move(1, c[lastIndex-i].PocetR()+1, c[lastIndex-i].PocetR())
-		}
-	}
-	return hhrxMin, hhrxMax
-}
-
 func (h *HrxTab) record() []string {
 	h.pc++
-	hrx := h.Hrx.Value()
-
+	hrx := h.Hrx.valuePresun(h.r0)
 	s1min, s1max, s2min, s2max := h.sMinMax()
 
-	// Presunut do append a delete
-	// Treba mat 2 kopie HHrx
-	// Jedna na min, druha na max
-	hhrxMin, hhrxMax := h.hhrxMinMax()
+	hhrxMin := h.HHrx.valuePresun(h.hhrxMin)
+	hhrxMax := h.HHrx.valuePresun(h.hhrxMax)
 
 	h.skupiny = append(h.skupiny, Skupina{
 		Hrx:    hrx,
 		HHrx:   [2]float64{hhrxMin, hhrxMax},
-		Presun: h.r1.copyNonZero(),
+		R1:     [2]float64{h.r1Min, h.r1Max},
+		R2:     h.rod,
+		Sucet:  [2]uint16{uint16(h.min), uint16(h.max)},
+		Presun: h.r1.copy(),
 	})
 
 	r := make([]string, 0, len(h.header))
@@ -231,7 +202,15 @@ func (h *HrxTab) append(t Tab) {
 	h.r1 = append(h.r1, t)
 
 	// presun v Hrx
-	h.Hrx.move(t.Max, t.Sk, t.Sk+1)
+	h.r0.move(t.Max, t.Sk, t.Sk+1)
+
+	// presun v HHrx min, max
+	N2 := h.skupinyN2[t.Sk]
+	N2LastIndex := len(N2) - 1
+	for i := 0; i < t.Max; i++ {
+		h.hhrxMin.move(1, N2[i].PocetR(), N2[i].PocetR()+1)
+		h.hhrxMax.move(1, N2[N2LastIndex-i].PocetR(), N2[N2LastIndex-i].PocetR()+1)
+	}
 
 	// pocet suctov
 	h.pocetSucet.Mul(&h.pocetSucet, h.psCache[t])
@@ -256,7 +235,15 @@ func (h *HrxTab) delete() {
 	h.r1 = h.r1[:len(h.r1)-1]
 
 	// presun v Hrx
-	h.Hrx.move(t.Max, t.Sk+1, t.Sk)
+	h.r0.move(t.Max, t.Sk+1, t.Sk)
+
+	// presun v HHrx min, max
+	N2 := h.skupinyN2[t.Sk]
+	N2LastIndex := len(N2) - 1
+	for i := 0; i < t.Max; i++ {
+		h.hhrxMin.move(1, N2[i].PocetR()+1, N2[i].PocetR())
+		h.hhrxMax.move(1, N2[N2LastIndex-i].PocetR()+1, N2[N2LastIndex-i].PocetR())
+	}
 
 	// pocet suctov
 	h.pocetSucet.Div(&h.pocetSucet, h.psCache[t])
@@ -284,7 +271,7 @@ func (h *HrxTab) make(r0 Presun, n int) error {
 		max = n
 	}
 	for max > 0 {
-		h.append(Tab{r0[0].Sk, max})
+		h.append(newTab(r0[0].Sk, max))
 		if n-max > 0 {
 			if err := h.make(r0[1:], n-max); err != nil {
 				return err
@@ -300,22 +287,12 @@ func (h *HrxTab) make(r0 Presun, n int) error {
 	return h.make(r0[1:], n)
 }
 
-func (h *HrxTab) Make() (Skupiny, error) {
-
-	// vytvorenie suboru
-	f, err := os.Create(fmt.Sprintf("%d%d/HrxHHrx_%d%d.csv", h.n, h.m, h.n, h.m))
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	w := csv.NewWriter(f)
-	w.Comma = ';'
-	h.w = w
+func (h *HrxTab) Make(workingDir string) (Skupiny, error) {
 
 	// priradenie skutocnych cisel(num.N)
 	// do skupin podla pocetnosti R2
-	skupinyN1 := map[int][]*num.N{}
-	skupinyN2 := map[int][]*num.N{}
+	skupinyN1 := map[int]num.Nums{}
+	skupinyN2 := map[int]num.Nums{}
 	for i := 1; i <= h.m; i++ {
 		N := h.Hrx.GetN(i)
 		sk := N.PocetR()
@@ -347,15 +324,12 @@ func (h *HrxTab) Make() (Skupiny, error) {
 		r3 = append(r3, "Pocet ROD-DO")
 		for _, c := range skupinyN1[k] {
 			r1 = append(r1, c.String())
-			r2 = append(r2, itoa(c.PocetR()))
-			r3 = append(r3, itoa(h.HHrx.GetN(c.Cislo()).PocetR()))
+			r2 = append(r2, itoa(h.HHrx.GetN(c.Cislo()).PocetR()))
+			r3 = append(r3, itoa(c.PocetR()))
 		}
 		PreHeader = append(PreHeader, r1, r2, r3, []string{""})
 	}
 	PreHeader = append(PreHeader, h.header)
-	if err = w.WriteAll(PreHeader); err != nil {
-		return nil, err
-	}
 
 	// Prepocitanie znamych hodnot
 	for _, t := range h.r0 {
@@ -375,76 +349,31 @@ func (h *HrxTab) Make() (Skupiny, error) {
 			// pocet suctov v skupine
 			var b big.Int
 			b.Binomial(int64(t.Max), int64(max))
-			h.psCache[Tab{t.Sk, max}] = &b
+			h.psCache[newTab(t.Sk, max)] = &b
 
 			// max, min sucet v skupine
 			smin += skN[i].Cislo()
 			smax += skN[len(skN)-1-i].Cislo()
-			h.mmCache[Tab{t.Sk, i + 1}] = [2]int{smin, smax}
+			h.mmCache[newTab(t.Sk, i+1)] = [2]int{smin, smax}
 
 			// max ROD-DO hodnota v skupine
-			h.rodCache[Tab{t.Sk, max}] = skupinyN1[t.Sk][0].R() * float64(max)
+			h.rodCache[newTab(t.Sk, max)] = skupinyN1[t.Sk][0].RNext() * float64(max)
 
 			// min,max R1-DO hodnota v skupine
-			rmin += h.HHrx.GetN(skN2[i].Cislo()).R()
-			rmax += h.HHrx.GetN(skN2[len(skN2)-1-i].Cislo()).R()
-			h.rCache[Tab{t.Sk, i + 1}] = [2]float64{rmin, rmax}
+			rmin += h.HHrx.GetN(skN2[i].Cislo()).RNext()
+			rmax += h.HHrx.GetN(skN2[len(skN2)-1-i].Cislo()).RNext()
+			h.rCache[newTab(t.Sk, i+1)] = [2]float64{rmin, rmax}
 
 			i++
 		}
 	}
-
-	if err := h.make(h.r0, h.n); err != nil {
+	h.w = rw.NewCsvMaxWriter(workingDir, "HrxHHrx", PreHeader)
+	h.w.Suffix = rw.IntSuffix()
+	defer h.w.Close()
+	if err := h.make(h.r0.copy(), h.n); err != nil {
 		return nil, err
 	}
-
-	w.Flush()
-	return h.skupiny, w.Error()
-}
-
-type Tab struct {
-	Sk  int
-	Max int
-}
-
-type Presun []Tab
-
-func (p Presun) copy() Presun {
-	presun := make(Presun, len(p))
-	for i := range p {
-		presun[i] = p[i]
-	}
-	return presun
-}
-
-func (p Presun) copyNonZero() Presun {
-	var presun Presun
-	for i := range p {
-		if p[i].Max > 0 {
-			presun = append(presun, p[i])
-		}
-	}
-	return presun
-}
-
-func (p Presun) Len() int           { return len(p) }
-func (p Presun) Less(i, j int) bool { return p[i].Sk < p[j].Sk }
-func (p Presun) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
-
-func (p Presun) String() string {
-	if len(p) > 0 {
-		s := make([]int, p[len(p)-1].Sk+1)
-		for _, v := range p {
-			s[v.Sk] = v.Max
-		}
-		s2 := make([]string, len(s))
-		for i := range s {
-			s2[i] = strconv.Itoa(s[i])
-		}
-		return strings.Join(s2, " ")
-	} else {
-		return ""
-	}
+	return h.skupiny, nil
 }
 
 func itoa(i int) string {
@@ -454,12 +383,4 @@ func itoa(i int) string {
 func ftoa(f float64) string {
 	s := strconv.FormatFloat(f, 'g', -1, 64)
 	return strings.Replace(s, ".", ",", 1)
-}
-
-type Skupiny []Skupina
-
-type Skupina struct {
-	Hrx    float64
-	HHrx   [2]float64
-	Presun Presun
 }
