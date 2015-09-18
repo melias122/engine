@@ -7,28 +7,27 @@ type Cifrovacky [10]byte
 func CifrovackyTeorMax(n, m int) Cifrovacky {
 	var c Cifrovacky
 	for i := 1; i <= m; i++ {
-		j := i % 10
-		if j == 0 && c[9] <= byte(n) {
-			c[9]++
-		} else if c[j-1] <= byte(n) {
-			c[j-1]++
-		}
+		c.set(i)
 	}
 	return c
 }
 
 func MakeCifrovacky(k Kombinacia) Cifrovacky {
 	var c Cifrovacky
-	for i := range k {
-		j := k[i] % 10 // cifra
-		switch j {
-		case 0:
-			c[9]++
-		default:
-			c[j-1]++
-		}
+	for _, n := range k {
+		c.set(int(n))
 	}
 	return c
+}
+
+func (c *Cifrovacky) set(n int) {
+	n = n % 10
+	switch n {
+	case 0:
+		c[9]++
+	default:
+		c[n-1]++
+	}
 }
 
 func (c Cifrovacky) Strings() []string {

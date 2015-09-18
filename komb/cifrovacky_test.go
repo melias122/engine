@@ -6,10 +6,18 @@ import (
 )
 
 func TestCifrovackyTeorMax(t *testing.T) {
-	tmax := CifrovackyTeorMax(5, 35)
-	exp := Cifrovacky{4, 4, 4, 4, 4, 3, 3, 3, 3, 3}
-	if bytes.Compare(tmax[:], exp[:]) != 0 {
-		t.Errorf("Expected %s, got: %s", exp, tmax)
+	tests := []struct {
+		n, m int
+		w    Cifrovacky
+	}{
+		{5, 35, Cifrovacky{4, 4, 4, 4, 4, 3, 3, 3, 3, 3}},
+		{5, 90, Cifrovacky{9, 9, 9, 9, 9, 9, 9, 9, 9, 9}},
+	}
+	for _, test := range tests {
+		got := CifrovackyTeorMax(test.n, test.m)
+		if bytes.Compare(got[:], test.w[:]) != 0 {
+			t.Errorf("Expected %v, got: %v", test.w, got)
+		}
 	}
 }
 
@@ -26,7 +34,7 @@ func TestMakeCifrovacky(t *testing.T) {
 	for _, test := range tests {
 		c := MakeCifrovacky(test.k)
 		if bytes.Compare(c[:], test.w[:]) != 0 {
-			t.Errorf("Expected %s, got: %s", test.w, c)
+			t.Errorf("Expected %v, got: %v", test.w, c)
 		}
 	}
 }

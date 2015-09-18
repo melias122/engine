@@ -31,8 +31,8 @@ func main() {
 	// n, m := 20, 80
 	// path := fmt.Sprintf("testdata/2080_r.csv")
 
-	n, m := 5, 35
-	path := fmt.Sprintf("testdata/535_r.csv")
+	n, m := 5, 90
+	path := fmt.Sprintf("testdata/590.csv")
 
 	workingDir, err := os.Getwd()
 	_, err = archiv.Make(path, workingDir, n, m)
