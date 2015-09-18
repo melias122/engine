@@ -8,9 +8,6 @@ import (
 	"runtime/pprof"
 
 	"github.com/melias122/psl/archiv"
-	"github.com/melias122/psl/filter"
-	"github.com/melias122/psl/generator"
-	"github.com/melias122/psl/num"
 )
 
 var a *archiv.Archiv
@@ -31,27 +28,27 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	n, m := 20, 80
-	path := fmt.Sprintf("testdata/2080_r.csv")
+	// n, m := 20, 80
+	// path := fmt.Sprintf("testdata/2080_r.csv")
 
-	// n, m := 7, 45
-	// path := fmt.Sprintf("testdata/745_r.csv")
+	n, m := 5, 35
+	path := fmt.Sprintf("testdata/535_r.csv")
 
 	workingDir, err := os.Getwd()
-	a, err = archiv.Make(path, workingDir, n, m)
+	_, err = archiv.Make(path, workingDir, n, m)
 	if err != nil {
 		panic(err)
 	}
 
-	filters := filter.Filters{
-		filter.NewSucet(n, 800, 1000),
-		filter.NewZhoda(n, 1, 1, a.K),
-		filter.NewZakazane(m, []byte{a.Uc.Cislo}),
-		filter.NewHrx(n, 36.23, 36.23, a.Hrx, "HRX"),
-		filter.NewR(n, 3.464E-014, 3.464E-014, a.HHrx.Cisla, "ƩR 1-DO"),
-		filter.NewCislovacky(n, 7, 9, num.IsN, "N"),
-		filter.NewCislovacky(n, 3, 5, num.IsPr, "Pr"),
-	}
+	// filters := filter.Filters{
+	// 	filter.NewSucet(n, 800, 1000),
+	// 	filter.NewZhoda(n, 1, 1, a.K),
+	// 	filter.NewZakazane(m, []byte{a.Uc.Cislo}),
+	// 	filter.NewHrx(n, 36.23, 36.23, a.Hrx, "HRX"),
+	// 	filter.NewR(n, 3.464E-014, 3.464E-014, a.HHrx.Cisla, "ƩR 1-DO"),
+	// 	filter.NewCislovacky(n, 7, 9, num.IsN, "N"),
+	// 	filter.NewCislovacky(n, 3, 5, num.IsPr, "Pr"),
+	// }
 	//
 	// vystup := generator.NewV1(n, m, Archiv.Hrx, Archiv.HHrx, Archiv.Riadok)
 	//
@@ -60,12 +57,12 @@ func main() {
 	// 	fmt.Println(sk)
 	// 	Generator.Generate(sk.Presun)
 	// }
-
-	msg := make(chan string)
-	go func() {
-		generator.GenerateFilter(n, a, filters, msg)
-	}()
-	<-msg
+	//
+	// msg := make(chan string)
+	// go func() {
+	// 	generator.GenerateFilter(n, a, filters, msg)
+	// }()
+	// <-msg
 
 	// fmt.Print("Generator: ")
 	// go func() {

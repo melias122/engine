@@ -10,6 +10,71 @@ import (
 	"github.com/melias122/psl/filter"
 )
 
+type Line interface {
+	Filter() (filter.Filter, error)
+	IsSet() bool
+	Clear()
+	Set(string, int)
+}
+
+type CifrovackyPanel struct {
+	name   string
+	le     [10]*walk.LineEdit
+	filter func() (filter.Filter, error)
+}
+
+func (c CifrovackyPanel) Filter() (filter.Filter, error) {
+	if c.filter == nil {
+		return nil, fmt.Errorf("%s: nil filter", c.name)
+	}
+	filter, err := c.filter()
+	if err != nil {
+		return nil, fmt.Errorf("%s: %s", c.name, err)
+	}
+	return filter, nil
+}
+
+func (c CifrovackyPanel) String() string {
+	var s string
+	for i, le := range c.le {
+		if i > 0 {
+			s += " "
+		}
+		if strings.TrimSpace(le.Text()) == "" {
+			s += "0"
+		} else {
+			s += le.Text()
+		}
+	}
+	return s
+}
+
+func (c CifrovackyPanel) Clear() {
+	for _, le := range c.le {
+		if le != nil {
+			le.SetText("")
+		} else {
+			log.Println(c.name, "nil line edit")
+		}
+	}
+}
+
+func (c CifrovackyPanel) IsSet() bool {
+	var count int
+	for i := range c.le {
+		if c.le[i].Text() != "" {
+			count++
+		}
+	}
+	return count > 0
+}
+
+func (c CifrovackyPanel) Set(s string, i int) {
+	if i >= 0 && i < len(c.le) {
+		c.le[i].SetText(s)
+	}
+}
+
 type StlNtica struct {
 	name   string
 	cb     [30]*walk.CheckBox
@@ -55,8 +120,16 @@ func (s StlNtica) IsSet() bool {
 
 func (s StlNtica) Clear() {
 	for _, cb := range s.cb {
-		cb.SetChecked(false)
+		if cb != nil {
+			cb.SetChecked(false)
+		} else {
+			log.Println(STLNtica, "nil checkbox")
+		}
 	}
+}
+
+func (s StlNtica) Set(str string, i int) {
+
 }
 
 type UiLine struct {

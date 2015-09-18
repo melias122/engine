@@ -27,25 +27,18 @@ type zhoda struct {
 	kombinacia  komb.Kombinacia
 }
 
-func (z zhoda) String() string {
-	return fmt.Sprintf("Zh: %d-%d", z.min, z.max)
-}
-
 func (z zhoda) Check(kombinacia komb.Kombinacia) bool {
 	count := komb.Zhoda(z.kombinacia, kombinacia)
-
-	if len(kombinacia) == z.n {
-		if count < z.min || count > z.max {
-			return false
-		}
-	} else {
-		if count > z.max {
-			return false
-		}
+	if (len(kombinacia) == z.n && count < z.min) || count > z.max {
+		return false
 	}
 	return true
 }
 
 func (z zhoda) CheckSkupina(skupina hrx.Skupina) bool {
 	return true
+}
+
+func (z zhoda) String() string {
+	return fmt.Sprintf("Zh: %d-%d", z.min, z.max)
 }

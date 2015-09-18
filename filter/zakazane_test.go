@@ -12,10 +12,10 @@ func TestZakazane(t *testing.T) {
 		f Filter
 		w bool
 	}{
-		{komb.Kombinacia{1}, NewZakazane([]byte{2, 3}), true},
-		{komb.Kombinacia{1, 2}, NewZakazane([]byte{2, 3}), false},
-		{komb.Kombinacia{1, 3}, NewZakazane([]byte{2, 3}), false},
-		{komb.Kombinacia{1, 4}, NewZakazane([]byte{2, 3}), true},
+		{komb.Kombinacia{1}, NewZakazane(3, []byte{2, 3}), true},
+		{komb.Kombinacia{1, 2}, NewZakazane(3, []byte{2, 3}), false},
+		{komb.Kombinacia{1, 3}, NewZakazane(3, []byte{2, 3}), false},
+		{komb.Kombinacia{1, 4}, NewZakazane(4, []byte{2, 3}), true},
 	}
 	for _, test := range tests {
 		ok := test.f.Check(test.k)

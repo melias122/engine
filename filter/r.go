@@ -29,20 +29,12 @@ func NewR(n int, min, max float64, cisla num.Nums, fname string) Filter {
 	}
 }
 
-func (r r) String() string {
-	return fmt.Sprintf("%s: %f-%f", r.fname, r.min, r.max)
-}
-
 func (r r) Check(k komb.Kombinacia) bool {
 	var sum float64
 	for _, cislo := range k {
 		sum += r.cisla[cislo-1].RNext()
 	}
-	if len(k) == r.n {
-		if sum < r.min || sum > r.max {
-			return false
-		}
-	} else if sum > r.max {
+	if (len(k) == r.n && sum < r.min) || sum > r.max {
 		return false
 	}
 	return true
@@ -60,4 +52,8 @@ func (r r) CheckSkupina(skupina hrx.Skupina) bool {
 		}
 	}
 	return true
+}
+
+func (r r) String() string {
+	return fmt.Sprintf("%s: %f-%f", r.fname, r.min, r.max)
 }

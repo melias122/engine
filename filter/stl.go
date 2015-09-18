@@ -28,20 +28,12 @@ func NewStl(n int, min, max float64, cisla num.Nums, fname string) Filter {
 	}
 }
 
-func (s stl) String() string {
-	return fmt.Sprintf("%s: %f-%f", s.fname, s.min, s.max)
-}
-
 func (s stl) Check(k komb.Kombinacia) bool {
 	var sum float64
 	for i, cislo := range k {
 		sum += s.cisla[cislo-1].SNext(i + 1)
 	}
-	if len(k) == s.n {
-		if sum < s.min || sum > s.max {
-			return false
-		}
-	} else if sum > s.max {
+	if (len(k) == s.n && sum < s.min) || sum > s.max {
 		return false
 	}
 	return true
@@ -49,4 +41,8 @@ func (s stl) Check(k komb.Kombinacia) bool {
 
 func (s stl) CheckSkupina(skupina hrx.Skupina) bool {
 	return true
+}
+
+func (s stl) String() string {
+	return fmt.Sprintf("%s: %f-%f", s.fname, s.min, s.max)
 }

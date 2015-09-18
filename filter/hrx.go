@@ -30,21 +30,13 @@ func NewHrx(n int, min, max float64, h *hrx.H, fname string) Filter {
 	}
 }
 
-func (h hrxfilter) String() string {
-	return fmt.Sprintf("%s: %f-%f", h.fname, h.min, h.max)
-}
-
 func (h hrxfilter) Check(k komb.Kombinacia) bool {
 	switch h.fname {
 	case "HRX":
 		return true
 	case "HHRX":
 		value := h.hrx.ValueKombinacia(k)
-		if len(k) == h.n {
-			if value < h.min || value > h.max {
-				return false
-			}
-		} else if value < h.min {
+		if value < h.min || (len(k) == h.n && value > h.max) {
 			return false
 		}
 	}
@@ -63,4 +55,8 @@ func (h hrxfilter) CheckSkupina(skupina hrx.Skupina) bool {
 		}
 	}
 	return true
+}
+
+func (h hrxfilter) String() string {
+	return fmt.Sprintf("%s: %f-%f", h.fname, h.min, h.max)
 }

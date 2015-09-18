@@ -18,6 +18,7 @@ var header = []string{
 	"HHRX", "ΔHHRX", "ƩR OD-DO", "ΔƩR OD-DO", "ƩSTL OD-DO", "ΔƩSTL OD-DO",
 	"Δ(ƩROD-DO-ƩSTLOD-DO)", "HRX", "ΔHRX", "ƩKombinacie", "ΔƩKombinacie",
 	"UC číslo", "UC riadok",
+	"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5", "Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
 }
 
 type Archiv struct {
@@ -29,7 +30,9 @@ type Archiv struct {
 	WorkingDir string
 	Suffix     string
 
-	riadky  []Riadok
+	origHeader []string
+	riadky     []Riadok
+
 	Skupiny hrx.Skupiny
 }
 
@@ -130,7 +133,11 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 			a.Uc.Riadok++                                            // TODO: nespravne ukazovanie uc predtym nez nastane 101
 			a.Add(errKomb.Komb, a.HHrx.Cisla, a.Hrx.Cisla, 100, 100) // V prvom riadku hodnoty hrx a hhrx su nastavene natvrdo 100
 		}
+		a.origHeader = errKomb.Header
+		a.Riadok.origStrings = errKomb.Orig
+		// fmt.Println(a.Riadok.origStrings)
 		a.riadky = append(a.riadky, a.Riadok)
+		// fmt.Println(a.Riadok.origStrings)
 
 		if err := w.Write(a.Riadok.record()); err != nil {
 			return err
@@ -177,6 +184,11 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 	// if err := MapaXtice(path, n); err != nil {
 	// 	return nil, err
 	// }
+
+	// Statistika Cifrovacky
+	if err := archiv.statistikaCifrovacky(); err != nil {
+		return nil, err
+	}
 
 	hrxtab := hrx.NewHrxTab(archiv.Hrx, archiv.HHrx, n, m)
 	hrxSkupiny, err := hrxtab.Make(archiv.WorkingDir)

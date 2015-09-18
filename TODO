@@ -1,0 +1,22 @@
+TODO:
+
+UI:
+-p/n, mc/vc vyparovanie
+-lim r+1
+-rozclenit panel.. mozno farby/ vacsie rozostupy
+-zaskrtavacie policko = vyhadzovanie kombinacii ktore uz sa nachadzaju v archive (filter zakazane kombinacie)
+-reset skupiny tlacitko
+
+-sortovanie filtra podla priority (zakazane,cislovacky,cifrovacky, atd...)
+-predikcia
+-mapa: ntice, xtice, zhoda
+-statistiky (1-do/ od-do): cislovacky, cifrovacky, ntice, zhoda
+-krok cislovacky
+-STL v tabulke hrxhhrx
+-filter musi vracat "upravene" Skupiny
+
+DONE:
+-krok cifrovacky
+-cifrovacky panel + filter
+-filter podla (hrx,hhrx,r1,r2,s1,s2)
+-hrxhhrx znamienko delta pri hrx a hhrx

@@ -44,18 +44,11 @@ const (
 	Kk = "Kk"
 	Sm = "Sm"
 
-	Ntica = "Ntica"
-	Xtica = "Xtica"
+	Ntica      = "Ntica"
+	Xtica      = "Xtica"
+	Cifrovacky = "Cifrovacky"
+	STLNtica   = "STL Ntica"
 )
-
-type Line interface {
-	Filter() (filter.Filter, error)
-	IsSet() bool
-	Clear()
-	Set(string, int)
-	// SetMin(string)
-	// SetMax(string)
-}
 
 type Ui struct {
 	//UI
@@ -68,7 +61,9 @@ type Ui struct {
 	riadokLE   *walk.LineEdit
 	ucL        *walk.Label
 	infoL      *walk.Label
+
 	stlNtica   *StlNtica
+	cifrovacky *CifrovackyPanel
 
 	//Vars
 	Archiv     *archiv.Archiv
@@ -362,7 +357,7 @@ func (u *Ui) DownFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewZakazane(cisla), nil
+		return filter.NewZakazane(u.m(), cisla), nil
 	}
 
 	zakazaneSTL := NewUiLine("Zakazane STL", 1)
@@ -404,7 +399,44 @@ func (u *Ui) DownFilters() Widget {
 		u.lines[line.name] = line
 	}
 
-	var stlNtica StlNtica
+	cifrovacky := new(CifrovackyPanel)
+	cifrovacky.name = Cifrovacky
+	cifrovacky.filter = func() (filter.Filter, error) {
+		c, err := filter.ParseCifrovacky(u.n(), u.m(), cifrovacky.String())
+		if err != nil {
+			return nil, err
+		}
+		return filter.NewCifrovacky(u.n(), u.m(), c)
+	}
+	cifrovackyWidget := []Widget{
+		Label{
+			Text:    cifrovacky.name,
+			MinSize: Size{Width: 70},
+		},
+	}
+	for i := range cifrovacky.le {
+		cifrovackyWidget = append(cifrovackyWidget, LineEdit{
+			AssignTo: &cifrovacky.le[i],
+		})
+	}
+	cifrovackyWidget = append(cifrovackyWidget, ToolButton{
+		Text:      "X",
+		OnClicked: func() { cifrovacky.Clear() },
+	})
+	// u.cifrovacky = &cifrovacky
+	u.lines[cifrovacky.name] = cifrovacky
+
+	widgets = append(widgets,
+		Composite{
+			Layout: HBox{
+				MarginsZero: true,
+			},
+			Children: cifrovackyWidget,
+		},
+	)
+
+	stlNtica := new(StlNtica)
+	stlNtica.name = STLNtica
 	stlNtica.filter = func() (filter.Filter, error) {
 		tica, err := filter.ParseNtica(u.n(), ntica.lines[0].Text())
 		if err != nil {
@@ -412,8 +444,6 @@ func (u *Ui) DownFilters() Widget {
 		}
 		return filter.NewStlNtica(u.n(), tica, stlNtica.Pozicie()), nil
 	}
-
-	stlNtica.name = "STL Ntica"
 	stlNticaWidget := []Widget{
 		Label{
 			Text:    stlNtica.name,
@@ -433,8 +463,8 @@ func (u *Ui) DownFilters() Widget {
 			OnClicked: func() { stlNtica.Clear() },
 		},
 	)
-	u.stlNtica = &stlNtica
-	// u.lines[stlNtica.name] = stlNtica
+	u.stlNtica = stlNtica // kvoli zakrtavaniu...
+	u.lines[STLNtica] = stlNtica
 
 	widgets = append(widgets,
 		Composite{
@@ -444,6 +474,7 @@ func (u *Ui) DownFilters() Widget {
 			Children: stlNticaWidget,
 		},
 	)
+
 	return Composite{
 		Layout: VBox{
 			MarginsZero: true,
@@ -485,7 +516,6 @@ func (u *Ui) Buttons() Widget {
 					for _, l := range u.lines {
 						l.Clear()
 					}
-					u.stlNtica.Clear()
 				},
 			},
 		},
@@ -553,6 +583,12 @@ func (u *Ui) ArchivR() {
 			v.Set(u.Archiv.Xtica.String(), 1)
 			continue
 
+		case Cifrovacky:
+			for i, c := range u.Archiv.Cifrovacky {
+				v.Set(strconv.Itoa(int(c)), i)
+			}
+			continue
+
 		default:
 			continue
 		}
@@ -614,23 +650,10 @@ func (u *Ui) NacitajSubor() {
 
 func (u *Ui) Filters() (filter.Filters, error) {
 	var (
-		f        filter.Filters
-		e        []error
-		stlNtica bool
+		f filter.Filters
+		e []error
 	)
-	if u.stlNtica.IsSet() {
-		filter, err := u.stlNtica.Filter()
-		if err != nil {
-			e = append(e, err)
-		} else {
-			stlNtica = true // TODO: remove this
-			f = append(f, filter)
-		}
-	}
-	for filterName, line := range u.lines {
-		if filterName == "Ntica" && stlNtica {
-			continue
-		}
+	for _, line := range u.lines {
 		if line.IsSet() {
 			filter, err := line.Filter()
 			if err != nil {
@@ -640,7 +663,7 @@ func (u *Ui) Filters() (filter.Filters, error) {
 			}
 		}
 	}
-	if len(f) == 0 {
+	if len(f) == 0 && len(e) == 0 {
 		e = append(e, errors.New("Nebol zadaný žiadny filter?"))
 	}
 	if len(e) != 0 {

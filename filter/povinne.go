@@ -24,14 +24,6 @@ func NewPovinne(n int, cisla []byte) Filter {
 	}
 }
 
-func (p povinne) String() string {
-	var b []byte
-	for k := range p.p {
-		b = append(b, k)
-	}
-	return fmt.Sprintf("Povinne: %s", strings.Replace(fmt.Sprintf("%v", b), " ", ", ", -1))
-}
-
 func (p povinne) Check(k komb.Kombinacia) bool {
 	var count int
 	for _, cislo := range k {
@@ -53,6 +45,14 @@ func (p povinne) Check(k komb.Kombinacia) bool {
 
 func (p povinne) CheckSkupina(skupina hrx.Skupina) bool {
 	return true
+}
+
+func (p povinne) String() string {
+	var b []byte
+	for k := range p.p {
+		b = append(b, k)
+	}
+	return fmt.Sprintf("Povinne: %s", strings.Replace(fmt.Sprintf("%v", b), " ", ", ", -1))
 }
 
 type povinneStl struct {

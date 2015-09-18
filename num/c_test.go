@@ -20,7 +20,7 @@ func BenchmarkMinus(b *testing.B) {
 
 func BenchmarkXP(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		IsMc(22)
+		IsPr(90)
 	}
 }
 

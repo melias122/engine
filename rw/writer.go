@@ -2,7 +2,6 @@ package rw
 
 import (
 	"encoding/csv"
-	"math/big"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -14,10 +13,6 @@ const (
 
 	// Maximum Excel rows..
 	MaxWrite = (5 * 10e4) - 1
-)
-
-var (
-	one = big.NewInt(1)
 )
 
 func IntSuffix() func() string {
@@ -40,7 +35,7 @@ type CsvMaxWriter struct {
 	writer        *csv.Writer
 	Suffix        func() string
 	SubDir        string
-	NWrites       *big.Int
+	NWrites       uint64
 }
 
 func NewCsvMaxWriter(dir, fileName string, header [][]string) *CsvMaxWriter {
@@ -52,8 +47,6 @@ func NewCsvMaxWriter(dir, fileName string, header [][]string) *CsvMaxWriter {
 		Suffix: func() string {
 			return "_" + filepath.Base(dir)
 		},
-
-		NWrites: big.NewInt(0),
 	}
 }
 
@@ -94,7 +87,7 @@ func (w *CsvMaxWriter) Write(record []string) error {
 		}
 	}
 	w.count++
-	w.NWrites.Add(w.NWrites, one)
+	w.NWrites++
 
 	return w.writer.Write(record)
 }

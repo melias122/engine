@@ -26,13 +26,10 @@ func (x xtica) String() string {
 
 func (x xtica) Check(k komb.Kombinacia) bool {
 	cmp := bytes.Compare(komb.Xtica(x.m, k), x.xtica)
-	if len(k) == x.n && cmp != 0 {
+	if (len(k) == x.n && cmp != 0) || cmp > 0 {
 		return false
-	} else if cmp > 0 {
-		return false
-	} else {
-		return true
 	}
+	return true
 }
 
 func (x xtica) CheckSkupina(skupina hrx.Skupina) bool {

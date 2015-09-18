@@ -35,21 +35,16 @@ func (c cislovacky) String() string {
 	return fmt.Sprintf("%s: %d-%d", c.fname, c.min, c.max)
 }
 
-func (c cislovacky) Check(combination komb.Kombinacia) bool {
+func (c cislovacky) Check(k komb.Kombinacia) bool {
 	var count int
-	for _, number := range combination {
+	for _, number := range k {
 		if c.fun(int(number)) {
 			count++
 		}
 	}
-	if len(combination) == c.n {
-		if count < c.min || count > c.max {
-			return false
-		}
-	} else {
-		if count > c.max {
-			return false
-		}
+
+	if count > c.max || (len(k) == c.n && count < c.min) {
+		return false
 	}
 	return true
 }

@@ -22,19 +22,9 @@ func NewZakazane(m int, cisla []byte) Filter {
 	}
 }
 
-func (z zakazane) String() string {
-	var b []int
-	for c, ok := range z.cisla {
-		if ok {
-			b = append(b, c+1)
-		}
-	}
-	return fmt.Sprintf("Zakázané: %s", strings.Replace(fmt.Sprintf("%v", b), " ", ", ", -1))
-}
-
 func (z zakazane) Check(k komb.Kombinacia) bool {
-	for _, cislo := range k {
-		if z.cisla[cislo-1] {
+	for _, c := range k {
+		if z.cisla[c-1] {
 			return false
 		}
 	}
@@ -43,6 +33,16 @@ func (z zakazane) Check(k komb.Kombinacia) bool {
 
 func (z zakazane) CheckSkupina(skupina hrx.Skupina) bool {
 	return true
+}
+
+func (z zakazane) String() string {
+	var b []int
+	for c, ok := range z.cisla {
+		if ok {
+			b = append(b, c+1)
+		}
+	}
+	return fmt.Sprintf("Zakázané: %s", strings.Replace(fmt.Sprintf("%v", b), " ", ", ", -1))
 }
 
 type stlKey struct {
@@ -68,18 +68,6 @@ func NewZakazaneStl(n int, cisla [][]byte) Filter {
 	return z
 }
 
-func (z zakazaneStl) String() string {
-	b := make([][]byte, z.n)
-	for k := range z.zakazane {
-		b[k.STL] = append(b[k.STL], k.Cislo)
-	}
-	var s string
-	for i := range b {
-		s += fmt.Sprintf("%d:%s ", i+1, strings.Replace(fmt.Sprintf("%v", b[i]), " ", ", ", -1))
-	}
-	return "Zakázané STL: " + s
-}
-
 func (z zakazaneStl) Check(k komb.Kombinacia) bool {
 	for i, c := range k {
 		if z.zakazane[stlKey{STL: i, Cislo: c}] {
@@ -91,4 +79,16 @@ func (z zakazaneStl) Check(k komb.Kombinacia) bool {
 
 func (z zakazaneStl) CheckSkupina(skupina hrx.Skupina) bool {
 	return true
+}
+
+func (z zakazaneStl) String() string {
+	b := make([][]byte, z.n)
+	for k := range z.zakazane {
+		b[k.STL] = append(b[k.STL], k.Cislo)
+	}
+	var s string
+	for i := range b {
+		s += fmt.Sprintf("%d:%s ", i+1, strings.Replace(fmt.Sprintf("%v", b[i]), " ", ", ", -1))
+	}
+	return "Zakázané STL: " + s
 }

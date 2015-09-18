@@ -2,6 +2,7 @@ package num
 
 import (
 	"bytes"
+	"log"
 	"strconv"
 )
 
@@ -11,7 +12,8 @@ type C [10]byte
 
 func NewC(cislo int) C {
 	if cislo <= 0 {
-		panic("num.NewC: cislo <= 0")
+		log.Println("NewC cislo == 0")
+		return C{}
 	}
 	var c C
 	for i, f := range cFuns {
@@ -45,12 +47,12 @@ func (c1 C) String() string {
 	return buf.String()
 }
 
-func (c C) ToStringSlice() []string {
-	ss := make([]string, len(c))
+func (c C) Strings() []string {
+	s := make([]string, len(c))
 	for i, cislo := range c {
-		ss[i] = strconv.Itoa(int(cislo))
+		s[i] = strconv.Itoa(int(cislo))
 	}
-	return ss
+	return s
 }
 
 func IsP(c int) bool {
@@ -62,6 +64,9 @@ func IsN(c int) bool {
 }
 
 func IsPr(c int) bool {
+	if c != 2 && IsP(c) {
+		return false
+	}
 	switch c {
 	case 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97:
 		return true

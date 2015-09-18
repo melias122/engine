@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"sync"
 	"time"
 
@@ -87,7 +88,7 @@ func GenerateKombinacie(n int, a *archiv.Archiv, filters filter.Filters, msg cha
 			log.Println(err)
 		}
 	}
-	msg <- fmt.Sprintf("Nájdených %s kombinácií", w.NWrites.String())
+	msg <- fmt.Sprintf("Nájdených %s kombinácií", strconv.FormatUint(w.NWrites, 10))
 }
 
 func GenerateFilter(n int, a *archiv.Archiv, filters filter.Filters, msg chan string) {
@@ -146,7 +147,7 @@ func GenerateFilter(n int, a *archiv.Archiv, filters filter.Filters, msg chan st
 			log.Println(err)
 		}
 	}
-	msg <- fmt.Sprintf("Nájdených %s riadkov", w.NWrites.String())
+	msg <- fmt.Sprintf("Nájdených %s riadkov", strconv.FormatUint(w.NWrites, 10))
 }
 
 type Generator struct {

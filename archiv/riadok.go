@@ -14,7 +14,8 @@ type Uc struct {
 }
 
 type Riadok struct {
-	n, m int
+	n, m        int
+	origStrings []string
 
 	Pc             uint16
 	K              komb.Kombinacia
@@ -36,6 +37,7 @@ type Riadok struct {
 	Hrx, DtHrx     float64
 	Sucet, DtSucet int
 	Uc
+	Cifrovacky komb.Cifrovacky
 }
 
 func (r *Riadok) Add(k komb.Kombinacia, n1, n2 num.Nums, hrx, hhrx float64) {
@@ -78,14 +80,14 @@ func (r *Riadok) Add(k komb.Kombinacia, n1, n2 num.Nums, hrx, hhrx float64) {
 	r.C = k.Cislovacky()
 	r.Ntica = komb.Ntica(k)
 	r.Xtica = komb.Xtica(r.m, k)
+
+	r.Cifrovacky = k.Cifrovacky()
 }
 
 func (r Riadok) record() []string {
 	rec := make([]string, 0, len(header))
 	rec = append(rec, itoa(int(r.Pc)), r.K.String())
-	for _, c := range r.C {
-		rec = append(rec, itoa(int(c)))
-	}
+	rec = append(rec, r.C.Strings()...)
 	rec = append(rec,
 		itoa(r.Zh),
 		ftoa(r.Sm),
@@ -115,24 +117,9 @@ func (r Riadok) record() []string {
 		itoa(int(r.Cislo)),
 		itoa(r.Riadok),
 	)
+	rec = append(rec, r.Cifrovacky.Strings()...)
 	return rec
 }
-
-// func sumS(k komb.Kombinacia, n *num.N) float64 {
-// 	var s float64
-// 	for i := range k {
-// 		s += n.S(i + 1)
-// 	}
-// 	return s
-// }
-//
-// func sumSnext(k komb.Kombinacia, n *num.N) float64 {
-// 	var s float64
-// 	for i := range k {
-// 		s += n.SNext(i + 1)
-// 	}
-// 	return s
-// }
 
 func itoa(i int) string {
 	return strconv.Itoa(i)

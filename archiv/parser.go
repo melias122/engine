@@ -12,8 +12,10 @@ import (
 )
 
 type ErrKomb struct {
-	Komb komb.Kombinacia
-	Err  error
+	Header []string
+	Komb   komb.Kombinacia
+	Orig   []string
+	Err    error
 }
 
 func parse(record []string, n int) (komb.Kombinacia, error) {
@@ -58,7 +60,7 @@ func Parse(path string, n, m int) chan ErrKomb {
 		r.Comma = rune(';')
 
 		// Skip Header
-		r.Read()
+		header, _ := r.Read()
 
 		var nline int
 		for {
@@ -79,7 +81,9 @@ func Parse(path string, n, m int) chan ErrKomb {
 			if err != nil {
 				ch <- ErrKomb{Err: err}
 			} else {
-				ch <- ErrKomb{Komb: komb}
+				recordCopy := make([]string, len(record))
+				copy(recordCopy, record)
+				ch <- ErrKomb{Komb: komb, Orig: recordCopy, Header: header}
 			}
 		}
 	}()

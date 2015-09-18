@@ -10,6 +10,7 @@ import (
 	"github.com/melias122/psl/komb"
 )
 
+// vystup filter
 type V2 struct {
 	n, m      int
 	Hrx, HHrx *hrx.H
@@ -19,7 +20,7 @@ type V2 struct {
 	hrx                  float64
 	zhoda, sucet         map[int]int
 	hhrx, r1, s1, r2, s2 map[float64]int
-	nKombi               int
+	nKombi               uint64
 	ntice, xtice         map[string]int
 }
 
@@ -56,6 +57,23 @@ var HeaderV2 = []string{
 	"ƩR1-DO (min)", "ƩR1-DO (max)", "ƩR1-DO (počet)",
 	"ƩSTL1-DO (min)", "ƩSTL1-DO (max)", "ƩSTL1-DO (počet)",
 }
+
+// type Skupina struct {
+// 	Hrx    float64
+// 	HHrx   [2]float64
+// 	R1     [2]float64
+// 	R2     float64
+// 	Sucet  [2]uint16
+// 	Presun Presun
+// }
+
+// func (v *V2) Skupina() hrx.Skupina {
+// 	var s hrx.Skupina
+// 	s.Presun = append(hrx.Presun(nil), v.p...) // copy
+// 	s.Hrx=v.hrx
+// 	s.HHrx = v.hh
+// 	return s
+// }
 
 func (v *V2) Add(k komb.Kombinacia) {
 	v.zhoda[komb.Zhoda(v.r.K, k)]++
@@ -94,26 +112,111 @@ func (v *V2) Add(k komb.Kombinacia) {
 func (v V2) Riadok() []string {
 	var r []string
 	r = append(r,
-		formatZhoda(v.zhoda),
+		v.formatZhoda(v.zhoda),
 		ftoa(v.hrx),
 		ftoa(v.r.Hrx-v.hrx),
 		v.p.String(),
-		itoa(v.nKombi),
+		strconv.FormatUint(v.nKombi, 10),
 	)
-	r = append(r, formatFloatMap(v.r2)...)
-	r = append(r, formatTica(v.ntice), formatTica(v.xtice))
-	r = append(r, formatFloatMap(v.s2)...)
-	r = append(r, formatIntMap(v.sucet)...)
-	r = append(r, formatFloatMap(v.hhrx)...)
-	r = append(r, formatFloatMap(v.r1)...)
-	r = append(r, formatFloatMap(v.s1)...)
+	r = append(r, v.formatFloatMap(v.r2)...)
+	r = append(r, v.formatTica(v.ntice), v.formatTica(v.xtice))
+	r = append(r, v.formatFloatMap(v.s2)...)
+	r = append(r, v.formatIntMap(v.sucet)...)
+	r = append(r, v.formatFloatMap(v.hhrx)...)
+	r = append(r, v.formatFloatMap(v.r1)...)
+	r = append(r, v.formatFloatMap(v.s1)...)
 	return r
+}
+
+func (v *V2) formatZhoda(m map[int]int) string {
+	if len(m) == 0 {
+		return "0:(0)"
+	}
+	var keys []int
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Ints(keys)
+
+	var buf bytes.Buffer
+	for i, k := range keys {
+		v := m[k]
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(itoa(k) + ":(" + itoa(v) + ")")
+	}
+	return buf.String()
+}
+
+func (v *V2) formatFloatMap(m map[float64]int) []string {
+	if len(m) == 0 {
+		return []string{"0", "0", "0"}
+	}
+	var (
+		n   int
+		min = math.MaxFloat64
+		max float64
+	)
+	for k, v := range m {
+		n += v
+		if k > max {
+			max = k
+		}
+		if k < min {
+			min = k
+		}
+	}
+	return []string{ftoa(min), ftoa(max), itoa(n)}
+}
+
+func (v *V2) formatIntMap(m map[int]int) []string {
+	if len(m) == 0 {
+		return []string{"0", "0", "0"}
+	}
+	var (
+		n   int
+		min = math.MaxInt32
+		max int
+	)
+	for k, v := range m {
+		n += v
+		if k > max {
+			max = k
+		}
+		if k < min {
+			min = k
+		}
+	}
+	return []string{itoa(min), itoa(max), itoa(n)}
+}
+
+func (v *V2) formatTica(m map[string]int) string {
+	if len(m) == 0 {
+		return ""
+	}
+	var keys []string
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var buf bytes.Buffer
+	for i, k := range keys {
+		v := m[k]
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(k + ":(" + itoa(v) + ")")
+	}
+	return buf.String()
 }
 
 func (v V2) Empty() bool {
 	return v.nKombi == 0
 }
 
+// vystup generator
 type V1 struct {
 	n, m      int
 	hrx, hhrx *hrx.H
@@ -132,6 +235,7 @@ func NewV1(a *Archiv) V1 {
 		"Δ(ƩR1-DO-ƩSTL1-DO)", "HHRX", "ΔHHRX", "ƩR OD-DO", "ΔƩR OD-DO",
 		"ƩSTL OD-DO", "ΔƩSTL OD-DO", "Δ(ƩROD-DO-ƩSTLOD-DO)", "HRX", "ΔHRX",
 		"ƩKombinacie",
+		"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5", "Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
 	)
 	return V1{
 		n:      a.n,
@@ -154,7 +258,7 @@ func (v V1) Riadok(k komb.Kombinacia) []string {
 	for _, cislo := range k {
 		line = append(line, strconv.Itoa(int(cislo)))
 	}
-	line = append(line, k.Cislovacky().ToStringSlice()...)
+	line = append(line, k.Cislovacky().Strings()...)
 	line = append(line,
 		itoa(komb.Zhoda(v.riadok.K, k)),
 		ftoa(komb.Smernica(v.n, v.m, k)),
@@ -180,89 +284,6 @@ func (v V1) Riadok(k komb.Kombinacia) []string {
 
 		itoa(k.Sucet()),
 	)
+	line = append(line, k.Cifrovacky().Strings()...)
 	return line
-}
-
-func formatZhoda(m map[int]int) string {
-	if len(m) == 0 {
-		return "0:(0)"
-	}
-	var keys []int
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Ints(keys)
-
-	var buf bytes.Buffer
-	for i, k := range keys {
-		v := m[k]
-		if i > 0 {
-			buf.WriteString(", ")
-		}
-		buf.WriteString(itoa(k) + ":(" + itoa(v) + ")")
-	}
-	return buf.String()
-}
-
-func formatFloatMap(m map[float64]int) []string {
-	if len(m) == 0 {
-		return []string{"0", "0", "0"}
-	}
-	var (
-		n   int
-		min = math.MaxFloat64
-		max float64
-	)
-	for k, v := range m {
-		n += v
-		if k > max {
-			max = k
-		}
-		if k < min {
-			min = k
-		}
-	}
-	return []string{ftoa(min), ftoa(max), itoa(n)}
-}
-
-func formatIntMap(m map[int]int) []string {
-	if len(m) == 0 {
-		return []string{"0", "0", "0"}
-	}
-	var (
-		n   int
-		min = math.MaxInt32
-		max int
-	)
-	for k, v := range m {
-		n += v
-		if k > max {
-			max = k
-		}
-		if k < min {
-			min = k
-		}
-	}
-	return []string{itoa(min), itoa(max), itoa(n)}
-}
-
-func formatTica(m map[string]int) string {
-	if len(m) == 0 {
-		return ""
-	}
-	var keys []string
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	var buf bytes.Buffer
-	for i, k := range keys {
-		v := m[k]
-		if i > 0 {
-			buf.WriteString(", ")
-		}
-		buf.WriteString(k + ":(" + itoa(v) + ")")
-	}
-	return buf.String()
 }
