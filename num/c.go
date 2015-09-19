@@ -6,8 +6,6 @@ import (
 	"strconv"
 )
 
-var cFuns = []func(int) bool{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC}
-
 type C [10]byte
 
 func NewC(cislo int) C {
@@ -16,7 +14,7 @@ func NewC(cislo int) C {
 		return C{}
 	}
 	var c C
-	for i, f := range cFuns {
+	for i, f := range []func(int) bool{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC} {
 		if f(cislo) {
 			c[i]++
 		}
