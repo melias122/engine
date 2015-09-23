@@ -28,11 +28,8 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	// n, m := 20, 80
-	// path := fmt.Sprintf("testdata/2080_r.csv")
-
-	n, m := 5, 90
-	path := fmt.Sprintf("testdata/590.csv")
+	n, m := 7, 45
+	path := fmt.Sprintf("testdata/745_r.csv")
 
 	workingDir, err := os.Getwd()
 	_, err = archiv.Make(path, workingDir, n, m)

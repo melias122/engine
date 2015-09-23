@@ -65,7 +65,7 @@ func (w *CsvMaxWriter) Reset() error {
 		return err
 	}
 	w.file = f
-	w.file.Write([]byte{0xEF, 0xBB, 0xBF}) // :( remove this...
+	w.file.Write([]byte{0xEF, 0xBB, 0xBF}) // TODO: UTF-8 BOM... :( remove this...
 	w.writer = csv.NewWriter(w.file)
 	w.writer.Comma = Comma
 	return w.writer.WriteAll(w.header)

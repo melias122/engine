@@ -263,10 +263,6 @@ func (u UiLine) Clear() {
 	}
 }
 
-func UiLinePair(u1, u2 *UiLine) {
-
-}
-
 func UiLineToWidget(uiLine UiLine, labelWidth int) Widget {
 	var (
 		rb1, rb2 *walk.RadioButton

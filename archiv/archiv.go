@@ -185,8 +185,28 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 	// 	return nil, err
 	// }
 
+	// MapaZhoda
+	if err := archiv.mapaZhoda(); err != nil {
+		return nil, err
+	}
+	if err := archiv.statistikaZhoda(); err != nil {
+		return nil, err
+	}
+
+	// MapaNtice
+	if err := archiv.mapaNtice(); err != nil {
+		return nil, err
+	}
+	if err := archiv.statistikaNtice(); err != nil {
+		return nil, err
+	}
+
 	// Statistika Cifrovacky
 	if err := archiv.statistikaCifrovacky(); err != nil {
+		return nil, err
+	}
+
+	if err := archiv.statistikaCislovacky(); err != nil {
 		return nil, err
 	}
 

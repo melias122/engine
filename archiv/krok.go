@@ -67,14 +67,15 @@ type statCifrovacky struct {
 	poslednyVyskytRiadok map[int]int
 }
 
-func makeStatCifrovacky(n, m int, r []Riadok) []*statCifrovacky {
+func makeStatCifrovacky(n, m int, r []Riadok, f func(r Riadok) []byte, tmax func() []byte) []*statCifrovacky {
 	var (
-		sc   = make([]*statCifrovacky, 10)
-		tmax = komb.CifrovackyTeorMax(n, m)
+		// tmax = komb.CifrovackyTeorMax(n, m)
+		tMax = tmax()
+		sc   = make([]*statCifrovacky, len(tMax))
 	)
 	// zratanie
 	for _, r := range r {
-		for si, u := range r.Cifrovacky {
+		for si, u := range f(r) {
 			if sc[si] == nil {
 				sc[si] = &statCifrovacky{
 					nUdalost:             make(map[int]int),
@@ -88,7 +89,7 @@ func makeStatCifrovacky(n, m int, r []Riadok) []*statCifrovacky {
 			u := int(u)
 			stat.nUdalost[u]++
 
-			for i := 0; i < int(tmax[si]); i++ {
+			for i := 0; i < int(tMax[si]); i++ {
 				if i == u {
 					if stat.diffCnt[i] > 0 {
 						stat.diff[i] = append(stat.diff[i], float64(stat.diffCnt[i]))
@@ -105,13 +106,14 @@ func makeStatCifrovacky(n, m int, r []Riadok) []*statCifrovacky {
 	return sc
 }
 
-func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky) [][]string {
+func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky, tmax func() []byte) [][]string {
 	var (
-		s          [][]string
-		tmax       = komb.CifrovackyTeorMax(n, m)
+		s [][]string
+		// tmax       = komb.CifrovackyTeorMax(n, m)
+		tMax       = tmax()
 		maxUdalost int
 	)
-	for _, u := range tmax {
+	for _, u := range tMax {
 		u := int(u)
 		if u > maxUdalost {
 			maxUdalost = u
@@ -140,7 +142,7 @@ func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky) [][]st
 	}
 	pad := len(s) / maxUdalost
 	for j, stat := range sc {
-		for u := 0; u <= maxUdalost && u < int(tmax[j]); u++ {
+		for u := 0; u <= maxUdalost && u < int(tMax[j]); u++ {
 			ap := int(aritmetickyPriemer(stat.diff[u]) + .5)
 			hp := int(harmonickyPriemer(stat.diff[u]) + .5)
 			vp := int(vazenyAritmetickyPriemer(stat.diff[u]) + .5)
@@ -167,13 +169,17 @@ func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky) [][]st
 		s[0] = append(s[0], "")
 		s[1] = append(s[1], "")
 	}
-	for i := 0; i < len(komb.Cifrovacky{}); i++ {
+	for i := 0; i < len(tMax); i++ {
 		var sum int
-		for k, v := range sc[i].nUdalost {
-			sum += k * v
+		for _, v := range sc[i].nUdalost {
+			sum += v
 		}
+		// sc[i].
+		// for range sc[i].nUdalost {
+		// sum++
+		// }
 		s[0] = append(s[0], itoa(sum))
-		s[1] = append(s[1], itoa(int(tmax[i])))
+		s[1] = append(s[1], itoa(int(tMax[i])))
 	}
 
 	s = append([][]string{[]string{}}, s...)
@@ -205,8 +211,13 @@ func (a *Archiv) statistikaCifrovacky() error {
 	w.Write([]string{})
 	w.Write([]string{"R 1-DO"})
 
-	stat1do := makeStatCifrovacky(a.n, a.m, a.riadky)
-	stat1doStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), stat1do)
+	f := func(r Riadok) []byte { return r.Cifrovacky[:] }
+	tmax := func() []byte {
+		max := komb.CifrovackyTeorMax(a.n, a.m)
+		return max[:]
+	}
+	stat1do := makeStatCifrovacky(a.n, a.m, a.riadky, f, tmax)
+	stat1doStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), stat1do, tmax)
 	for _, s := range stat1doStrings {
 		if err := w.Write(s); err != nil {
 			return err
@@ -218,8 +229,8 @@ func (a *Archiv) statistikaCifrovacky() error {
 	w.Write([]string{})
 	w.Write([]string{"R OD-DO"})
 	if a.Uc.Cislo != 0 && a.Uc.Riadok > 1 {
-		statoddo := makeStatCifrovacky(a.n, a.m, a.riadky[a.Uc.Riadok-1:])
-		statoddoStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), statoddo)
+		statoddo := makeStatCifrovacky(a.n, a.m, a.riadky[a.Uc.Riadok-1:], f, tmax)
+		statoddoStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), statoddo, tmax)
 		for _, s := range statoddoStrings {
 			if err := w.Write(s); err != nil {
 				return err
