@@ -174,14 +174,9 @@ func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky, tmax f
 		for _, v := range sc[i].nUdalost {
 			sum += v
 		}
-		// sc[i].
-		// for range sc[i].nUdalost {
-		// sum++
-		// }
 		s[0] = append(s[0], itoa(sum))
 		s[1] = append(s[1], itoa(int(tMax[i])))
 	}
-
 	s = append([][]string{[]string{}}, s...)
 	s = append([][]string{[]string{}}, s...)
 
