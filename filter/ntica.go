@@ -65,5 +65,5 @@ func (s stlNtica) CheckSkupina(h hrx.Skupina) bool {
 }
 
 func (s stlNtica) String() string {
-	return fmt.Sprintf("STL Ntica: %v", s.pozicie)
+	return fmt.Sprintf("STL Ntica: %s", s.pozicie)
 }

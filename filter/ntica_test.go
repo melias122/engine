@@ -29,3 +29,32 @@ func TestNtica(t *testing.T) {
 		}
 	}
 }
+
+func TestStlNtica(t *testing.T) {
+	tests := []struct {
+		Filter
+		k komb.Kombinacia
+	}{
+		{NewStlNtica(4, komb.Tica{4, 0, 0, 0}, []byte{0, 0, 0, 0}), komb.Kombinacia{1, 3, 5, 7}},
+		{NewStlNtica(4, komb.Tica{2, 1, 0, 0}, []byte{1, 1, 0, 0}), komb.Kombinacia{1, 2, 5, 7}},
+		{NewStlNtica(4, komb.Tica{2, 1, 0, 0}, []byte{0, 1, 1, 0}), komb.Kombinacia{1, 3, 4, 7}},
+		{NewStlNtica(4, komb.Tica{2, 1, 0, 0}, []byte{0, 0, 1, 1}), komb.Kombinacia{1, 3, 6, 7}},
+		{NewStlNtica(4, komb.Tica{1, 0, 1, 0}, []byte{1, 1, 1, 0}), komb.Kombinacia{1, 2, 3, 7}},
+		{NewStlNtica(4, komb.Tica{1, 0, 1, 0}, []byte{0, 1, 1, 1}), komb.Kombinacia{1, 3, 4, 5}},
+		{NewStlNtica(4, komb.Tica{0, 0, 0, 1}, []byte{1, 1, 1, 1}), komb.Kombinacia{2, 3, 4, 5}},
+		{
+			Filter: NewStlNtica(5, komb.Tica{0, 0, 0, 0, 1}, []byte{1, 1, 1, 1, 1}),
+			k:      komb.Kombinacia{1, 2, 3, 4, 5},
+		},
+		{
+			Filter: NewStlNtica(6, komb.Tica{4, 1, 0, 0, 0, 0}, []byte{0, 0, 0, 0, 1, 1}),
+			k:      komb.Kombinacia{1, 3, 5, 7, 9, 10},
+		},
+	}
+	for _, test := range tests {
+		ok := test.Check(test.k)
+		if !ok {
+			t.Errorf("Excepted: (%v), Got: (%v)", true, ok)
+		}
+	}
+}
