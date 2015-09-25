@@ -2,7 +2,8 @@ package filter
 
 import (
 	"bytes"
-	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/melias122/psl/hrx"
 	"github.com/melias122/psl/komb"
@@ -21,9 +22,9 @@ func NewNtica(n int, tica komb.Tica) Filter {
 }
 
 func (n ntica) Check(k komb.Kombinacia) bool {
-	cmp := bytes.Compare(komb.Ntica(k), n.ntica)
-	if (len(k) == n.n && cmp != 0) || cmp > 0 {
-		return false
+	nticaK := komb.Ntica(k)
+	if len(k) == n.n {
+		return bytes.Equal(nticaK, n.ntica)
 	}
 	return true
 }
@@ -33,7 +34,7 @@ func (n ntica) CheckSkupina(skupina hrx.Skupina) bool {
 }
 
 func (n ntica) String() string {
-	return "Ntica:" + n.ntica.String()
+	return "Ntica: " + n.ntica.String()
 }
 
 type stlNtica struct {
@@ -54,8 +55,8 @@ func (s stlNtica) Check(k komb.Kombinacia) bool {
 	if !s.ntica.Check(k) {
 		return false
 	}
-	if s.n == len(k) && bytes.Compare(komb.NticaPozicie(k), s.pozicie) != 0 {
-		return false
+	if s.n == len(k) {
+		return bytes.Equal(komb.NticaPozicie(k), s.pozicie)
 	}
 	return true
 }
@@ -65,5 +66,11 @@ func (s stlNtica) CheckSkupina(h hrx.Skupina) bool {
 }
 
 func (s stlNtica) String() string {
-	return fmt.Sprintf("STL Ntica: %s", s.pozicie)
+	var pozicie []string
+	for i, p := range s.pozicie {
+		if p == 1 {
+			pozicie = append(pozicie, strconv.Itoa(i+1))
+		}
+	}
+	return s.ntica.String() + "\n" + "STL Ntica: " + strings.Join(pozicie, ", ")
 }

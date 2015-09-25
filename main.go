@@ -8,6 +8,9 @@ import (
 	"runtime/pprof"
 
 	"github.com/melias122/psl/archiv"
+	"github.com/melias122/psl/filter"
+	"github.com/melias122/psl/generator"
+	"github.com/melias122/psl/komb"
 )
 
 var a *archiv.Archiv
@@ -28,45 +31,31 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	n, m := 7, 45
-	path := fmt.Sprintf("testdata/745_r.csv")
+	n, m := 5, 35
+	path := fmt.Sprintf("testdata/535.csv")
 
 	workingDir, err := os.Getwd()
-	_, err = archiv.Make(path, workingDir, n, m)
+	a, err = archiv.Make(path, workingDir, n, m)
 	if err != nil {
 		panic(err)
 	}
 
-	// filters := filter.Filters{
-	// 	filter.NewSucet(n, 800, 1000),
-	// 	filter.NewZhoda(n, 1, 1, a.K),
-	// 	filter.NewZakazane(m, []byte{a.Uc.Cislo}),
-	// 	filter.NewHrx(n, 36.23, 36.23, a.Hrx, "HRX"),
-	// 	filter.NewR(n, 3.464E-014, 3.464E-014, a.HHrx.Cisla, "ƩR 1-DO"),
-	// 	filter.NewCislovacky(n, 7, 9, num.IsN, "N"),
-	// 	filter.NewCislovacky(n, 3, 5, num.IsPr, "Pr"),
-	// }
-	//
-	// vystup := generator.NewV1(n, m, Archiv.Hrx, Archiv.HHrx, Archiv.Riadok)
-	//
-	// Generator := generator.NewGenerator(n, Archiv.Hrx.Cisla, vystup, filters)
-	// for _, sk := range Skupiny {
-	// 	fmt.Println(sk)
-	// 	Generator.Generate(sk.Presun)
-	// }
-	//
-	// msg := make(chan string)
-	// go func() {
-	// 	generator.GenerateFilter(n, a, filters, msg)
-	// }()
-	// <-msg
-
-	// fmt.Print("Generator: ")
-	// go func() {
-	// 	generator.GenerateKombinacie(n, archiv, filters, msg)
-	// }()
-	// fmt.Println("ok..")
-	// <-msg
+	filters := filter.Filters{
+		filter.NewSucet(n, 100, 150),
+		filter.NewStlNtica(n, komb.Tica{2, 0, 1, 0, 0}, []byte{0, 0, 1, 1, 1}),
+		filter.NewXtica(n, m, komb.Tica{0, 0, 2, 3}),
+		// filter.NewZhoda(n, 1, 1, a.K),
+		// filter.NewZakazane(m, []byte{a.Uc.Cislo}),
+		// filter.NewHrx(n, 36.23, 36.23, a.Hrx, "HRX"),
+		// filter.NewR(n, 3.464E-014, 3.464E-014, a.HHrx.Cisla, "ƩR 1-DO"),
+		// filter.NewCislovacky(n, 7, 9, num.IsN, "N"),
+		// filter.NewCislovacky(n, 3, 5, num.IsPr, "Pr"),
+	}
+	msg := make(chan string)
+	go func() {
+		generator.GenerateKombinacie(n, a, filters, msg)
+	}()
+	fmt.Println(<-msg)
 }
 
 // func ForwardLinearPrediction(coefs, x []float64) {
