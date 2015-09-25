@@ -230,12 +230,14 @@ func NewV1(a *Archiv) V1 {
 	for i := 1; i <= a.n; i++ {
 		header = append(header, strconv.Itoa(i))
 	}
-	header = append(header, "P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC", "ZH", "Sm",
-		"Kk", "N-tice", "X-tice", "ƩR1-DO", "ΔƩR1-DO", "ƩSTL1-DO", "ΔƩSTL1-DO",
-		"Δ(ƩR1-DO-ƩSTL1-DO)", "HHRX", "ΔHHRX", "ƩR OD-DO", "ΔƩR OD-DO",
-		"ƩSTL OD-DO", "ΔƩSTL OD-DO", "Δ(ƩROD-DO-ƩSTLOD-DO)", "HRX", "ΔHRX",
-		"ƩKombinacie",
-		"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5", "Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
+	header = append(header,
+		"P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC",
+		"ZH", "ZH presun (r/r+1)", "Sm", "Kk", "Ntica", "Ntica súčet",
+		"Ntica súčin pozície a stĺpca", "X-tice", "ƩR1-DO", "ΔƩR1-DO",
+		"ƩSTL1-DO", "ΔƩSTL1-DO", "Δ(ƩR1-DO-ƩSTL1-DO)", "HHRX", "ΔHHRX",
+		"ƩR OD-DO", "ΔƩR OD-DO", "ƩSTL OD-DO", "ΔƩSTL OD-DO", "Δ(ƩROD-DO-ƩSTLOD-DO)",
+		"HRX", "ΔHRX", "ƩKombinacie", "Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5",
+		"Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
 	)
 	return V1{
 		n:      a.n,
@@ -249,7 +251,7 @@ func NewV1(a *Archiv) V1 {
 
 func (v V1) Riadok(k komb.Kombinacia) []string {
 	var (
-		line   = make([]string, 0, 30)
+		line   = make([]string, 0, 35)
 		r1, s1 = k.SucetRSNext(v.hhrx.Cisla)
 		r2, s2 = k.SucetRSNext(v.hrx.Cisla)
 		hrx    = v.hrx.ValueKombinacia(k)
@@ -261,9 +263,12 @@ func (v V1) Riadok(k komb.Kombinacia) []string {
 	line = append(line, k.Cislovacky().Strings()...)
 	line = append(line,
 		itoa(komb.Zhoda(v.riadok.K, k)),
+		komb.ZhodaPresun(v.riadok.K, k).String(),
 		ftoa(komb.Smernica(v.n, v.m, k)),
 		ftoa(komb.Korelacia(v.n, v.m, v.riadok.K, k)),
 		komb.Ntica(k).String(),
+		komb.NticaSucet(k).String(),
+		komb.NticaSucin(k).String(),
 		komb.Xtica(v.m, k).String(),
 
 		ftoa(r1),

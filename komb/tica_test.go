@@ -82,3 +82,37 @@ func TestNticaPozicie(t *testing.T) {
 		}
 	}
 }
+
+func TestNticaSucet(t *testing.T) {
+	tests := []struct {
+		k     Kombinacia
+		sucet nticaSS
+	}{
+		{Kombinacia{1, 3, 5}, nticaSS{}},
+		{Kombinacia{1, 2, 3}, nticaSS{6}},
+		{Kombinacia{1, 2, 5, 7, 8}, nticaSS{3, 15}},
+	}
+	for _, test := range tests {
+		sucet := NticaSucet(test.k)
+		if sucet.String() != test.sucet.String() {
+			t.Errorf("Expected: %s, Got: %s", test.sucet.String(), sucet.String())
+		}
+	}
+}
+
+func TestNticaSucin(t *testing.T) {
+	tests := []struct {
+		k     Kombinacia
+		sucin nticaSS
+	}{
+		{Kombinacia{1, 3, 5}, nticaSS{}},
+		{Kombinacia{1, 2, 3}, nticaSS{6}},
+		{Kombinacia{1, 2, 5, 7, 8}, nticaSS{2, 20}},
+	}
+	for _, test := range tests {
+		sucin := NticaSucin(test.k)
+		if sucin.String() != test.sucin.String() {
+			t.Errorf("Expected: %s, Got: %s", test.sucin.String(), sucin.String())
+		}
+	}
+}

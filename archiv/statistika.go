@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/melias122/psl/komb"
 	"github.com/melias122/psl/num"
 	"github.com/melias122/psl/rw"
 )
@@ -125,7 +126,7 @@ func (a *Archiv) statistikaNtice() error {
 	for _, r := range a.riadky {
 		ntica := r.Ntica.String()
 		stat.celkom[ntica]++
-		sucin := sucinNtic(r.K, r.Ntica)
+		sucin := komb.NticaSucin(r.K).String()
 		if _, ok := stat.sucin[ntica]; !ok {
 			stat.sucin[ntica] = make(map[string]int)
 		}

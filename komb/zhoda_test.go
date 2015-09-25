@@ -2,6 +2,23 @@ package komb
 
 import "testing"
 
+func TestZhodaPresun(t *testing.T) {
+	tests := []struct {
+		k0, k1 Kombinacia
+		presun
+	}{
+		{Kombinacia{1, 2, 3}, Kombinacia{4, 5, 6}, presun{}},
+		{Kombinacia{1, 2, 3}, Kombinacia{1, 4, 5}, presun{{1, 1}}},
+		{Kombinacia{1, 2, 3}, Kombinacia{1, 2, 3}, presun{{1, 1}, {2, 2}, {3, 3}}},
+	}
+	for _, test := range tests {
+		presun := ZhodaPresun(test.k0, test.k1)
+		if test.presun.String() != presun.String() {
+			t.Errorf("Expected: %s, Got: %s", test.presun, presun)
+		}
+	}
+}
+
 func TestZhoda(t *testing.T) {
 	tests := []struct {
 		k1, k2 Kombinacia

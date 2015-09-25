@@ -3,6 +3,7 @@ package komb
 import (
 	"bytes"
 	"strconv"
+	"strings"
 )
 
 type Tica []byte
@@ -64,4 +65,73 @@ func ntica(k Kombinacia) (Tica, []byte) {
 	}
 	tica[n]++
 	return tica, pozicie
+}
+
+// nticaSS sluzi na prevod suctu alebo
+// sucinu na retazec
+// Pozn.: neskor mozno do filtra
+type nticaSS []int
+
+func (n nticaSS) String() string {
+	s := make([]string, len(n))
+	for i, n := range n {
+		s[i] = strconv.Itoa(n)
+	}
+	return strings.Join(s, ", ")
+}
+
+// NticaSucet urcuje sucet cisiel Kombinacie
+// na pozicii ntice
+// Kombinacia{1,2,3,5,6}
+// NticaSucet{1+2+3, 5+6} == {6, 11}
+func NticaSucet(k Kombinacia) nticaSS {
+	return ss(k, sucet)
+}
+
+// NticaSucet urcuje sucin pozicie a stlpca
+// Kombinacie na pozicii ntice
+// Kombinacia{10,11,12,15,16}
+// NticaSucet{1*2*3, 4*5} == {6, 20}
+func NticaSucin(k Kombinacia) nticaSS {
+	return ss(k, sucin)
+}
+
+type operacia int
+
+const (
+	sucet operacia = iota
+	sucin
+)
+
+func ss(k Kombinacia, o operacia) nticaSS {
+	if len(k) < 2 {
+		return nticaSS{}
+	}
+	var (
+		n     nticaSS
+		spolu int
+	)
+	for i := range k[:len(k)-1] {
+		if k[i]+1 == k[i+1] {
+			switch o {
+			case sucet:
+				if spolu == 0 {
+					spolu = int(k[i])
+				}
+				spolu += int(k[i+1])
+			case sucin:
+				if spolu == 0 {
+					spolu = int(i + 1)
+				}
+				spolu *= int(i + 2)
+			}
+		} else if spolu != 0 {
+			n = append(n, spolu)
+			spolu = 0
+		}
+	}
+	if spolu != 0 {
+		n = append(n, spolu)
+	}
+	return n
 }
