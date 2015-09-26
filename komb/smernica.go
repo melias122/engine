@@ -1,25 +1,20 @@
 package komb
 
 func Smernica(n, m int, k Kombinacia) float64 {
-	return smernica(n, m, k)
-}
-
-func smernica(n, m int, k Kombinacia) float64 {
+	if len(k) < 2 {
+		return .0
+	}
 	var (
 		sm  float64
-		nSm int
+		nSm float64
+		M   = float64(m - 1)
+		N   = float64(n - 1)
 	)
-	for i := 0; i < n-1; i++ {
-		for j := i + 1; j < n; j++ {
-			p1 := (float64(k[j]) - float64(k[i])) / float64(m-1)
-			p2 := (float64(j) - float64(i)) / float64(n-1)
-			p1 /= p2
-			sm += p1
+	for i, n0 := range k[:len(k)-1] {
+		for j, n1 := range k[i+1:] {
+			sm += (float64(n1-n0) / M) / (float64(j+1) / N)
 			nSm++
 		}
 	}
-	if nSm > 0 {
-		sm /= float64(nSm)
-	}
-	return sm
+	return sm / nSm
 }
