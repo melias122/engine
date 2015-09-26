@@ -1,19 +1,14 @@
 package num
 
 import (
-	"bytes"
-	"log"
 	"strconv"
+	"strings"
 )
 
-type C [10]byte
+type Cislovacky [10]byte
 
-func NewC(cislo int) C {
-	if cislo <= 0 {
-		log.Println("NewC cislo == 0")
-		return C{}
-	}
-	var c C
+func NewC(cislo int) Cislovacky {
+	var c Cislovacky
 	for i, f := range []func(int) bool{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC} {
 		if f(cislo) {
 			c[i]++
@@ -22,33 +17,26 @@ func NewC(cislo int) C {
 	return c
 }
 
-func (c1 *C) Plus(c2 C) {
+func (c1 *Cislovacky) Plus(c2 Cislovacky) {
 	for i, c := range c2 {
 		c1[i] += c
 	}
 }
 
-func (c1 *C) Minus(c2 C) {
+func (c1 *Cislovacky) Minus(c2 Cislovacky) {
 	for i, c := range c2 {
 		c1[i] -= c
 	}
 }
 
-func (c1 C) String() string {
-	var buf bytes.Buffer
-	for i, c := range c1 {
-		if i > 0 {
-			buf.WriteString(" ")
-		}
-		buf.WriteString(strconv.Itoa(int(c)))
-	}
-	return buf.String()
+func (c Cislovacky) String() string {
+	return strings.Join(c.Strings(), " ")
 }
 
-func (c C) Strings() []string {
+func (c Cislovacky) Strings() []string {
 	s := make([]string, len(c))
-	for i, cislo := range c {
-		s[i] = strconv.Itoa(int(cislo))
+	for i, c := range c {
+		s[i] = strconv.Itoa(int(c))
 	}
 	return s
 }

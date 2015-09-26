@@ -29,7 +29,7 @@ func ZhodaPresun(k0, k1 Kombinacia) presun {
 	var p presun
 	for i, j := 0, 0; i < len(k0) && j < len(k1); {
 		if k0[i] == k1[j] {
-			p = append(p, [2]byte{k0[i], k1[j]})
+			p = append(p, [2]byte{byte(i + 1), byte(j + 1)})
 			i++
 			j++
 		} else if k0[i] < k1[j] {

@@ -1,7 +1,6 @@
 package komb
 
 import (
-	"bytes"
 	"strconv"
 	"strings"
 )
@@ -9,14 +8,11 @@ import (
 type Tica []byte
 
 func (t Tica) String() string {
-	var buf bytes.Buffer
+	s := make([]string, len(t))
 	for i, n := range t {
-		if i > 0 {
-			buf.WriteString(" ")
-		}
-		buf.WriteString(strconv.Itoa(int(n)))
+		s[i] = strconv.Itoa(int(n))
 	}
-	return buf.String()
+	return strings.Join(s, " ")
 }
 
 func Xtica(m int, k Kombinacia) Tica {
@@ -25,19 +21,19 @@ func Xtica(m int, k Kombinacia) Tica {
 
 func xtica(m int, k Kombinacia) Tica {
 	xtica := make(Tica, (m+9)/10)
-	for _, number := range k {
-		xtica[(number-1)/10]++
+	for _, n := range k {
+		xtica[(n-1)/10]++
 	}
 	return xtica
 }
 
-func Ntica(kombinacia Kombinacia) Tica {
-	tica, _ := ntica(kombinacia)
+func Ntica(k Kombinacia) Tica {
+	tica, _ := ntica(k)
 	return tica
 }
 
-func NticaPozicie(kombinacia Kombinacia) []byte {
-	_, pozicie := ntica(kombinacia)
+func NticaPozicie(k Kombinacia) []byte {
+	_, pozicie := ntica(k)
 	return pozicie
 }
 

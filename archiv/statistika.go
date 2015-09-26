@@ -203,7 +203,7 @@ func (a *Archiv) statistikaCislovacky() error {
 	defer w.Close()
 
 	tmax := func() []byte {
-		var c num.C
+		var c num.Cislovacky
 		for i := 1; i <= a.m; i++ {
 			c.Plus(num.NewC(i))
 		}

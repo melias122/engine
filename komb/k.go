@@ -3,6 +3,7 @@ package komb
 import (
 	"bytes"
 	"strconv"
+	"strings"
 
 	"github.com/melias122/psl/num"
 )
@@ -10,29 +11,19 @@ import (
 type Kombinacia []byte
 
 func (k Kombinacia) String() string {
-	var buf bytes.Buffer
+	s := make([]string, len(k))
 	for i, n := range k {
-		if i > 0 {
-			buf.WriteString(" ")
-		}
-		buf.WriteString(strconv.Itoa(int(n)))
+		s[i] = strconv.Itoa(int(n))
 	}
-	return buf.String()
+	return strings.Join(s, " ")
 }
 
 func (k Kombinacia) Contains(cislo byte) bool {
-	switch len(k) {
-	case 0:
-		return false
-	case 1:
-		return k[0] == cislo
-	default:
-		return bytes.Contains(k, []byte{cislo})
-	}
+	return bytes.IndexByte(k, cislo) > -1
 }
 
-func (k Kombinacia) Cislovacky() num.C {
-	var c num.C
+func (k Kombinacia) Cislovacky() num.Cislovacky {
+	var c num.Cislovacky
 	for _, cislo := range k {
 		c.Plus(num.NewC(int(cislo)))
 	}

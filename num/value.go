@@ -3,13 +3,8 @@ package num
 import "math/big"
 
 var (
-	// bcache = make(map[bkey]*big.Int)
 	fcache = make(map[key]float64)
 )
-
-// type bkey struct {
-// 	a, b byte
-// }
 
 type key struct {
 	x, y, n, m byte
@@ -40,39 +35,13 @@ func value(pocet, x, y, n, m int) float64 {
 	b.Binomial(int64(m-x), int64(n-y))
 
 	if a.Int64() != 0 && b.Int64() != 0 {
+		var r big.Rat
 		a.Mul(&a, &b)
 		b.SetInt64(int64(pocet))
-		value, _ = new(big.Rat).SetFrac(&b, &a).Float64()
+		value, _ = r.SetFrac(&b, &a).Float64()
 	}
 	return value
 }
-
-// func value(pocet, x, y, n, m int) float64 {
-// 	var (
-// 		a, b  big.Int
-// 		value float64
-// 	)
-// 	aCachedKey := bkey{byte(x - 1), byte(y - 1)}
-// 	aCached, ok := bcache[aCachedKey]
-// 	if !ok {
-// 		aCached = a.Binomial(int64(x-1), int64(y-1))
-// 		bcache[aCachedKey] = aCached
-// 	}
-//
-// 	bCachedKey := bkey{byte(m - x), byte(n - y)}
-// 	bCached, ok := bcache[bCachedKey]
-// 	if !ok {
-// 		bCached = b.Binomial(int64(m-x), int64(n-y))
-// 		bcache[bCachedKey] = bCached
-// 	}
-//
-// 	if aCached.Int64() != 0 && bCached.Int64() != 0 {
-// 		a.Mul(aCached, bCached)
-// 		b.SetInt64(int64(pocet))
-// 		value, _ = new(big.Rat).SetFrac(&b, &a).Float64()
-// 	}
-// 	return value
-// }
 
 // func vrati maximalnu teoreticku
 // pocetnost cisla v stlpci

@@ -3,16 +3,16 @@ package num
 import "testing"
 
 func BenchmarkPlus(b *testing.B) {
-	c0 := C{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	c1 := C{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	c0 := Cislovacky{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	c1 := Cislovacky{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	for i := 0; i < b.N; i++ {
 		c0.Plus(c1)
 	}
 }
 
 func BenchmarkMinus(b *testing.B) {
-	c0 := C{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	c1 := C{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+	c0 := Cislovacky{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	c1 := Cislovacky{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
 	for i := 0; i < b.N; i++ {
 		c0.Minus(c1)
 	}
@@ -49,16 +49,16 @@ func TestNewC(t *testing.T) {
 
 func TestPlus(t *testing.T) {
 	var test struct {
-		in      []C
-		result  C
-		exepted C
+		in      []Cislovacky
+		result  Cislovacky
+		exepted Cislovacky
 	}
-	test.in = []C{
-		C{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-		C{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		C{0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	test.in = []Cislovacky{
+		Cislovacky{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+		Cislovacky{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		Cislovacky{0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	}
-	test.exepted = C{1, 3, 5, 7, 9, 11, 13, 15, 17, 20}
+	test.exepted = Cislovacky{1, 3, 5, 7, 9, 11, 13, 15, 17, 20}
 
 	for _, i := range test.in {
 		test.result.Plus(i)
@@ -72,16 +72,16 @@ func TestPlus(t *testing.T) {
 
 func TestMinus(t *testing.T) {
 	var test struct {
-		in      []C
-		result  C
-		exepted C
+		in      []Cislovacky
+		result  Cislovacky
+		exepted Cislovacky
 	}
-	test.in = []C{
-		C{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		C{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-		C{0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	test.in = []Cislovacky{
+		Cislovacky{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		Cislovacky{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+		Cislovacky{0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	}
-	test.exepted = C{1, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+	test.exepted = Cislovacky{1, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 
 	for _, i := range test.in[1:] {
 		test.in[0].Minus(i)

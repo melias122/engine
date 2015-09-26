@@ -19,7 +19,7 @@ type Riadok struct {
 
 	Pc             uint16
 	K              komb.Kombinacia
-	C              num.C
+	C              num.Cislovacky
 	Zh             int
 	Sm, DtSm       float64
 	Kk, DtKk       float64
