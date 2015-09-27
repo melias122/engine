@@ -35,10 +35,6 @@ type HrxTab struct {
 	r1Min, r1Max  float64
 	hhrxR0, hrxR0 float64
 
-	//sMinMax
-	sMM   [][4]float64
-	sNums num.Nums
-
 	w *rw.CsvMaxWriter
 
 	psCache  map[Tab]*big.Int
@@ -71,8 +67,8 @@ func NewHrxTab(Hrx, HHrx *H, n, m int) *HrxTab {
 		hhrxMin: HHrx.Presun(),
 		hhrxMax: HHrx.Presun(),
 
-		sMM:   make([][4]float64, n),
-		sNums: make(num.Nums, 0, m),
+		// sMM:   make([][4]float64, n),
+		// sNums: make(num.Nums, 0, m),
 
 		psCache:  make(map[Tab]*big.Int),
 		mmCache:  make(map[Tab][2]int),

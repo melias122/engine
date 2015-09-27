@@ -9,9 +9,7 @@ UI:
 
 -sortovanie filtra podla priority (zakazane,cislovacky,cifrovacky, atd...)
 -predikcia
--mapa: ntice, xtice, zhoda
--statistiky (1-do/ od-do): cislovacky, cifrovacky, ntice, zhoda
--krok cislovacky
+-mapa: xtice
 -STL v tabulke hrxhhrx
 -filter musi vracat "upravene" Skupiny
 
@@ -20,3 +18,6 @@ DONE:
 -cifrovacky panel + filter
 -filter podla (hrx,hhrx,r1,r2,s1,s2)
 -hrxhhrx znamienko delta pri hrx a hhrx
+-mapa: ntice, zhoda
+-statistiky (1-do/ od-do): cislovacky, cifrovacky, ntice, zhoda
+-krok cislovacky

@@ -10,7 +10,6 @@ import (
 	"github.com/melias122/psl/archiv"
 	"github.com/melias122/psl/filter"
 	"github.com/melias122/psl/generator"
-	"github.com/melias122/psl/komb"
 )
 
 var a *archiv.Archiv
@@ -31,8 +30,8 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	n, m := 5, 35
-	path := fmt.Sprintf("testdata/535.csv")
+	n, m := 20, 80
+	path := fmt.Sprintf("testdata/2080_r.csv")
 
 	workingDir, err := os.Getwd()
 	a, err = archiv.Make(path, workingDir, n, m)
@@ -41,9 +40,9 @@ func main() {
 	}
 
 	filters := filter.Filters{
-		filter.NewSucet(n, 100, 150),
-		filter.NewStlNtica(n, komb.Tica{2, 0, 1, 0, 0}, []byte{0, 0, 1, 1, 1}),
-		filter.NewXtica(n, m, komb.Tica{0, 0, 2, 3}),
+		filter.NewSucet(n, 15, 150),
+		// filter.NewStlNtica(n, komb.Tica{2, 0, 1, 0, 0}, []byte{0, 0, 1, 1, 1}),
+		// filter.NewXtica(n, m, komb.Tica{0, 0, 2, 3}),
 		// filter.NewZhoda(n, 1, 1, a.K),
 		// filter.NewZakazane(m, []byte{a.Uc.Cislo}),
 		// filter.NewHrx(n, 36.23, 36.23, a.Hrx, "HRX"),
