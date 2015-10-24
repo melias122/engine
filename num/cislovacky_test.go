@@ -24,13 +24,13 @@ func BenchmarkXP(b *testing.B) {
 	}
 }
 
-func TestNewC(t *testing.T) {
+func TestNewCsilovacky(t *testing.T) {
 	tests := []struct {
 		x int
 		w string
 	}{
 		// P N PR MC VC c19 c0 cC Cc CC
-		{0, "0 0 0 0 0 0 0 0 0 0"},
+		// {0, "0 0 0 0 0 0 0 0 0 0"},
 		{1, "0 1 0 1 0 1 0 0 0 0"},
 		{2, "1 0 1 1 0 1 0 0 0 0"},
 		{9, "0 1 0 0 1 1 0 0 0 0"},
@@ -40,7 +40,7 @@ func TestNewC(t *testing.T) {
 		{21, "0 1 0 1 0 0 0 0 1 0"},
 	}
 	for _, test := range tests {
-		r := NewC(test.x).String()
+		r := NewCislovacky(test.x).String()
 		if r != test.w {
 			t.Fatalf("Expected: (%s), Have: (%s)", test.w, r)
 		}
