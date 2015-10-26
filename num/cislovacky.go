@@ -23,26 +23,19 @@ func NewCislovacky(n int) Cislovacky {
 }
 
 // Plus scita dve Cislovacky
-func (c1 *Cislovacky) Plus(c2 Cislovacky) {
-	for i, c := range c2 {
-		c1[i] += c
+func (c *Cislovacky) Plus(c2 Cislovacky) {
+	for i, j := range c2 {
+		c[i] += j
 	}
 }
 
-// Minus odcita dve Cislovacky
-// func (c1 *Cislovacky) Minus(c2 Cislovacky) {
-// 	for i, c := range c2 {
-// 		c1[i] -= c
-// 	}
-// }
-
 // String implementuje interface Stringer
-func (c Cislovacky) String() string {
+func (c *Cislovacky) String() string {
 	return strings.Join(c.Strings(), " ")
 }
 
 // Strings je pomocna funkcia pre vypis jednotlivych cislovacie
-func (c Cislovacky) Strings() []string {
+func (c *Cislovacky) Strings() []string {
 	s := make([]string, len(c))
 	for i, c := range c {
 		s[i] = strconv.Itoa(int(c))
@@ -100,9 +93,8 @@ func IsC0(n int) bool {
 func IscC(n int) bool {
 	if n > 11 {
 		return n/10 < n%10
-	} else {
-		return false
 	}
+	return false
 }
 
 // IsCc kontroluje ci v dvojcifernom cisle je prva cifra vacsia ako druha.
@@ -110,9 +102,8 @@ func IscC(n int) bool {
 func IsCc(n int) bool {
 	if n > 20 && !IsC0(n) {
 		return n/10 > n%10
-	} else {
-		return false
 	}
+	return false
 }
 
 // IsCC kontroluje ci v dvojcifernom cisle je prva cifra rovna druhej.
