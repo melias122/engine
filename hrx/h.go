@@ -11,16 +11,27 @@ type H struct {
 	n, m   int
 	xcisla Presun
 	Cisla  num.Nums
+	max    int
 }
 
-func New(n, m int) *H {
-	h := &H{
+func NewHrx(n, m int) *H {
+	return &H{
+		n:      n,
+		m:      m,
+		xcisla: NewPresun(m),
+		Cisla:  make(num.Nums, m),
+
+		max: 19,
+	}
+}
+
+func NewHHrx(n, m int) *H {
+	return &H{
 		n:      n,
 		m:      m,
 		xcisla: NewPresun(m),
 		Cisla:  make(num.Nums, m),
 	}
-	return h
 }
 
 func (h *H) Add(x, y int) {
@@ -75,7 +86,7 @@ func (h *H) Value() float64 {
 }
 
 func (h *H) ValueKombinacia(k komb.Kombinacia) float64 {
-	p := h.xcisla.copy()
+	p := h.xcisla.copy() // use chan xcisla to reduce presure on GC
 	for _, cislo := range k {
 		sk := h.GetN(int(cislo)).PocetR()
 		p.move(1, sk, sk+1)
@@ -85,12 +96,17 @@ func (h *H) ValueKombinacia(k komb.Kombinacia) float64 {
 
 //Vypocita hodnotu Presun p
 func (h *H) valuePresun(p Presun) float64 {
+	if p.Max() == 0 {
+		return 100
+	}
 	var (
-		max = float64(p.Max())
+		max float64
 		hrx float64
 	)
-	if max == .0 {
-		return 100
+	if h.max == 0 {
+		max = float64(p.Max())
+	} else {
+		max = float64(h.max)
 	}
 	for _, p := range p {
 		hrx += h.value(float64(p.Sk), float64(p.Max), max)

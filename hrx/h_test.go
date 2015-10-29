@@ -4,7 +4,39 @@ import (
 	"math"
 	"strconv"
 	"testing"
+
+	"github.com/melias122/psl/komb"
 )
+
+func BenchmarkValue(b *testing.B) {
+	n, m := 30, 90
+	hrx := NewHHrx(n, m)
+	for i := 0; i < 1000; i++ {
+		hrx.Add((i%m)+1, i%n)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hrx.Value()
+	}
+	b.ReportAllocs()
+}
+
+func BenchmarkValueKombinacia(b *testing.B) {
+	n, m := 30, 90
+	k := make(komb.Kombinacia, n)
+	for i := 1; i <= n; i++ {
+		k[i-1] = byte(i)
+	}
+	hrx := NewHHrx(n, m)
+	for i := 0; i < 1000; i++ {
+		hrx.Add((i%m)+1, i%n)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		hrx.ValueKombinacia(k)
+	}
+	b.ReportAllocs()
+}
 
 func BenchmarkPow16(b *testing.B) {
 	x := 1.1234567890
@@ -27,7 +59,7 @@ func BenchmarkPow16Multi(b *testing.B) {
 
 func TestNewHrx(t *testing.T) {
 	const n, m = 5, 35
-	hrx := New(n, m)
+	hrx := NewHrx(n, m)
 	if hrx.n != n {
 		t.Errorf("Excepted: (5), Got: (%d)", hrx.n)
 	}
@@ -39,33 +71,9 @@ func TestNewHrx(t *testing.T) {
 	}
 }
 
-// func TestAdd(t *testing.T) {
-// 	const n, m = 2, 4
-// 	hrx := New(n, m)
-//
-// 	tests := []struct {
-// 		x, y int
-// 		w    []int8
-// 	}{
-// 		{1, 0, []int8{3, 1, 0, 0}},
-// 		{1, 0, []int8{3, 0, 1, 0}},
-// 		{2, 0, []int8{2, 1, 1, 0}},
-// 		{3, 0, []int8{1, 2, 1, 0}},
-// 		{4, 0, []int8{0, 3, 1, 0}},
-// 		{4, 0, []int8{0, 2, 2, 0}},
-// 		{1, 0, []int8{0, 2, 1, 1}},
-// 	}
-// 	for _, test := range tests {
-// 		hrx.Add(test.x, test.y)
-// 		if !reflect.DeepEqual(hrx.skupiny, test.w) {
-// 			t.Errorf("Excepted: (%v), Got: (%v)", test.w, hrx.skupiny)
-// 		}
-// 	}
-// }
-
 func TestIs101(t *testing.T) {
 	const n, m = 2, 4
-	hrx := New(n, m)
+	hrx := NewHrx(n, m)
 
 	tests := []struct {
 		x, y  int
@@ -87,7 +95,7 @@ func TestIs101(t *testing.T) {
 
 func TestValue(t *testing.T) {
 	const n, m = 5, 35
-	hrx := New(n, m)
+	hrx := NewHHrx(n, m)
 
 	if strconv.FormatFloat(hrx.Value(), 'f', 2, 64) != "100.00" {
 		t.Errorf("Excepted: (%s), Got: (%.2f)", "100.00", hrx.Value())
@@ -115,7 +123,7 @@ func TestValue(t *testing.T) {
 
 func TestValueKombinacia(t *testing.T) {
 	const n, m = 5, 35
-	hrx := New(n, m)
+	hrx := NewHHrx(n, m)
 
 	for _, a := range [][]int{
 		[]int{2, 7, 13, 32, 35},
@@ -147,20 +155,26 @@ func TestValueKombinacia(t *testing.T) {
 }
 
 func TestHrx(t *testing.T) {
-	k_hrx := [][]int{
+	hrx := NewHrx(3, 6)
+	for n, i := range [][]int{
 		[]int{1, 3, 5},
 		[]int{2, 4, 6},
-	}
-	// k_hhrx := [][]int{
-	// 	[]int{1, 5, 6},
-	// 	[]int{1, 3, 5},
-	// 	[]int{2, 4, 6},
-	// }
-	hrx := New(3, 6)
-	for _, i := range k_hrx {
+		[]int{1, 2, 3},
+		[]int{1, 2, 4},
+		[]int{1, 3, 6},
+		[]int{1, 4, 6},
+		[]int{2, 4, 6},
+		[]int{3, 4, 6},
+		[]int{3, 4, 6},
+		[]int{3, 4, 6},
+		[]int{3, 4, 6},
+		[]int{3, 4, 6},
+		[]int{3, 4, 6},
+		[]int{3, 4, 6},
+	} {
 		for y, x := range i {
 			hrx.Add(x, y)
 		}
+		t.Log(n, ":", hrx.Value())
 	}
-	// t.Log(hrx)
 }

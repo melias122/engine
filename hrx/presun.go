@@ -86,3 +86,12 @@ func (p Presun) String() string {
 	}
 	return strings.Join(s, " ")
 }
+
+func (p Presun) Contains(t Tab) bool {
+	i := sort.Search(len(p), func(j int) bool { return p[j].Sk >= t.Sk })
+	if i < len(p) && p[i].Sk == t.Sk && p[i].Max == t.Max {
+		return true
+	} else {
+		return false
+	}
+}
