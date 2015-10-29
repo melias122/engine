@@ -39,7 +39,8 @@ func (a *Archiv) PocetnostR() error {
 		}
 
 		// Cislovacky
-		riadok = append(riadok, num.NewC(i).Strings()...)
+		cislovacky := num.NewCislovacky(i)
+		riadok = append(riadok, cislovacky.Strings()...)
 		// for _, e := range num.NewC(i) {
 		// 	riadok = append(riadok, itoa(int(e)))
 		// }
@@ -94,7 +95,8 @@ func (a *Archiv) PocetnostS() error {
 			}
 
 			// Cislovacky
-			r = append(r, num.NewC(i).Strings()...)
+			cislovacky := num.NewCislovacky(i)
+			r = append(r, cislovacky.Strings()...)
 			// teorPoc := num.Max(i, j, a.n, a.m)
 
 			teorPocet.Mul(teorPocet.Binomial(int64(a.m-i), int64(a.n-j)), bi.Binomial(int64(i-1), int64(j-1)))

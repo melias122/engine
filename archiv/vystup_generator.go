@@ -58,23 +58,6 @@ var HeaderV2 = []string{
 	"ƩSTL1-DO (min)", "ƩSTL1-DO (max)", "ƩSTL1-DO (počet)",
 }
 
-// type Skupina struct {
-// 	Hrx    float64
-// 	HHrx   [2]float64
-// 	R1     [2]float64
-// 	R2     float64
-// 	Sucet  [2]uint16
-// 	Presun Presun
-// }
-
-// func (v *V2) Skupina() hrx.Skupina {
-// 	var s hrx.Skupina
-// 	s.Presun = append(hrx.Presun(nil), v.p...) // copy
-// 	s.Hrx=v.hrx
-// 	s.HHrx = v.hh
-// 	return s
-// }
-
 func (v *V2) Add(k komb.Kombinacia) {
 	v.zhoda[komb.Zhoda(v.r.K, k)]++
 
@@ -260,7 +243,8 @@ func (v V1) Riadok(k komb.Kombinacia) []string {
 	for _, cislo := range k {
 		line = append(line, strconv.Itoa(int(cislo)))
 	}
-	line = append(line, k.Cislovacky().Strings()...)
+	cislovacky := k.Cislovacky()
+	line = append(line, cislovacky.Strings()...)
 	line = append(line,
 		itoa(komb.Zhoda(v.riadok.K, k)),
 		komb.ZhodaPresun(v.riadok.K, k).String(),

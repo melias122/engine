@@ -25,7 +25,7 @@ func (k Kombinacia) Contains(cislo byte) bool {
 func (k Kombinacia) Cislovacky() num.Cislovacky {
 	var c num.Cislovacky
 	for _, cislo := range k {
-		c.Plus(num.NewC(int(cislo)))
+		c.Plus(num.NewCislovacky(int(cislo)))
 	}
 	return c
 }
