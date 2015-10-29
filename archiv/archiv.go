@@ -44,8 +44,8 @@ func New(workingDir string, n, m int) *Archiv {
 			n: n,
 			m: m,
 		},
-		Hrx:  hrx.New(n, m),
-		HHrx: hrx.New(n, m),
+		Hrx:  hrx.NewHrx(n, m),
+		HHrx: hrx.NewHHrx(n, m),
 
 		WorkingDir: workingDir,
 		Suffix:     filepath.Base(workingDir),
@@ -101,7 +101,7 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 			// Spatne dohladanie Uc cisla a riadku a inrementovanie cisiel Roddo
 			if reverse {
 				// Nova hrx zostava a resetovanie cisiel Roddo
-				a.Hrx = hrx.New(a.n, a.m)
+				a.Hrx = hrx.NewHrx(a.n, a.m)
 				uc := Uc{Riadok: len(kombinacie)}
 				// Spatne nacitava kombinacie a incremtuje Roddo
 				// a Hrx az pokial nenastane udalost 101
@@ -165,35 +165,30 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 	archiv := New(dir, n, m)
 	chanErrKomb := Parse(path, n, m)
 
-	// Archiv.csv
 	if err := archiv.write(chanErrKomb); err != nil {
 		return nil, err
 	}
 
-	// PocetnostR.csv
 	if err := archiv.PocetnostR(); err != nil {
 		return nil, err
 	}
 
-	// PocetnostS.csv
 	if err := archiv.PocetnostS(); err != nil {
 		return nil, err
 	}
 
-	// Mapa Xtice
-	// if err := MapaXtice(path, n); err != nil {
-	// 	return nil, err
-	// }
+	if err := archiv.mapaXtice(); err != nil {
+		return nil, err
+	}
 
-	// MapaZhoda
 	if err := archiv.mapaZhoda(); err != nil {
 		return nil, err
 	}
+
 	if err := archiv.statistikaZhoda(); err != nil {
 		return nil, err
 	}
 
-	// MapaNtice
 	if err := archiv.mapaNtice(); err != nil {
 		return nil, err
 	}
@@ -201,7 +196,6 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 		return nil, err
 	}
 
-	// Statistika Cifrovacky
 	if err := archiv.statistikaCifrovacky(); err != nil {
 		return nil, err
 	}
