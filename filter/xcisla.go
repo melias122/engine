@@ -73,8 +73,17 @@ func (x xcisla) CheckSkupina(h hrx.Skupina) bool {
 
 func (x xcisla) String() string {
 	var s []string
-	// for k := range x.x {
-	// 	s = append(s, fmt.Sprintf("%d/%d", k.Sk, k.Max))
-	// }
-	return fmt.Sprintf("Xcisla: %s", strings.Join(s, ", "))
+	for _, tabs := range x.x {
+		var str string
+		if len(tabs) > 0 {
+			str = fmt.Sprintf("%d:", tabs[0].Sk)
+		}
+		var str2 []string
+		for _, t := range tabs {
+			str2 = append(str2, fmt.Sprint(t.Max))
+		}
+		str += strings.Join(str2, ",")
+		s = append(s, str)
+	}
+	return fmt.Sprintf("%s", strings.Join(s, ";"))
 }
