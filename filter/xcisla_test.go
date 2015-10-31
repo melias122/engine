@@ -32,23 +32,3 @@ func TestXcisla(t *testing.T) {
 		}
 	}
 }
-
-func TestParseXcisla(t *testing.T) {
-	tests := []struct {
-		s string
-		h hrx.Presun
-	}{
-		{"", hrx.Presun{}},
-		{"                    ", hrx.Presun{}},
-		{"1:1", hrx.Presun{{1, 1}}},
-		{"1:1,2", hrx.Presun{{1, 1}, {1, 2}}},
-	}
-	for _, test := range tests {
-		h, err := parseXcisla(test.s)
-		if err != nil {
-			t.Log(err)
-		} else {
-			t.Logf("Excpected: (%s), got: (%s)", test.h, h)
-		}
-	}
-}
