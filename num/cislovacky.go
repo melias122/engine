@@ -5,16 +5,40 @@ import (
 	"strings"
 )
 
+type Cislovacka byte
+
+const (
+	P Cislovacka = iota
+	CN
+	Pr
+	Mc
+	Vc
+	C19
+	C0
+	CcC
+	Cc
+	CC
+)
+
+var CislovackyFuncs = []CislovackaFunc{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC}
+
+func (i Cislovacka) Func() CislovackaFunc {
+	if i >= Cislovacka(len(CislovackyFuncs)-1) {
+		return nil
+	}
+	return CislovackyFuncs[i]
+}
+
 // Cislovacky su P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
-type Cislovacky [10]byte
+type Cislovacky [10]Cislovacka
 
 // FunCislovacky su funkcie, ktore vyhodnocuju ci je cislo danou cislovackou
-type FunCislovacky func(int) bool
+type CislovackaFunc func(int) bool
 
 // NewCislovacky vytvori Cislovacky pre cislo n. Cislovacky maju zmysel pre n z intervalu <1, 99>
 func NewCislovacky(n int) Cislovacky {
 	var c Cislovacky
-	for i, f := range []FunCislovacky{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC} {
+	for i, f := range CislovackyFuncs {
 		if f(n) {
 			c[i]++
 		}
