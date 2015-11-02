@@ -23,7 +23,7 @@ const (
 var CislovackyFuncs = []CislovackaFunc{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC}
 
 func (i Cislovacka) Func() CislovackaFunc {
-	if i >= Cislovacka(len(CislovackyFuncs)-1) {
+	if i > Cislovacka(len(CislovackyFuncs)-1) {
 		return nil
 	}
 	return CislovackyFuncs[i]
