@@ -11,63 +11,76 @@ func TestParser(t *testing.T) {
 	// }{}
 }
 
-func TestParseDigit(t *testing.T) {
+func TestParseInt(t *testing.T) {
 	tests := []struct {
 		s string
 		d int
-		e bool
 	}{
-		{"", 0, true},
-		{"foo", 0, true},
-		{"0", 0, false},
-		// {"-1", -1, false},
-		{"1", 1, false},
-		// {"2e2", 2e2, false},
+		{"", 0},
+		{"foo", 0},
+		{"0", 0},
+		// {"-1", -1},
+		{"1", 1},
+		// {"2e2", 2e2},
 	}
 	for _, test := range tests {
 		r := strings.NewReader(test.s)
-		p := NewParser(r)
+		p := NewParser(r, 5, 35)
 		d, err := p.ParseInt()
-		if err != nil && !test.e {
-			t.Log("Should not err: ", test)
-		}
 		if d != test.d {
 			t.Fatal(err)
 		}
 	}
 }
 
-func TestParseColon(t *testing.T) {
+func TestParseInts(t *testing.T) {
 	tests := []struct {
-		s string
-		d []int
+		s     string
+		d     []int
+		zhoda []byte
 	}{
-		{"3-2", nil},
-		{"1-3", []int{1, 2, 3}},
-		{"  1  ,  2  ,4    ", []int{1, 2, 4}},
-		{"1,2,4-5", []int{1, 2, 4, 5}},
+		// {"3-2", nil, nil},
+		{"1-3", []int{1, 2, 3}, nil},
+		{"  1  ,  2  ,4    ", []int{1, 2, 4}, nil},
+		{"1,2,4-5", []int{1, 2, 4, 5}, nil},
 
-		{"", nil},
-		{"1,2,4-5,", nil},
-		{"1,2, 4 -5, foo    ", nil},
+		{"", nil, nil},
+		{"1,2,4-5,", nil, nil},
+		{"1,2, 4 -5, foo    ", nil, nil},
+
+		{"P", nil, nil},
+		{"N", nil, nil},
+		{"Pr", nil, nil},
+		{"Mc", nil, nil},
+		{"Vc", nil, nil},
+		{"C19", nil, nil},
+		{"C0", nil, nil},
+		{"cC", nil, nil},
+		{"Cc", nil, nil},
+		{"CC", nil, nil},
+		{s: "p,zh,CC", d: nil, zhoda: []byte{1, 2, 3, 4, 5, 6}},
 	}
 	for _, test := range tests {
 		r := strings.NewReader(test.s)
-		p := NewParser(r)
-		d, err := p.ParseInts()
+		p := NewParser(r, 5, 35)
+		d, err := p.ParseInts(test.zhoda)
+		if err != nil {
+			t.Fatal(err)
+		}
 		if !reflect.DeepEqual(test.d, d) {
 			t.Fatal(err, test, d)
 		}
 	}
 }
 
-func TestParseSemiColon(t *testing.T) {
+func TestParseMapInts(t *testing.T) {
 	tests := []struct {
 		s string
 		r MapInts
 	}{
 		{"1:1", MapInts{1: Ints{1}}},
 		{"1:1,2-4;2:3;5:8", MapInts{1: Ints{1, 2, 3, 4}, 2: Ints{3}, 5: Ints{8}}},
+		{s: "1:P;2:N;3:Pr", r: MapInts{1: cislovacky[P], 2: cislovacky[N], 3: cislovacky[Pr]}},
 
 		{"", nil},
 		{"1-3", nil},
@@ -79,8 +92,8 @@ func TestParseSemiColon(t *testing.T) {
 	}
 	for _, test := range tests {
 		r := strings.NewReader(test.s)
-		p := NewParser(r)
-		res, err := p.ParseMapInts()
+		p := NewParser(r, 5, 99)
+		res, err := p.ParseMapInts(nil)
 		if !reflect.DeepEqual(test.r, res) {
 			t.Fatal(err, test, res)
 		}

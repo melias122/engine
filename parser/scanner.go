@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"strings"
 )
 
 type Scanner struct {
@@ -97,7 +98,7 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 	for {
 		if ch := s.read(); ch == eof {
 			break
-		} else if !isLetter(ch) {
+		} else if !isLetter(ch) && string(ch) != "0" && string(ch) != "1" && string(ch) != "9" && string(ch) != "-" {
 			s.unread()
 			break
 		} else {
@@ -105,13 +106,34 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 		}
 	}
 
+	switch buf.String() {
+	case "cC":
+		return CA, buf.String()
+	case "Cc":
+		return CB, buf.String()
+	case "CC":
+		return CC, buf.String()
+	}
+
 	// If the string matches a keyword then return that keyword.
-	// switch strings.ToUpper(buf.String()) {
-	// case "P":
-	// 	return P, buf.String()
-	// case "N":
-	// 	return N, buf.String()
-	// }
+	switch strings.ToUpper(buf.String()) {
+	case "P":
+		return P, buf.String()
+	case "N":
+		return N, buf.String()
+	case "PR":
+		return Pr, buf.String()
+	case "MC":
+		return Mc, buf.String()
+	case "VC":
+		return Vc, buf.String()
+	case "C19", "C1-C9":
+		return C19, buf.String()
+	case "C0":
+		return C0, buf.String()
+	case "ZH":
+		return Zh, buf.String()
+	}
 
 	// Otherwise return as a regular identifier.
 	return IDENT, buf.String()
