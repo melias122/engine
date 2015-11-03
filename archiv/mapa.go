@@ -2,11 +2,13 @@ package archiv
 
 import (
 	"bytes"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/melias122/psl/komb"
 	"github.com/melias122/psl/rw"
+	"github.com/tealeg/xlsx"
 )
 
 type zhodaRiadok struct {
@@ -268,59 +270,45 @@ func nticeStr(n int) []string {
 	return tice
 }
 
-// func MapaXtice(path string, n int) error {
-// 	// f.Seek(0, 0)
-// 	file, err := os.Open(path)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	r := csv.NewReader(file)
-// 	r.Comma = ';'
-// 	records, err := r.ReadAll()
-// 	if err != nil {
-// 		return err
-// 	}
-//
-// 	xlsxFile := xlsx.NewFile()
-// 	sheet := xlsxFile.AddSheet("Mapa Xtice")
-//
-// 	for _, record := range records {
-// 		row := sheet.AddRow()
-// 		for range record {
-// 			cell := row.AddCell()
-// 			cell.Value = "Value"
-// 			// cell.SetString(c)
-// 		}
-// 		kombinacia, _ := parse(record, n)
-// 		for _, cislo := range kombinacia {
-// 			cell := row.AddCell()
-// 			cell.SetInt(int(cislo))
+func (a *Archiv) mapaXtice() error {
 
-// TODO: farby
-// style := xlsx.NewStyle()
-// switch (int(cislo) - 1) / 10 {
-// case 0: // Red
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 1: // Green
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 2: // Blue
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 3: // Yellow
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 4: // Cyan
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 5: // Dark Red
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 6: // Dark Green
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 7: // Dark Blue
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// case 8: // Dark Yellow
-// 	style.Fill = *xlsx.NewFill("solid", "FF0123456X", "FF0123456X")
-// default:
-// }
-// cell.SetStyle(style)
-// }
-// }
-// return xlsxFile.Save("MapaXtice.xlsx")
-// }
+	xlsxFile := xlsx.NewFile()
+	sheet := xlsxFile.AddSheet("Mapa Xtice")
+
+	for _, riadok := range a.riadky {
+		row := sheet.AddRow()
+		for _, s := range riadok.origStrings {
+			cell := row.AddCell()
+			cell.SetString(s)
+		}
+		for _, cislo := range riadok.K {
+			cell := row.AddCell()
+			cell.SetInt(int(cislo))
+
+			style := xlsx.NewStyle()
+			switch (int(cislo) - 1) / 10 {
+			case 0:
+				style.Fill = *xlsx.NewFill("solid", "FF000000", "FF000000")
+			case 1:
+				style.Fill = *xlsx.NewFill("solid", "00FF0000", "00FF0000")
+			case 2:
+				style.Fill = *xlsx.NewFill("solid", "000000FF", "000000FF")
+			case 3:
+				style.Fill = *xlsx.NewFill("solid", "FFFF0000", "FFFF0000")
+			case 4:
+				style.Fill = *xlsx.NewFill("solid", "FF00FF00", "FF00FF00")
+			case 5:
+				style.Fill = *xlsx.NewFill("solid", "FF660000", "FF660000")
+			case 6:
+				style.Fill = *xlsx.NewFill("solid", "FF006600", "FF006600")
+			case 7:
+				style.Fill = *xlsx.NewFill("solid", "00006600", "00006600")
+			case 8:
+				style.Fill = *xlsx.NewFill("solid", "FF66CC00", "FF66CC00")
+			default:
+			}
+			cell.SetStyle(style)
+		}
+	}
+	return xlsxFile.Save(filepath.Join(a.WorkingDir, "MapaXtice.xlsx"))
+}
