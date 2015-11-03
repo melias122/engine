@@ -12,10 +12,10 @@ func TestZakazane(t *testing.T) {
 		f Filter
 		w bool
 	}{
-		{komb.Kombinacia{1}, NewZakazane(3, []byte{2, 3}), true},
-		{komb.Kombinacia{1, 2}, NewZakazane(3, []byte{2, 3}), false},
-		{komb.Kombinacia{1, 3}, NewZakazane(3, []byte{2, 3}), false},
-		{komb.Kombinacia{1, 4}, NewZakazane(4, []byte{2, 3}), true},
+		{komb.Kombinacia{1}, Zakazane([]int{2, 3}, 5, 35), true},
+		{komb.Kombinacia{1, 2}, Zakazane([]int{2, 3}, 5, 35), false},
+		{komb.Kombinacia{1, 3}, Zakazane([]int{2, 3}, 5, 35), false},
+		{komb.Kombinacia{1, 4}, Zakazane([]int{2, 3}, 5, 35), true},
 	}
 	for _, test := range tests {
 		ok := test.f.Check(test.k)
@@ -25,24 +25,21 @@ func TestZakazane(t *testing.T) {
 	}
 }
 
-func TestZakazaneStl(t *testing.T) {
+func TestZakazaneSTL(t *testing.T) {
 	tests := []struct {
 		k komb.Kombinacia
 		f Filter
 		w bool
 	}{
-		{komb.Kombinacia{1}, NewZakazaneStl(1, [][]byte{{1}}), false},
-		{komb.Kombinacia{1}, NewZakazaneStl(1, [][]byte{{2, 3}}), true},
-		{komb.Kombinacia{2, 3, 5}, NewZakazaneStl(3, [][]byte{{1}, {2}, {3, 5}}), false},
-		{komb.Kombinacia{2, 3, 6}, NewZakazaneStl(3, [][]byte{{1}, {2}, {3, 5}}), true},
-		{komb.Kombinacia{2, 3, 6}, NewZakazaneStl(3, [][]byte{{1}, {2}, {}}), true},
+		{komb.Kombinacia{1}, ZakazaneSTL(map[int][]int{1: {1}}, 5, 35), false},
+		{komb.Kombinacia{1}, ZakazaneSTL(map[int][]int{1: {2}}, 5, 35), true},
+		{komb.Kombinacia{2, 3, 5}, ZakazaneSTL(map[int][]int{2: {3}}, 5, 35), false},
+		{komb.Kombinacia{2, 3, 6}, ZakazaneSTL(map[int][]int{2: {4}}, 5, 35), true},
+		{komb.Kombinacia{2, 3, 6}, ZakazaneSTL(map[int][]int{3: {7}}, 5, 35), true},
 
-		{komb.Kombinacia{1}, NewZakazaneStl(1, [][]byte{{1}}), false},
-		{komb.Kombinacia{2}, NewZakazaneStl(1, [][]byte{{1}}), true},
-		{komb.Kombinacia{2, 3}, NewZakazaneStl(2, [][]byte{{1}, {3}}), false},
-		{komb.Kombinacia{2, 4}, NewZakazaneStl(2, [][]byte{{1}, {3}}), true},
-		{komb.Kombinacia{2, 4, 5}, NewZakazaneStl(3, [][]byte{{1}, {3}, {5}}), false},
-		{komb.Kombinacia{2, 4, 6}, NewZakazaneStl(3, [][]byte{{1}, {3}, {5}}), true},
+		{komb.Kombinacia{2}, ZakazaneSTL(map[int][]int{3: {3}}, 5, 35), true},
+		{komb.Kombinacia{2, 3}, ZakazaneSTL(map[int][]int{1: {2}, 2: {3}}, 5, 35), false},
+		{komb.Kombinacia{2, 4, 6}, ZakazaneSTL(map[int][]int{1: {2}, 2: {4}, 3: {6}}, 5, 35), false},
 	}
 	for i, test := range tests {
 		ok := test.f.Check(test.k)
