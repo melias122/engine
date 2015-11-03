@@ -3,8 +3,6 @@ package filter
 import (
 	"bytes"
 	"fmt"
-	"strconv"
-	"strings"
 
 	"github.com/melias122/psl/hrx"
 	"github.com/melias122/psl/komb"
@@ -47,16 +45,4 @@ func (c cifrovacky) CheckSkupina(s hrx.Skupina) bool {
 
 func (c cifrovacky) String() string {
 	return fmt.Sprintf("Cifrovacky: %s", c.c[:])
-}
-
-func ParseCifrovacky(n, m int, s string) (komb.Cifrovacky, error) {
-	var C komb.Cifrovacky
-	for i, s := range strings.Split(s, " ") {
-		c, err := strconv.ParseUint(s, 10, 8)
-		if err != nil {
-			return komb.Cifrovacky{}, err
-		}
-		C[i] = byte(c)
-	}
-	return C, nil
 }

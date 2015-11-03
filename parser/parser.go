@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
+
+	"github.com/melias122/psl/komb"
 )
 
 type Ints []int
@@ -17,13 +20,14 @@ type Parser struct {
 		n   int
 	}
 	Zhoda []byte
+	n, m  int
 }
 
-func NewParser(r io.Reader) *Parser {
+func NewParser(r io.Reader, n, m int) *Parser {
 	return &Parser{
 		s: NewScanner(r),
-		// n: m,
-		// m: m,
+		n: m,
+		m: m,
 	}
 }
 
@@ -34,15 +38,15 @@ func (p *Parser) ParseInt() (int, error) {
 	}
 
 	// Parse number
-	return strconv.Atoi(lit)
-	// number, err := strconv.Atoi(lit)
-	// if err != nil {
-	// 	return 0, err
-	// }
-	// if number < 1 || number > p.m {
-	// 	return 0, fmt.Errorf("expected number in range 1..%d", p.m)
-	// }
-	// return number, nil
+	// return strconv.Atoi(lit)
+	number, err := strconv.Atoi(lit)
+	if err != nil {
+		return 0, err
+	}
+	if number < 1 || number > p.m {
+		return 0, fmt.Errorf("expected number in range 1..%d", p.m)
+	}
+	return number, nil
 }
 
 func (p *Parser) ParseInts() (Ints, error) {
@@ -83,13 +87,13 @@ func (p *Parser) ParseInts() (Ints, error) {
 			}
 
 		case P, N, Pr, Mc, Vc, C19, C0, CA, CB, CC:
-			s = append(s, cislovacky[tok]...)
-			// for _, num := range cislovacky[tok] {
-			// 	if num > p.M {
-			// 		break
-			// 	}
-			// s = append(s, num)
-			// }
+			// s = append(s, cislovacky[tok]...)
+			for _, num := range cislovacky[tok] {
+				if num > p.m {
+					break
+				}
+				s = append(s, num)
+			}
 
 		case Zh:
 			for _, num := range p.Zhoda {
@@ -117,9 +121,9 @@ func (p *Parser) ParseMapInts() (MapInts, error) {
 		if err != nil {
 			return nil, err
 		}
-		// if i < 1 || i > p.n {
-		// 	return nil, fmt.Errorf("STL expected to be in range 1..%d", p.n)
-		// }
+		if i < 1 {
+			return nil, fmt.Errorf("STL expected to be greater than zero")
+		}
 		m[i] = []int{}
 		// next should be colon(:)
 		if tok, lit := p.scanIgnoreWhitespace(); tok != COLON {
@@ -181,4 +185,79 @@ var cislovacky = [...][]int{
 	CA:  {12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 45, 46, 47, 48, 49, 56, 57, 58, 59, 67, 68, 69, 78, 79, 89},
 	CB:  {21, 31, 32, 41, 42, 43, 51, 52, 53, 54, 61, 62, 63, 64, 65, 71, 72, 73, 74, 75, 76, 81, 82, 83, 84, 85, 86, 87, 91, 92, 93, 94, 95, 96, 97, 98},
 	CC:  {11, 22, 33, 44, 55, 66, 77, 88, 99},
+}
+
+func ParseFloat(s string) (f float64, e error) {
+	s = strings.TrimSpace(s)
+	s = strings.Replace(s, ",", ".", 1)
+	f, e = strconv.ParseFloat(s, 64)
+	return
+}
+
+func parseTica(s string) (t komb.Tica, e error) {
+	s = strings.TrimSpace(s)
+	for _, str := range strings.Split(s, " ") {
+		var i int
+		i, e = strconv.Atoi(str)
+		if e != nil {
+			return
+		}
+		t = append(t, byte(i))
+	}
+	return
+}
+
+func ParseNtica(n int, s string) (komb.Tica, error) {
+	ntica, err := parseTica(s)
+	if err != nil {
+		return nil, err
+	}
+	if len(ntica) > n {
+		return nil, fmt.Errorf("Dĺžka ntice musí byť <= %d", n)
+	}
+	var sum int
+	for i, n := range ntica {
+		sum += int(n) * (i + 1)
+	}
+	if sum != n {
+		return nil, fmt.Errorf("Súčet ntice != %d", n)
+	}
+	for len(ntica) < n {
+		ntica = append(ntica, 0)
+	}
+	return ntica, nil
+}
+
+func ParseXtica(n, m int, s string) (komb.Tica, error) {
+	xtica, err := parseTica(s)
+	if err != nil {
+		return nil, err
+	}
+	lenXtica := (m + 9) / 10
+	if len(xtica) > lenXtica {
+		return nil, fmt.Errorf("Dĺžka xtice musí byť <= %d", lenXtica)
+	}
+	var sum int
+	for _, n := range xtica {
+		sum += int(n)
+	}
+	if sum != n {
+		return nil, fmt.Errorf("Súčet xtice != %d", n)
+	}
+	for len(xtica) < lenXtica {
+		xtica = append(xtica, 0)
+	}
+	return xtica, nil
+}
+
+func ParseCifrovacky(s string, n, m int) ([]int, error) {
+	var ints [10]int
+	for i, s := range strings.Split(s, " ") {
+		j, err := strconv.Atoi(s)
+		if err != nil {
+			return nil, err
+		}
+		ints[i] = j
+	}
+	return ints[:], nil
 }

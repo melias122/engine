@@ -18,17 +18,17 @@ type xcisla struct {
 
 // XcislaFromString implementuju filter nad Xcislami.
 // Format: "1:1,2,3; 2:1-3,5; 3:1; 3:2"
-func XcislaFromString(s string) (Filter, error) {
-	p := parser.NewParser(strings.NewReader(s))
-	m, err := p.ParseMapInts()
+func XcislaFromString(s string, n, m int) (Filter, error) {
+	p := parser.NewParser(strings.NewReader(s), n, m)
+	mapInts, err := p.ParseMapInts()
 	if err != nil {
 		return nil, err
 	}
 
 	var x hrx.Presun
-	for j, ints := range m {
+	for j, ints := range mapInts {
 		for _, i := range ints {
-			x = append(x, hrx.Tab{j, i})
+			x = append(x, hrx.Tab{Sk: j, Max: i})
 		}
 	}
 	return Xcisla(x), nil

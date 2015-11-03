@@ -3,66 +3,7 @@ package filter
 import (
 	"strconv"
 	"testing"
-
-	"github.com/melias122/psl/komb"
 )
-
-func TestParseNtica(t *testing.T) {
-	tests := []struct {
-		s string
-		w komb.Tica
-		n int
-	}{
-		{s: "", w: komb.Tica{}, n: 5},
-		{s: "             \t\n   \t\t\n", w: komb.Tica{}, n: 5},
-		{s: "5", w: komb.Tica{5, 0, 0, 0, 0}, n: 5},
-		{s: "5 0 0 0 0", w: komb.Tica{5, 0, 0, 0, 0}, n: 5},
-		{s: "5 0 0 0 0 0", w: komb.Tica{}, n: 5},
-	}
-	for _, test := range tests {
-		n, e := ParseNtica(test.n, test.s)
-		if e != nil {
-			if n.String() != test.w.String() {
-				t.Errorf("Expected: %s, Got: %s", test.w, n)
-			}
-		}
-	}
-}
-
-func TestParseXtica(t *testing.T) {
-	tests := []struct {
-		s    string
-		n, m int
-		w    komb.Tica
-		e    bool
-	}{
-		{n: 5, m: 35, s: "", w: komb.Tica{}, e: true},
-		{n: 5, m: 35, s: "    ", w: komb.Tica{}, e: true},
-		{n: 5, m: 35, s: "    \t\t\t\t\t\t \n\n  \t      ", w: komb.Tica{}, e: true},
-		{n: 5, m: 35, s: "1 2", e: true}, // 1+2 != 5
-		{n: 5, m: 35, s: "1 2 0 0 1", e: true},
-		{n: 5, m: 35, s: "1 2 2 2", e: true},
-		{n: 5, m: 35, s: "5,0,0", e: true},
-		{n: 5, m: 35, s: "5;", e: true},
-
-		{n: 5, m: 35, s: "5", w: komb.Tica{5, 0, 0, 0}},
-		{n: 5, m: 35, s: "5 ", w: komb.Tica{5, 0, 0, 0}},
-		{n: 5, m: 35, s: "3 2", w: komb.Tica{3, 2, 0, 0}},
-		{n: 5, m: 35, s: "1 2 0 2", w: komb.Tica{1, 2, 0, 2}},
-	}
-	for _, test := range tests {
-		x, e := ParseXtica(test.n, test.m, test.s)
-		if e != nil {
-			if x.String() != test.w.String() {
-				t.Errorf("Expected: %s, Got: %s", test.w, x)
-			}
-		} else {
-			if test.e {
-				t.Errorf("Expected: error (%s)", test.s)
-			}
-		}
-	}
-}
 
 func TestGRTLSS(t *testing.T) {
 	tests := []struct {
