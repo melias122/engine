@@ -150,21 +150,21 @@ func IsCC(n int) bool {
 }
 
 // Cislovacky implementuju Filter pre P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
-type CislovackyFilter struct {
+type filterCislovacky struct {
 	n, min, max int
 	fname       string
 	f           CislovackaFunc
 	exact       []bool
 }
 
-func CislovackyRange(n, min, max int, c Cislovacka) *CislovackyFilter {
+func NewFilterCislovackyRange(n, min, max int, c Cislovacka) Filter {
 	if min < 0 {
 		min = 0
 	}
 	if max > n {
 		max = n
 	}
-	return &CislovackyFilter{
+	return &filterCislovacky{
 		n:     n,
 		min:   min,
 		max:   max,
@@ -173,7 +173,7 @@ func CislovackyRange(n, min, max int, c Cislovacka) *CislovackyFilter {
 	}
 }
 
-func CislovackyExact(n int, ints []int, c Cislovacka) *CislovackyFilter {
+func NewFilterCislovackyExact(n int, ints []int, c Cislovacka) Filter {
 	sort.Ints(ints)
 	min := ints[0]
 	max := ints[len(ints)-1]
@@ -189,7 +189,7 @@ func CislovackyExact(n int, ints []int, c Cislovacka) *CislovackyFilter {
 			exact[i] = true
 		}
 	}
-	return &CislovackyFilter{
+	return &filterCislovacky{
 		n:     n,
 		min:   min,
 		max:   max,
@@ -199,11 +199,11 @@ func CislovackyExact(n int, ints []int, c Cislovacka) *CislovackyFilter {
 	}
 }
 
-func (c *CislovackyFilter) String() string {
+func (c *filterCislovacky) String() string {
 	return fmt.Sprintf("%s: %d-%d", c.fname, c.min, c.max)
 }
 
-func (c *CislovackyFilter) Check(k Kombinacia) bool {
+func (c *filterCislovacky) Check(k Kombinacia) bool {
 	var count int
 	for _, n := range k {
 		if c.f(int(n)) {
@@ -219,6 +219,6 @@ func (c *CislovackyFilter) Check(k Kombinacia) bool {
 	return true
 }
 
-func (c *CislovackyFilter) CheckSkupina(skupina Skupina) bool {
+func (c *filterCislovacky) CheckSkupina(skupina Skupina) bool {
 	return true
 }

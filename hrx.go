@@ -7,7 +7,7 @@ import (
 
 type H struct {
 	n, m   int
-	xcisla Presun
+	xcisla Xcisla
 	Cisla  Nums
 	max    int
 }
@@ -16,7 +16,7 @@ func NewHrx(n, m int) *H {
 	return &H{
 		n:      n,
 		m:      m,
-		xcisla: NewPresun(m),
+		xcisla: NewXcisla(m),
 		Cisla:  make(Nums, m),
 
 		max: 19,
@@ -27,7 +27,7 @@ func NewHHrx(n, m int) *H {
 	return &H{
 		n:      n,
 		m:      m,
-		xcisla: NewPresun(m),
+		xcisla: NewXcisla(m),
 		Cisla:  make(Nums, m),
 	}
 }
@@ -93,7 +93,7 @@ func (h *H) ValueKombinacia(k Kombinacia) float64 {
 }
 
 //Vypocita hodnotu Presun p
-func (h *H) valuePresun(p Presun) float64 {
+func (h *H) valuePresun(p Xcisla) float64 {
 	if p.Max() == 0 {
 		return 100
 	}
@@ -112,25 +112,25 @@ func (h *H) valuePresun(p Presun) float64 {
 	return math.Sqrt(math.Sqrt(hrx)) * 100
 }
 
-func (h *H) Presun() Presun {
+func (h *H) Xcisla() Xcisla {
 	return h.xcisla.copy()
 }
 
-type hrxfilter struct {
+type filterHrx struct {
 	n        int
 	min, max float64
 	hrx      *H
 	fname    string
 }
 
-func NewHrxFilter(n int, min, max float64, h *H, fname string) Filter {
+func NewFilterHrx(n int, min, max float64, h *H, fname string) Filter {
 	if min < 0 {
 		min = 0
 	}
 	if max > 100 {
 		max = 99.99999999999
 	}
-	return hrxfilter{
+	return filterHrx{
 		n:     n,
 		min:   nextLSS(min),
 		max:   nextGRT(max),
@@ -139,7 +139,7 @@ func NewHrxFilter(n int, min, max float64, h *H, fname string) Filter {
 	}
 }
 
-func (h hrxfilter) Check(k Kombinacia) bool {
+func (h filterHrx) Check(k Kombinacia) bool {
 	switch h.fname {
 	case "HRX":
 		return true
@@ -152,7 +152,7 @@ func (h hrxfilter) Check(k Kombinacia) bool {
 	return true
 }
 
-func (h hrxfilter) CheckSkupina(skupina Skupina) bool {
+func (h filterHrx) CheckSkupina(skupina Skupina) bool {
 	switch h.fname {
 	case "HRX":
 		if skupina.Hrx > h.max || skupina.Hrx < h.min {
@@ -166,6 +166,6 @@ func (h hrxfilter) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (h hrxfilter) String() string {
+func (h filterHrx) String() string {
 	return fmt.Sprintf("%s: %f-%f", h.fname, h.min, h.max)
 }

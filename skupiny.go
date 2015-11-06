@@ -8,5 +8,5 @@ type Skupina struct {
 	R1     [2]float64
 	R2     float64
 	Sucet  [2]uint16
-	Presun Presun
+	Xcisla Xcisla
 }

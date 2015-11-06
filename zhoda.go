@@ -1,13 +1,9 @@
 package psl
 
 import (
-	"fmt"
 	"sort"
 	"strconv"
 	"strings"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
 )
 
 func Zhoda(k0, k1 Kombinacia) int {
@@ -54,14 +50,20 @@ func (p presun) String() string {
 	return strings.Join(s, ", ")
 }
 
-func ZhodaRange(n, min, max int, kombinacia Kombinacia) Filter {
+type filterZhoda struct {
+	n, min, max int
+	kombinacia  Kombinacia
+	exact       []bool
+}
+
+func NewFilterZhodaRange(n, min, max int, kombinacia Kombinacia) Filter {
 	if min < 0 {
 		min = 0
 	}
 	if max > n {
 		max = n
 	}
-	return zhodaFilter{
+	return filterZhoda{
 		n:          n,
 		min:        min,
 		max:        max,
@@ -69,7 +71,7 @@ func ZhodaRange(n, min, max int, kombinacia Kombinacia) Filter {
 	}
 }
 
-func ZhodaExact(n int, ints []int, kombinacia Kombinacia) Filter {
+func NewFilterZhodaExact(n int, ints []int, kombinacia Kombinacia) Filter {
 	sort.Ints(ints)
 	min := ints[0]
 	max := ints[len(ints)-1]
@@ -85,7 +87,7 @@ func ZhodaExact(n int, ints []int, kombinacia Kombinacia) Filter {
 			exact[i] = true
 		}
 	}
-	return zhodaFilter{
+	return filterZhoda{
 		n:          n,
 		min:        min,
 		max:        max,
@@ -94,27 +96,21 @@ func ZhodaExact(n int, ints []int, kombinacia Kombinacia) Filter {
 	}
 }
 
-type zhodaFilter struct {
-	n, min, max int
-	kombinacia  Kombinacia
-	exact       []bool
-}
-
-func (z zhodaFilter) Check(k Kombinacia) bool {
-	count := Zhoda(z.kombinacia, k)
-	if (len(k) == z.n && count < z.min) || count > z.max {
+func (f filterZhoda) Check(k Kombinacia) bool {
+	count := Zhoda(f.kombinacia, k)
+	if (len(k) == f.n && count < f.min) || count > f.max {
 		return false
 	}
-	if z.exact != nil && len(k) == z.n {
-		return z.exact[count]
+	if f.exact != nil && len(k) == f.n {
+		return f.exact[count]
 	}
 	return true
 }
 
-func (z zhodaFilter) CheckSkupina(skupina Skupina) bool {
+func (f filterZhoda) CheckSkupina(s Skupina) bool {
 	return true
 }
 
-func (z zhodaFilter) String() string {
-	return fmt.Sprintf("Zh: %d-%d", z.min, z.max)
+func (f filterZhoda) String() string {
+	return "Zh: " + strconv.Itoa(f.min) + "-" + strconv.Itoa(f.max)
 }

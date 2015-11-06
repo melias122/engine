@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"strconv"
 	"strings"
-
-	// "github.com/melias122/psl/num"
 )
 
 type Kombinacia []byte

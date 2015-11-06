@@ -5,9 +5,6 @@ import (
 	"math"
 	"sort"
 	"strconv"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
 )
 
 // vystup filter
@@ -15,7 +12,7 @@ type V2 struct {
 	n, m      int
 	Hrx, HHrx *H
 	r         Riadok
-	p         Presun
+	p         Xcisla
 
 	hrx                  float64
 	zhoda, sucet         map[int]int
@@ -31,7 +28,7 @@ func NewV2(a *Archiv, sk Skupina) V2 {
 		Hrx:  a.Hrx,
 		HHrx: a.HHrx,
 		r:    a.Riadok,
-		p:    sk.Presun,
+		p:    sk.Xcisla,
 
 		hrx:   sk.Hrx,
 		zhoda: make(map[int]int),

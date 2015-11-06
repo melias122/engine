@@ -1,9 +1,5 @@
 package psl
 
-// "github.com/melias122/psl/hrx"
-// "github.com/melias122/psl/komb"
-// "github.com/melias122/psl/num"
-
 type Delta int
 
 const (
@@ -11,15 +7,15 @@ const (
 	NEGATIVE
 )
 
-type rMinusSTL struct {
+type filterRMinusSTL struct {
 	n     int
 	nums  Nums
 	delta Delta
 	fname string
 }
 
-func R1MinusSTL1(d Delta, nums Nums, n int) Filter {
-	return rMinusSTL{
+func NewFilterR1MinusSTL1(d Delta, nums Nums, n int) Filter {
+	return filterRMinusSTL{
 		n:     n,
 		nums:  nums,
 		delta: d,
@@ -28,7 +24,7 @@ func R1MinusSTL1(d Delta, nums Nums, n int) Filter {
 }
 
 func R2MinusSTL2(d Delta, nums Nums, n int) Filter {
-	return rMinusSTL{
+	return filterRMinusSTL{
 		n:     n,
 		nums:  nums,
 		delta: d,
@@ -36,7 +32,7 @@ func R2MinusSTL2(d Delta, nums Nums, n int) Filter {
 	}
 }
 
-func (r rMinusSTL) Check(k Kombinacia) bool {
+func (r filterRMinusSTL) Check(k Kombinacia) bool {
 	if len(k) == r.n {
 		sum1, sum2 := k.SucetRSNext(r.nums)
 		switch r.delta {
@@ -49,11 +45,11 @@ func (r rMinusSTL) Check(k Kombinacia) bool {
 	return true
 }
 
-func (r rMinusSTL) CheckSkupina(s Skupina) bool {
+func (r filterRMinusSTL) CheckSkupina(s Skupina) bool {
 	return true
 }
 
-func (r rMinusSTL) String() string {
+func (r filterRMinusSTL) String() string {
 	var s string
 	switch r.delta {
 	case POSSITIVE:

@@ -2,24 +2,20 @@ package psl
 
 import (
 	"fmt"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/num"
 )
 
-type stl struct {
+type filterSTL struct {
 	n        int
 	min, max float64
 	cisla    Nums
 	fname    string
 }
 
-func NewStl(n int, min, max float64, cisla Nums, fname string) Filter {
+func NewFilterSTL(n int, min, max float64, cisla Nums, fname string) Filter {
 	if min < 0 {
 		min = 0
 	}
-	return stl{
+	return filterSTL{
 		n:     n,
 		min:   nextLSS(min),
 		max:   nextGRT(max),
@@ -28,7 +24,7 @@ func NewStl(n int, min, max float64, cisla Nums, fname string) Filter {
 	}
 }
 
-func (s stl) Check(k Kombinacia) bool {
+func (s filterSTL) Check(k Kombinacia) bool {
 	var sum float64
 	for i, cislo := range k {
 		sum += s.cisla[cislo-1].SNext(i + 1)
@@ -39,10 +35,10 @@ func (s stl) Check(k Kombinacia) bool {
 	return true
 }
 
-func (s stl) CheckSkupina(skupina Skupina) bool {
+func (s filterSTL) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (s stl) String() string {
+func (s filterSTL) String() string {
 	return fmt.Sprintf("%s: %f-%f", s.fname, s.min, s.max)
 }

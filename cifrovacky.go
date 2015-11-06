@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
 )
 
 type Cifrovacky [10]byte
@@ -49,12 +46,12 @@ func (k Kombinacia) Cifrovacky() Cifrovacky {
 	return MakeCifrovacky(k)
 }
 
-type cifrovackyFilter struct {
+type filterCifrovacky struct {
 	n int
 	c Cifrovacky
 }
 
-func NewCifrovacky(n, m int, c Cifrovacky) (Filter, error) {
+func NewFilterCifrovacky(n, m int, c Cifrovacky) (Filter, error) {
 	var sum int
 	for i := range c {
 		sum += int(c[i])
@@ -68,10 +65,10 @@ func NewCifrovacky(n, m int, c Cifrovacky) (Filter, error) {
 			return nil, fmt.Errorf("cifra(%d): %d je viac ako maximum %d", (i+1)%10, c[i], tmax[i])
 		}
 	}
-	return cifrovackyFilter{n: n, c: c}, nil
+	return filterCifrovacky{n: n, c: c}, nil
 }
 
-func (c cifrovackyFilter) Check(k Kombinacia) bool {
+func (c filterCifrovacky) Check(k Kombinacia) bool {
 	cifrovacky := k.Cifrovacky()
 	cmp := bytes.Compare(cifrovacky[:], c.c[:])
 	if cmp > 0 || (len(k) == c.n && cmp != 0) {
@@ -80,10 +77,10 @@ func (c cifrovackyFilter) Check(k Kombinacia) bool {
 	return true
 }
 
-func (c cifrovackyFilter) CheckSkupina(s Skupina) bool {
+func (c filterCifrovacky) CheckSkupina(s Skupina) bool {
 	return true
 }
 
-func (c cifrovackyFilter) String() string {
+func (c filterCifrovacky) String() string {
 	return fmt.Sprintf("Cifrovacky: %s", c.c[:])
 }

@@ -2,36 +2,41 @@ package psl
 
 import (
 	"bytes"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
 )
 
-type xticaFilter struct {
+func Xtica(m int, k Kombinacia) Tica {
+	xtica := make(Tica, (m+9)/10)
+	for _, n := range k {
+		xtica[(n-1)/10]++
+	}
+	return xtica
+}
+
+type filterXtica struct {
 	n, m  int
 	xtica Tica
 }
 
-func NewXtica(n, m int, tica Tica) Filter {
-	return xticaFilter{
+func NewFilterXtica(n, m int, tica Tica) Filter {
+	return filterXtica{
 		n:     n,
 		m:     m,
 		xtica: tica,
 	}
 }
 
-func (x xticaFilter) String() string {
-	return "Xtica: " + x.xtica.String()
+func (f filterXtica) String() string {
+	return "Xtica: " + f.xtica.String()
 }
 
-func (x xticaFilter) Check(k Kombinacia) bool {
-	cmp := bytes.Compare(Xtica(x.m, k), x.xtica)
-	if (len(k) == x.n && cmp != 0) || cmp > 0 {
+func (f filterXtica) Check(k Kombinacia) bool {
+	cmp := bytes.Compare(Xtica(f.m, k), f.xtica)
+	if (len(k) == f.n && cmp != 0) || cmp > 0 {
 		return false
 	}
 	return true
 }
 
-func (x xticaFilter) CheckSkupina(skupina Skupina) bool {
+func (f filterXtica) CheckSkupina(skupina Skupina) bool {
 	return true
 }

@@ -4,8 +4,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-
-	// "github.com/melias122/psl/komb"
 )
 
 func TestParser(t *testing.T) {
@@ -65,7 +63,8 @@ func TestParseInts(t *testing.T) {
 	for _, test := range tests {
 		r := strings.NewReader(test.s)
 		p := NewParser(r, 5, 35)
-		d, err := p.ParseInts(test.zhoda)
+		d, err := p.ParseInts()
+		p.Zhoda = test.zhoda
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -95,7 +94,7 @@ func TestParseMapInts(t *testing.T) {
 	for _, test := range tests {
 		r := strings.NewReader(test.s)
 		p := NewParser(r, 5, 99)
-		res, err := p.ParseMapInts(nil)
+		res, err := p.ParseMapInts()
 		if !reflect.DeepEqual(test.r, res) {
 			t.Fatal(err, test, res)
 		}
@@ -105,14 +104,14 @@ func TestParseMapInts(t *testing.T) {
 func TestParseNtica(t *testing.T) {
 	tests := []struct {
 		s string
-		w komb.Tica
+		w Tica
 		n int
 	}{
-		{s: "", w: komb.Tica{}, n: 5},
-		{s: "             \t\n   \t\t\n", w: komb.Tica{}, n: 5},
-		{s: "5", w: komb.Tica{5, 0, 0, 0, 0}, n: 5},
-		{s: "5 0 0 0 0", w: komb.Tica{5, 0, 0, 0, 0}, n: 5},
-		{s: "5 0 0 0 0 0", w: komb.Tica{}, n: 5},
+		{s: "", w: Tica{}, n: 5},
+		{s: "             \t\n   \t\t\n", w: Tica{}, n: 5},
+		{s: "5", w: Tica{5, 0, 0, 0, 0}, n: 5},
+		{s: "5 0 0 0 0", w: Tica{5, 0, 0, 0, 0}, n: 5},
+		{s: "5 0 0 0 0 0", w: Tica{}, n: 5},
 	}
 	for _, test := range tests {
 		n, e := ParseNtica(test.n, test.s)
@@ -128,22 +127,22 @@ func TestParseXtica(t *testing.T) {
 	tests := []struct {
 		s    string
 		n, m int
-		w    komb.Tica
+		w    Tica
 		e    bool
 	}{
-		{n: 5, m: 35, s: "", w: komb.Tica{}, e: true},
-		{n: 5, m: 35, s: "    ", w: komb.Tica{}, e: true},
-		{n: 5, m: 35, s: "    \t\t\t\t\t\t \n\n  \t      ", w: komb.Tica{}, e: true},
+		{n: 5, m: 35, s: "", w: Tica{}, e: true},
+		{n: 5, m: 35, s: "    ", w: Tica{}, e: true},
+		{n: 5, m: 35, s: "    \t\t\t\t\t\t \n\n  \t      ", w: Tica{}, e: true},
 		{n: 5, m: 35, s: "1 2", e: true}, // 1+2 != 5
 		{n: 5, m: 35, s: "1 2 0 0 1", e: true},
 		{n: 5, m: 35, s: "1 2 2 2", e: true},
 		{n: 5, m: 35, s: "5,0,0", e: true},
 		{n: 5, m: 35, s: "5;", e: true},
 
-		{n: 5, m: 35, s: "5", w: komb.Tica{5, 0, 0, 0}},
-		{n: 5, m: 35, s: "5 ", w: komb.Tica{5, 0, 0, 0}},
-		{n: 5, m: 35, s: "3 2", w: komb.Tica{3, 2, 0, 0}},
-		{n: 5, m: 35, s: "1 2 0 2", w: komb.Tica{1, 2, 0, 2}},
+		{n: 5, m: 35, s: "5", w: Tica{5, 0, 0, 0}},
+		{n: 5, m: 35, s: "5 ", w: Tica{5, 0, 0, 0}},
+		{n: 5, m: 35, s: "3 2", w: Tica{3, 2, 0, 0}},
+		{n: 5, m: 35, s: "1 2 0 2", w: Tica{1, 2, 0, 2}},
 	}
 	for _, test := range tests {
 		x, e := ParseXtica(test.n, test.m, test.s)

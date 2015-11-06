@@ -4,9 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
-
-	// "github.com/melias122/psl/num"
-	// "github.com/melias122/psl/rw"
 )
 
 func (a *Archiv) PocetnostR() error {

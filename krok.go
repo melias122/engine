@@ -3,9 +3,6 @@ package psl
 import (
 	"fmt"
 	"strconv"
-
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/rw"
 )
 
 func aritmetickyPriemer(s []float64) float64 {

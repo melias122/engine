@@ -17,7 +17,7 @@ func BenchmarkValue(b *testing.B) {
 	b.ReportAllocs()
 }
 
-func TestValue(t *testing.T) {
+func TestValueR_STL(t *testing.T) {
 	tests := []struct {
 		x, y, n, m, pocet int
 		w                 string

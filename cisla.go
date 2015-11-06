@@ -1,8 +1,5 @@
 package psl
 
-// "github.com/melias122/psl/hrx"
-// "github.com/melias122/psl/num"
-
 type cislo struct {
 	cislo byte
 	pocet *int
@@ -14,10 +11,10 @@ func newCislo(c int, pocet *int) cislo {
 
 type cisla []cislo
 
-func newCisla(nums Nums, presun Presun) cisla {
+func newCisla(nums Nums, xcisla Xcisla) cisla {
 	var cisla cisla
 	skupinaPocet := make(map[int]*int)
-	for _, tab := range presun {
+	for _, tab := range xcisla {
 		pocet := tab.Max
 		skupinaPocet[tab.Sk] = &pocet
 	}

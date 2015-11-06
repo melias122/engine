@@ -3,52 +3,48 @@ package psl
 import (
 	"strconv"
 	"strings"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/parser"
 )
 
-type zakazane struct {
+type filterZakazane struct {
 	cisla []bool
 }
 
-func ZakazaneFromString(s string, zhoda []byte, n, m int) (Filter, error) {
+func NewFilterZakazaneFromString(s string, zhoda []byte, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
 	p.Zhoda = zhoda
 	ints, err := p.ParseInts()
 	if err != nil {
 		return nil, err
 	}
-	return Zakazane(ints, n, m), nil
+	return NewFilterZakazane(ints, n, m), nil
 }
 
-func Zakazane(ints []int, n, m int) Filter {
+func NewFilterZakazane(ints []int, n, m int) Filter {
 	z := make([]bool, m)
 	for _, i := range ints {
 		z[i-1] = true
 	}
-	return zakazane{
+	return filterZakazane{
 		cisla: z,
 	}
 }
 
-func (z zakazane) Check(k Kombinacia) bool {
+func (f filterZakazane) Check(k Kombinacia) bool {
 	for _, c := range k {
-		if z.cisla[c-1] {
+		if f.cisla[c-1] {
 			return false
 		}
 	}
 	return true
 }
 
-func (z zakazane) CheckSkupina(skupina Skupina) bool {
+func (f filterZakazane) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (z zakazane) String() string {
+func (f filterZakazane) String() string {
 	var s []string
-	for c, ok := range z.cisla {
+	for c, ok := range f.cisla {
 		if ok {
 			s = append(s, strconv.Itoa(c+1))
 		}
@@ -56,11 +52,11 @@ func (z zakazane) String() string {
 	return "Zakázané:" + strings.Join(s, ", ")
 }
 
-type zakazaneStl struct {
+type filterZakazaneSTL struct {
 	zakazane [][]bool
 }
 
-func ZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
+func NewFilterZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
 	p.Zhoda = zhoda
 	mi, err := p.ParseMapInts()
@@ -71,11 +67,11 @@ func ZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
 	for k, v := range mi {
 		mapInts[k] = v
 	}
-	return ZakazaneSTL(mapInts, n, m), nil
+	return NewFilterZakazaneSTL(mapInts, n, m), nil
 }
 
-func ZakazaneSTL(mapInts map[int][]int, n, m int) Filter {
-	z := zakazaneStl{
+func NewFilterZakazaneSTL(mapInts map[int][]int, n, m int) Filter {
+	z := filterZakazaneSTL{
 		zakazane: make([][]bool, n),
 	}
 	for i := range mapInts {
@@ -89,7 +85,7 @@ func ZakazaneSTL(mapInts map[int][]int, n, m int) Filter {
 	return z
 }
 
-func (z zakazaneStl) Check(k Kombinacia) bool {
+func (z filterZakazaneSTL) Check(k Kombinacia) bool {
 	for i, j := range k {
 		if z.zakazane[i] == nil {
 			continue
@@ -101,11 +97,11 @@ func (z zakazaneStl) Check(k Kombinacia) bool {
 	return true
 }
 
-func (z zakazaneStl) CheckSkupina(skupina Skupina) bool {
+func (z filterZakazaneSTL) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (z zakazaneStl) String() string {
+func (z filterZakazaneSTL) String() string {
 	var s []string
 	for i := range z.zakazane {
 		if z.zakazane[i] == nil {

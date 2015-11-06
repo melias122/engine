@@ -5,19 +5,16 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	// "github.com/melias122/psl/num"
-	// "github.com/melias122/psl/rw"
 )
 
 type HrxTab struct {
 	n, m int
-	r0   Presun
-	r1   Presun
+	r0   Xcisla
+	r1   Xcisla
 	Hrx  *H
 	HHrx *H
 
-	hhrxMin, hhrxMax Presun
+	hhrxMin, hhrxMax Xcisla
 
 	skupiny Skupiny
 
@@ -56,16 +53,16 @@ func NewHrxTab(Hrx, HHrx *H, n, m int) *HrxTab {
 	return &HrxTab{
 		n:          n,
 		m:          m,
-		r0:         Hrx.Presun(),
-		r1:         make(Presun, 0, n),
+		r0:         Hrx.Xcisla(),
+		r1:         make(Xcisla, 0, n),
 		Hrx:        Hrx,
 		HHrx:       HHrx,
 		riadokHrx:  Hrx.Value(),
 		riadokHHrx: HHrx.Value(),
 		pocetSucet: *big.NewInt(1),
 
-		hhrxMin: HHrx.Presun(),
-		hhrxMax: HHrx.Presun(),
+		hhrxMin: HHrx.Xcisla(),
+		hhrxMax: HHrx.Xcisla(),
 
 		// sMM:   make([][4]float64, n),
 		// sNums: make(num.Nums, 0, m),
@@ -165,7 +162,7 @@ func (h *HrxTab) record() []string {
 		R1:     [2]float64{h.r1Min, h.r1Max},
 		R2:     h.rod,
 		Sucet:  [2]uint16{uint16(h.min), uint16(h.max)},
-		Presun: h.r1.copy(),
+		Xcisla: h.r1.copy(),
 	})
 
 	r := make([]string, 0, len(h.header))
@@ -258,7 +255,7 @@ func (h *HrxTab) delete() {
 	h.r1Max -= r1mm[1]
 }
 
-func (h *HrxTab) make(r0 Presun, n int) error {
+func (h *HrxTab) make(r0 Xcisla, n int) error {
 	if len(r0) == 0 {
 		return nil
 	}

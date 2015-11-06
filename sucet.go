@@ -2,28 +2,25 @@ package psl
 
 import (
 	"fmt"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
 )
 
-type sucetFilter struct {
+type filterSucet struct {
 	n        int
 	min, max int
 }
 
-func NewSucet(n int, min, max int) Filter {
+func NewFilterSucet(n int, min, max int) Filter {
 	if min < 0 {
 		min = 0
 	}
-	return sucetFilter{
+	return filterSucet{
 		n:   n,
 		min: min,
 		max: max,
 	}
 }
 
-func (s sucetFilter) Check(k Kombinacia) bool {
+func (s filterSucet) Check(k Kombinacia) bool {
 	var sum int
 	for _, cislo := range k {
 		sum += int(cislo)
@@ -34,7 +31,7 @@ func (s sucetFilter) Check(k Kombinacia) bool {
 	return true
 }
 
-func (s sucetFilter) CheckSkupina(skupina Skupina) bool {
+func (s filterSucet) CheckSkupina(skupina Skupina) bool {
 	if int(skupina.Sucet[0]) > s.max || int(skupina.Sucet[1]) < s.min {
 		return false
 	} else {
@@ -42,6 +39,6 @@ func (s sucetFilter) CheckSkupina(skupina Skupina) bool {
 	}
 }
 
-func (s sucetFilter) String() string {
+func (s filterSucet) String() string {
 	return fmt.Sprintf("Sucet: %d-%d", s.min, s.max)
 }

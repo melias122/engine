@@ -81,13 +81,3 @@ func TestDt(t *testing.T) {
 		}
 	}
 }
-
-// func TestParseBytes(t *testing.T) {
-// 	tests := []struct {
-// 		s string
-// 		w string
-// 	}{
-// 		{s: "", w: ""},
-// 		{s: "       \t \t \t   \n", w: ""},
-// 	}
-// }

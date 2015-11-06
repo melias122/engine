@@ -5,10 +5,6 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
-
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/num"
-	// "github.com/melias122/psl/rw"
 )
 
 func (a *Archiv) statistikaZhoda() error {

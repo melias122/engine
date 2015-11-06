@@ -10,13 +10,6 @@ import (
 	"strconv"
 	"sync"
 	"time"
-
-	// "github.com/melias122/psl/archiv"
-	// "github.com/melias122/psl/filter"
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/num"
-	// "github.com/melias122/psl/rw"
 )
 
 func protokol(wdir, subdir string, filters Filters) {
@@ -34,7 +27,7 @@ func GenerateKombinacie(n int, a *Archiv, filters Filters, msg chan string) {
 	var (
 		wg, wg2        sync.WaitGroup
 		chanKombinacie = make(chan Kombinacia, 16)
-		chanPresuny    = make(chan Presun, 2)
+		chanPresuny    = make(chan Xcisla, 2)
 		chanRiadok     = make(chan []string, 8)
 		vystup         = NewV1(a)
 	)
@@ -51,7 +44,7 @@ func GenerateKombinacie(n int, a *Archiv, filters Filters, msg chan string) {
 		defer close(chanPresuny)
 		for _, s := range a.Skupiny {
 			if filters.CheckSkupina(s) {
-				chanPresuny <- s.Presun
+				chanPresuny <- s.Xcisla
 			}
 		}
 	}()
@@ -127,7 +120,7 @@ func GenerateFilter(n int, a *Archiv, filters Filters, msg chan string) {
 				)
 				go func(skupina Skupina) {
 					defer close(chanKombinacie)
-					generator.Generate(skupina.Presun)
+					generator.Generate(skupina.Xcisla)
 				}(skupina)
 				for k := range chanKombinacie {
 					vystup.Add(k)
@@ -166,7 +159,7 @@ func NewGenerator(n int, HrxNums Nums, ch chan Kombinacia, f ...Filter) *Generat
 	}
 }
 
-func (g *Generator) Generate(p Presun) {
+func (g *Generator) Generate(p Xcisla) {
 	g.generate(newCisla(g.nums, p), make(Kombinacia, 0, g.n))
 }
 

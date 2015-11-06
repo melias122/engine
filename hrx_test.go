@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func BenchmarkValue(b *testing.B) {
+func BenchmarkHrxValue(b *testing.B) {
 	n, m := 30, 90
 	hrx := NewHHrx(n, m)
 	for i := 0; i < 1000; i++ {
@@ -21,7 +21,7 @@ func BenchmarkValue(b *testing.B) {
 
 func BenchmarkValueKombinacia(b *testing.B) {
 	n, m := 30, 90
-	k := make(komb.Kombinacia, n)
+	k := make(Kombinacia, n)
 	for i := 1; i <= n; i++ {
 		k[i-1] = byte(i)
 	}
@@ -91,7 +91,7 @@ func TestIs101(t *testing.T) {
 	}
 }
 
-func TestValue(t *testing.T) {
+func TestHrxValue(t *testing.T) {
 	const n, m = 5, 35
 	hrx := NewHHrx(n, m)
 
@@ -119,7 +119,7 @@ func TestValue(t *testing.T) {
 	}
 }
 
-func TestValueKombinacia(t *testing.T) {
+func TestHrxValueKombinacia(t *testing.T) {
 	const n, m = 5, 35
 	hrx := NewHHrx(n, m)
 
@@ -149,30 +149,5 @@ func TestValueKombinacia(t *testing.T) {
 		if strconv.FormatFloat(vk, 'f', 12, 64) != test.value {
 			t.Errorf("Excepted: (%s), Got: (%.12f)", test.value, vk)
 		}
-	}
-}
-
-func TestHrx(t *testing.T) {
-	hrx := NewHrx(3, 6)
-	for n, i := range [][]int{
-		[]int{1, 3, 5},
-		[]int{2, 4, 6},
-		[]int{1, 2, 3},
-		[]int{1, 2, 4},
-		[]int{1, 3, 6},
-		[]int{1, 4, 6},
-		[]int{2, 4, 6},
-		[]int{3, 4, 6},
-		[]int{3, 4, 6},
-		[]int{3, 4, 6},
-		[]int{3, 4, 6},
-		[]int{3, 4, 6},
-		[]int{3, 4, 6},
-		[]int{3, 4, 6},
-	} {
-		for y, x := range i {
-			hrx.Add(x, y)
-		}
-		t.Log(n, ":", hrx.Value())
 	}
 }

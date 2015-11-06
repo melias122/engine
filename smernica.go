@@ -2,9 +2,6 @@ package psl
 
 import (
 	"fmt"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
 )
 
 func Smernica(n, m int, k Kombinacia) float64 {
@@ -26,19 +23,19 @@ func Smernica(n, m int, k Kombinacia) float64 {
 	return sm / nSm
 }
 
-type smernicaFilter struct {
+type filterSmernica struct {
 	n, m     int
 	min, max float64
 }
 
-func NewSmernica(n, m int, min, max float64) Filter {
+func NewFilterSmernica(n, m int, min, max float64) Filter {
 	if min < 0 {
 		min = 0
 	}
 	if max > 2 {
 		max = 2
 	}
-	return smernicaFilter{
+	return filterSmernica{
 		n:   n,
 		m:   m,
 		min: nextLSS(min),
@@ -46,7 +43,7 @@ func NewSmernica(n, m int, min, max float64) Filter {
 	}
 }
 
-func (s smernicaFilter) Check(k Kombinacia) bool {
+func (s filterSmernica) Check(k Kombinacia) bool {
 	if len(k) == s.n {
 		smernica := Smernica(s.n, s.m, k)
 		if smernica < s.min || smernica > s.max {
@@ -56,10 +53,10 @@ func (s smernicaFilter) Check(k Kombinacia) bool {
 	return true
 }
 
-func (s smernicaFilter) CheckSkupina(skupina Skupina) bool {
+func (s filterSmernica) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (s smernicaFilter) String() string {
+func (s filterSmernica) String() string {
 	return fmt.Sprintf("Sm: %f-%f", s.min, s.max)
 }

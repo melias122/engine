@@ -6,8 +6,6 @@ import (
 	"strconv"
 	"strings"
 
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/rw"
 	"github.com/tealeg/xlsx"
 )
 

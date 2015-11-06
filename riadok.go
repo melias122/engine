@@ -1,8 +1,5 @@
 package psl
 
-// "github.com/melias122/psl/komb"
-// "github.com/melias122/psl/num"
-
 type Uc struct {
 	Cislo  byte
 	Riadok int

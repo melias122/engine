@@ -2,25 +2,21 @@ package psl
 
 import (
 	"fmt"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/num"
 )
 
-type r struct {
+type filterR struct {
 	n        int
 	min, max float64
 	cisla    Nums
 	fname    string
 }
 
-func NewR(n int, min, max float64, cisla Nums, fname string) Filter {
+func NewFilterR(n int, min, max float64, cisla Nums, fname string) Filter {
 	if min < 0 {
 		min = 0
 	}
 	//TODO: max... asi 1
-	return r{
+	return filterR{
 		n:     n,
 		min:   nextLSS(min),
 		max:   nextGRT(max),
@@ -29,7 +25,7 @@ func NewR(n int, min, max float64, cisla Nums, fname string) Filter {
 	}
 }
 
-func (r r) Check(k Kombinacia) bool {
+func (r filterR) Check(k Kombinacia) bool {
 	var sum float64
 	for _, cislo := range k {
 		sum += r.cisla[cislo-1].RNext()
@@ -40,7 +36,7 @@ func (r r) Check(k Kombinacia) bool {
 	return true
 }
 
-func (r r) CheckSkupina(skupina Skupina) bool {
+func (r filterR) CheckSkupina(skupina Skupina) bool {
 	switch r.fname {
 	case "ƩR 1-DO":
 		if skupina.R1[0] > r.max || skupina.R1[1] < r.min {
@@ -54,6 +50,6 @@ func (r r) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (r r) String() string {
+func (r filterR) String() string {
 	return fmt.Sprintf("%s: %f-%f", r.fname, r.min, r.max)
 }

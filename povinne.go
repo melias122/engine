@@ -3,29 +3,25 @@ package psl
 import (
 	"strconv"
 	"strings"
-
-	// "github.com/melias122/psl/hrx"
-	// "github.com/melias122/psl/komb"
-	// "github.com/melias122/psl/parser"
 )
 
-type povinne struct {
+type filterPovinne struct {
 	povinne  []bool
 	n, count int
 }
 
-func PovinneFromString(s string, last Kombinacia, n, m int) (Filter, error) {
+func NewFilterPovinneFromString(s string, last Kombinacia, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
 	p.Zhoda = last
 	ints, err := p.ParseInts()
 	if err != nil {
 		return nil, err
 	}
-	return Povinne(ints, n, m), nil
+	return NewFilterPovinne(ints, n, m), nil
 }
 
-func Povinne(ints []int, n, m int) Filter {
-	p := povinne{
+func NewFilterPovinne(ints []int, n, m int) Filter {
+	p := filterPovinne{
 		povinne: make([]bool, m),
 		n:       n,
 	}
@@ -41,7 +37,7 @@ func Povinne(ints []int, n, m int) Filter {
 	return p
 }
 
-func (p povinne) Check(k Kombinacia) bool {
+func (p filterPovinne) Check(k Kombinacia) bool {
 	// if p.n-len(k) > p.count {
 	// if len(k) < p.count {
 	// 	return true
@@ -59,11 +55,11 @@ func (p povinne) Check(k Kombinacia) bool {
 	return true
 }
 
-func (p povinne) CheckSkupina(s Skupina) bool {
+func (p filterPovinne) CheckSkupina(s Skupina) bool {
 	return true
 }
 
-func (p povinne) String() string {
+func (p filterPovinne) String() string {
 	var s []string
 	for i, ok := range p.povinne {
 		if ok {
@@ -73,12 +69,12 @@ func (p povinne) String() string {
 	return "Povinne: " + strings.Join(s, ", ")
 }
 
-type povinneStl struct {
+type filterPovinneSTL struct {
 	povinne [][]bool
 	count   int
 }
 
-func PovinneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
+func NewFilterPovinneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
 	parser := NewParser(strings.NewReader(s), n, m)
 	parser.Zhoda = zhoda
 	ma, err := parser.ParseMapInts()
@@ -90,11 +86,11 @@ func PovinneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
 	for k, v := range ma {
 		mapInts[k] = v
 	}
-	return PovinneSTL(mapInts, n, m), nil
+	return NewFilterPovinneSTL(mapInts, n, m), nil
 }
 
-func PovinneSTL(mapInts map[int][]int, n, m int) Filter {
-	p := povinneStl{
+func NewFilterPovinneSTL(mapInts map[int][]int, n, m int) Filter {
+	p := filterPovinneSTL{
 		povinne: make([][]bool, n),
 	}
 
@@ -117,7 +113,7 @@ func PovinneSTL(mapInts map[int][]int, n, m int) Filter {
 	return p
 }
 
-func (p povinneStl) Check(k Kombinacia) bool {
+func (p filterPovinneSTL) Check(k Kombinacia) bool {
 	for i, j := range k {
 		if p.povinne[i] == nil {
 			continue
@@ -129,11 +125,11 @@ func (p povinneStl) Check(k Kombinacia) bool {
 	return true
 }
 
-func (p povinneStl) CheckSkupina(s Skupina) bool {
+func (p filterPovinneSTL) CheckSkupina(s Skupina) bool {
 	return true
 }
 
-func (p povinneStl) String() string {
+func (p filterPovinneSTL) String() string {
 	var s []string
 	for i := range p.povinne {
 		if p.povinne[i] == nil {
