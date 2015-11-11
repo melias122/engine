@@ -18,6 +18,9 @@ var archivHeader = []string{
 	"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5", "Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
 }
 
+// type Interface interface{}
+
+// Archiv aaa
 type Archiv struct {
 	n, m int
 	Riadok
@@ -143,6 +146,23 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 	return nil
 }
 
+type errFuncs struct {
+	funcs []func() error
+	err   error
+}
+
+func (e errFuncs) run() error {
+	for _, f := range e.funcs {
+		if e.err != nil {
+			break
+		}
+		if err := f(); err != nil {
+			e.err = err
+		}
+	}
+	return e.err
+}
+
 func Make(path, workingDir string, n, m int) (*Archiv, error) {
 
 	if path == "" {
@@ -166,38 +186,20 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 		return nil, err
 	}
 
-	if err := archiv.PocetnostR(); err != nil {
-		return nil, err
+	e := errFuncs{
+		funcs: []func() error{
+			archiv.PocetnostR,
+			archiv.PocetnostS,
+			archiv.mapaXtice,
+			archiv.mapaZhoda,
+			archiv.statistikaZhoda,
+			archiv.mapaNtice,
+			archiv.statistikaNtice,
+			archiv.statistikaCifrovacky,
+			archiv.statistikaCislovacky,
+		},
 	}
-
-	if err := archiv.PocetnostS(); err != nil {
-		return nil, err
-	}
-
-	if err := archiv.mapaXtice(); err != nil {
-		return nil, err
-	}
-
-	if err := archiv.mapaZhoda(); err != nil {
-		return nil, err
-	}
-
-	if err := archiv.statistikaZhoda(); err != nil {
-		return nil, err
-	}
-
-	if err := archiv.mapaNtice(); err != nil {
-		return nil, err
-	}
-	if err := archiv.statistikaNtice(); err != nil {
-		return nil, err
-	}
-
-	if err := archiv.statistikaCifrovacky(); err != nil {
-		return nil, err
-	}
-
-	if err := archiv.statistikaCislovacky(); err != nil {
+	if err := e.run(); err != nil {
 		return nil, err
 	}
 
