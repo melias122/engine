@@ -116,35 +116,40 @@ func (h *H) Xcisla() Xcisla {
 	return h.xcisla.copy()
 }
 
-type filterHrx struct {
+type filterH struct {
 	n        int
 	min, max float64
-	hrx      *H
-	fname    string
+	h        *H
+	typ      int // 0 == Hrx, 1 == HHrx
 }
 
-func NewFilterHrx(n int, min, max float64, h *H, fname string) Filter {
+func newFilterH(n int, min, max float64, h *H, typ int) Filter {
 	if min < 0 {
 		min = 0
 	}
 	if max > 100 {
 		max = 99.99999999999
 	}
-	return filterHrx{
-		n:     n,
-		min:   nextLSS(min),
-		max:   nextGRT(max),
-		hrx:   h,
-		fname: fname,
+	return filterH{
+		n:   n,
+		min: nextLSS(min),
+		max: nextGRT(max),
+		h:   h,
+		typ: typ,
 	}
 }
 
-func (h filterHrx) Check(k Kombinacia) bool {
-	switch h.fname {
-	case "HRX":
-		return true
-	case "HHRX":
-		value := h.hrx.ValueKombinacia(k)
+func NewFilterHrx(n int, min, max float64, Hrx *H) Filter {
+	return newFilterH(n, min, max, Hrx, 0)
+}
+
+func NewFilterHHrx(n int, min, max float64, HHrx *H) Filter {
+	return newFilterH(n, min, max, HHrx, 1)
+}
+
+func (h filterH) Check(k Kombinacia) bool {
+	if h.typ == 1 {
+		value := h.h.ValueKombinacia(k)
 		if value < h.min || (len(k) == h.n && value > h.max) {
 			return false
 		}
@@ -152,13 +157,12 @@ func (h filterHrx) Check(k Kombinacia) bool {
 	return true
 }
 
-func (h filterHrx) CheckSkupina(skupina Skupina) bool {
-	switch h.fname {
-	case "HRX":
+func (h filterH) CheckSkupina(skupina Skupina) bool {
+	if h.typ == 0 {
 		if skupina.Hrx > h.max || skupina.Hrx < h.min {
 			return false
 		}
-	case "HHRX":
+	} else if h.typ == 1 {
 		if skupina.HHrx[0] > h.max || skupina.HHrx[1] < h.min {
 			return false
 		}
@@ -166,6 +170,12 @@ func (h filterHrx) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (h filterHrx) String() string {
-	return fmt.Sprintf("%s: %f-%f", h.fname, h.min, h.max)
+func (h filterH) String() string {
+	var s string
+	if h.typ == 0 {
+		s = "Hrx"
+	} else if h.typ == 1 {
+		s = "HHrx"
+	}
+	return fmt.Sprintf("%s: %f-%f", s, h.min, h.max)
 }
