@@ -69,28 +69,6 @@ func TestNewHrx(t *testing.T) {
 	}
 }
 
-func TestIs101(t *testing.T) {
-	const n, m = 2, 4
-	hrx := NewHrx(n, m)
-
-	tests := []struct {
-		x, y  int
-		is101 bool
-	}{
-		{1, 0, false},
-		{2, 0, false},
-		{3, 0, false},
-		{4, 0, true},
-		{1, 0, true},
-	}
-	for _, test := range tests {
-		hrx.Add(test.x, test.y)
-		if hrx.Is101() != test.is101 {
-			t.Errorf("Excepted: (%v), Got: (%v)", test.is101, hrx.Is101())
-		}
-	}
-}
-
 func TestHrxValue(t *testing.T) {
 	const n, m = 5, 35
 	hrx := NewHHrx(n, m)

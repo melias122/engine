@@ -111,19 +111,19 @@ func ss(k Kombinacia, o operacia) nticaSS {
 	return n
 }
 
-type nticaFilter struct {
+type filterNtica struct {
 	n     int
 	ntica Tica
 }
 
-func NewNtica(n int, tica Tica) Filter {
-	return nticaFilter{
+func NewFilterNtica(n int, tica Tica) Filter {
+	return filterNtica{
 		n:     n,
 		ntica: tica,
 	}
 }
 
-func (n nticaFilter) Check(k Kombinacia) bool {
+func (n filterNtica) Check(k Kombinacia) bool {
 	nticaK := Ntica(k)
 	if len(k) == n.n {
 		return bytes.Equal(nticaK, n.ntica)
@@ -131,29 +131,29 @@ func (n nticaFilter) Check(k Kombinacia) bool {
 	return true
 }
 
-func (n nticaFilter) CheckSkupina(skupina Skupina) bool {
+func (n filterNtica) CheckSkupina(skupina Skupina) bool {
 	return true
 }
 
-func (n nticaFilter) String() string {
+func (n filterNtica) String() string {
 	return "Ntica: " + n.ntica.String()
 }
 
-type stlNtica struct {
+type filterSTLNtica struct {
 	n       int
 	pozicie []byte
 	ntica   Filter
 }
 
-func NewStlNtica(n int, tica Tica, pozicie []byte) Filter {
-	return stlNtica{
+func NewFilterSTLNtica(n int, tica Tica, pozicie []byte) Filter {
+	return filterSTLNtica{
 		n:       n,
-		ntica:   NewNtica(n, tica),
+		ntica:   NewFilterNtica(n, tica),
 		pozicie: pozicie,
 	}
 }
 
-func (s stlNtica) Check(k Kombinacia) bool {
+func (s filterSTLNtica) Check(k Kombinacia) bool {
 	if !s.ntica.Check(k) {
 		return false
 	}
@@ -163,11 +163,11 @@ func (s stlNtica) Check(k Kombinacia) bool {
 	return true
 }
 
-func (s stlNtica) CheckSkupina(h Skupina) bool {
+func (s filterSTLNtica) CheckSkupina(h Skupina) bool {
 	return true
 }
 
-func (s stlNtica) String() string {
+func (s filterSTLNtica) String() string {
 	var pozicie []string
 	for i, p := range s.pozicie {
 		if p == 1 {

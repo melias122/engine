@@ -124,7 +124,7 @@ func (h *HrxTab) sMinMax() (float64, float64, float64, float64) {
 					z[3] = n2.Cislo()
 				}
 
-				n1 := h.HHrx.GetN(n2.Cislo())
+				n1 := h.HHrx.GetNum(n2.Cislo())
 				if n1.SNext(i+1) < s1Min && !zS1min[n2.Cislo()] {
 					s1Min = n1.SNext(i + 1)
 					z[0] = n2.Cislo()
@@ -287,11 +287,11 @@ func (h *HrxTab) Make(workingDir string) (Skupiny, error) {
 	skupinyN1 := map[int]Nums{}
 	skupinyN2 := map[int]Nums{}
 	for i := 1; i <= h.m; i++ {
-		N := h.Hrx.GetN(i)
+		N := h.Hrx.GetNum(i)
 		sk := N.PocetR()
 		skupinyN1[sk] = append(skupinyN1[sk], N)
 
-		N2 := h.HHrx.GetN(i)
+		N2 := h.HHrx.GetNum(i)
 		skupinyN2[sk] = append(skupinyN2[sk], N2)
 	}
 	h.skupinyN1 = skupinyN1
@@ -317,7 +317,7 @@ func (h *HrxTab) Make(workingDir string) (Skupiny, error) {
 		r3 = append(r3, "Pocet ROD-DO")
 		for _, c := range skupinyN1[k] {
 			r1 = append(r1, c.String())
-			r2 = append(r2, itoa(h.HHrx.GetN(c.Cislo()).PocetR()))
+			r2 = append(r2, itoa(h.HHrx.GetNum(c.Cislo()).PocetR()))
 			r3 = append(r3, itoa(c.PocetR()))
 		}
 		PreHeader = append(PreHeader, r1, r2, r3, []string{""})
@@ -353,8 +353,8 @@ func (h *HrxTab) Make(workingDir string) (Skupiny, error) {
 			h.rodCache[newTab(t.Sk, max)] = skupinyN1[t.Sk][0].RNext() * float64(max)
 
 			// min,max R1-DO hodnota v skupine
-			rmin += h.HHrx.GetN(skN2[i].Cislo()).RNext()
-			rmax += h.HHrx.GetN(skN2[len(skN2)-1-i].Cislo()).RNext()
+			rmin += h.HHrx.GetNum(skN2[i].Cislo()).RNext()
+			rmax += h.HHrx.GetNum(skN2[len(skN2)-1-i].Cislo()).RNext()
 			h.rCache[newTab(t.Sk, i+1)] = [2]float64{rmin, rmax}
 
 			i++

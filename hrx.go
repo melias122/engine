@@ -52,11 +52,7 @@ func (h *H) Add(x, y int) {
 	N.Inc(y)
 }
 
-func (h *H) Is101() bool {
-	return h.Cisla.Is101()
-}
-
-func (h *H) GetN(x int) *Num {
+func (h *H) GetNum(x int) *Num {
 	N := h.Cisla[x-1]
 	if N == nil {
 		return NewNum(x, h.n, h.m)
@@ -86,7 +82,7 @@ func (h *H) Value() float64 {
 func (h *H) ValueKombinacia(k Kombinacia) float64 {
 	p := h.xcisla.copy() // use chan xcisla to reduce presure on GC
 	for _, cislo := range k {
-		sk := h.GetN(int(cislo)).PocetR()
+		sk := h.GetNum(int(cislo)).PocetR()
 		p.move(1, sk, sk+1)
 	}
 	return h.valuePresun(p)

@@ -79,7 +79,7 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 		}
 		// Ak sa v hhrx vyskytli vsetky cisla 1..m
 		// nastala udalost 101
-		if a.HHrx.Is101() {
+		if a.HHrx.Cisla.Is101() {
 			// Ked narazime na Uc cislo na riadku Roddo
 			// potrebuje spatne dohladat Uc cislo
 			var reverse bool
@@ -106,11 +106,11 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 				// Spatne nacitava kombinacie a incremtuje Roddo
 				// a Hrx az pokial nenastane udalost 101
 				// udalost 101 nastava ked sa kazde cislo vyskytne aspon 1
-				for !a.Hrx.Is101() {
+				for !a.Hrx.Cisla.Is101() {
 					uc.Riadok--
 					for y, x := range kombinacie[uc.Riadok] {
 						a.Hrx.Add(int(x), y)
-						if a.Hrx.Is101() && uc.Cislo == 0 {
+						if a.Hrx.Cisla.Is101() && uc.Cislo == 0 {
 							uc.Cislo = x
 						}
 					}

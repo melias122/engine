@@ -178,24 +178,24 @@ func TestIsCC(t *testing.T) {
 	}
 }
 
-func TestRangeCislovacky(t *testing.T) {
+func TestFilterCislovackyRange(t *testing.T) {
 	tests := []struct {
 		k Kombinacia
 		f Filter
 		w bool
 	}{
-		{Kombinacia{1}, CislovackyRange(1, 0, 0, P), true},
-		{Kombinacia{1}, CislovackyRange(1, 0, 1, P), true},
-		{Kombinacia{1}, CislovackyRange(1, 1, 1, P), false},
-		{Kombinacia{1}, CislovackyRange(3, 1, 1, P), true},
-		{Kombinacia{1, 2}, CislovackyRange(3, 1, 1, P), true},
-		{Kombinacia{1, 2, 3}, CislovackyRange(3, 1, 1, P), true},
-		{Kombinacia{1, 2, 4}, CislovackyRange(3, 1, 1, P), false},
-		{Kombinacia{1, 2, 3, 4, 5}, CislovackyRange(5, 0, 1, P), false},
-		{Kombinacia{1, 2, 3, 4, 5}, CislovackyRange(5, 0, 2, P), true},
-		{Kombinacia{1, 2, 3, 4, 5}, CislovackyRange(5, 2, 2, P), true},
-		{Kombinacia{1, 2, 3, 4, 5}, CislovackyRange(5, 2, 3, P), true},
-		{Kombinacia{1, 2, 3, 4, 5}, CislovackyRange(5, 3, 3, P), false},
+		{Kombinacia{1}, NewFilterCislovackyRange(1, 0, 0, P), true},
+		{Kombinacia{1}, NewFilterCislovackyRange(1, 0, 1, P), true},
+		{Kombinacia{1}, NewFilterCislovackyRange(1, 1, 1, P), false},
+		{Kombinacia{1}, NewFilterCislovackyRange(3, 1, 1, P), true},
+		{Kombinacia{1, 2}, NewFilterCislovackyRange(3, 1, 1, P), true},
+		{Kombinacia{1, 2, 3}, NewFilterCislovackyRange(3, 1, 1, P), true},
+		{Kombinacia{1, 2, 4}, NewFilterCislovackyRange(3, 1, 1, P), false},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterCislovackyRange(5, 0, 1, P), false},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterCislovackyRange(5, 0, 2, P), true},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterCislovackyRange(5, 2, 2, P), true},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterCislovackyRange(5, 2, 3, P), true},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterCislovackyRange(5, 3, 3, P), false},
 	}
 	for _, test := range tests {
 		ok := test.f.Check(test.k)
@@ -205,19 +205,19 @@ func TestRangeCislovacky(t *testing.T) {
 	}
 }
 
-func TestExactCislovacky(t *testing.T) {
+func TestFilterCislovackyExact(t *testing.T) {
 	tests := []struct {
 		k Kombinacia
 		f Filter
 		w bool
 	}{
-		{Kombinacia{2}, CislovackyExact(4, []int{0, 2}, P), true},
-		{Kombinacia{2, 4}, CislovackyExact(4, []int{0, 2}, P), true},
-		{Kombinacia{2, 4, 6, 7}, CislovackyExact(4, []int{0, 2}, P), false},
-		{Kombinacia{2, 4, 6, 7}, CislovackyExact(4, []int{1, 3}, P), true},
-		{Kombinacia{2, 4, 7, 9}, CislovackyExact(4, []int{1, 3}, P), false},
+		{Kombinacia{2}, NewFilterCislovackyExact(4, []int{0, 2}, P), true},
+		{Kombinacia{2, 4}, NewFilterCislovackyExact(4, []int{0, 2}, P), true},
+		{Kombinacia{2, 4, 6, 7}, NewFilterCislovackyExact(4, []int{0, 2}, P), false},
+		{Kombinacia{2, 4, 6, 7}, NewFilterCislovackyExact(4, []int{1, 3}, P), true},
+		{Kombinacia{2, 4, 7, 9}, NewFilterCislovackyExact(4, []int{1, 3}, P), false},
 
-		{Kombinacia{1, 3, 7, 9}, CislovackyExact(4, []int{1, 3}, P), false},
+		{Kombinacia{1, 3, 7, 9}, NewFilterCislovackyExact(4, []int{1, 3}, P), false},
 	}
 	for _, test := range tests {
 		ok := test.f.Check(test.k)

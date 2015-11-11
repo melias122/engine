@@ -22,8 +22,8 @@ func (a *Archiv) PocetnostR() error {
 	for i := 1; i <= a.m; i++ {
 		riadok = riadok[:0]
 
-		N1 := a.HHrx.GetN(i)
-		N2 := a.Hrx.GetN(i)
+		N1 := a.HHrx.GetNum(i)
+		N2 := a.Hrx.GetNum(i)
 
 		// Cislo
 		riadok = append(riadok, N1.String())
@@ -74,8 +74,8 @@ func (a *Archiv) PocetnostS() error {
 		teorPocet, bi big.Int
 	)
 	for i := 1; i <= a.m; i++ {
-		N1 := a.HHrx.GetN(i)
-		N2 := a.Hrx.GetN(i)
+		N1 := a.HHrx.GetNum(i)
+		N2 := a.Hrx.GetNum(i)
 		for j := 1; j <= a.n; j++ {
 
 			r := make([]string, 0, len(header))

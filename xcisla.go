@@ -34,12 +34,12 @@ func (p *Xcisla) move(n, from, to int) {
 }
 
 func (p Xcisla) index(sk int) (int, bool) {
-	i := sort.Search(len(p), func(j int) bool { return p[j].Sk >= sk })
-	if i < len(p) && p[i].Sk == sk {
-		return i, true
-	} else {
-		return i, false
+	cmp := func(j int) bool {
+		return p[j].Sk >= sk
 	}
+	i := sort.Search(len(p), cmp)
+	ok := i < len(p) && p[i].Sk == sk
+	return i, ok
 }
 
 func (p *Xcisla) add(n, sk int) {
