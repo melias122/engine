@@ -2,6 +2,7 @@ package psl
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -9,8 +10,9 @@ import (
 )
 
 var archivHeader = []string{
-	"Poradové číslo", "Kombinacie", "P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc",
-	"CC", "ZH", "Sm", "\u0394Sm", "Kk", "\u0394Kk", "N-tice", "X-tice", "ƩR1-DO", "ΔƩR1-DO",
+	"Poradové číslo", "Kombinacie", "P", "N", "Sled PN", "Pr", "Sled PNPr", "Mc", "Vc", "Sled McVc", "C19", "C0", "cC", "Cc",
+	"CC", "Sled prirodzené kritéria", "ZH", "SPZH", "Sm", "\u0394Sm", "Kk", "\u0394Kk", "N-tice", "Ntica súčet",
+	"Ntica súčin pozície a stĺpca", "X-tice", "ƩR1-DO", "ΔƩR1-DO",
 	"ƩR1-DO \"r+1\"", "ƩSTL1-DO", "ΔƩSTL1-DO", "ƩSTL1-DO \"r+1\"", "Δ(ƩR1-DO-ƩSTL1-DO)",
 	"HHRX", "ΔHHRX", "ƩR OD-DO", "ΔƩR OD-DO", "ƩSTL OD-DO", "ΔƩSTL OD-DO",
 	"Δ(ƩROD-DO-ƩSTLOD-DO)", "HRX", "ΔHRX", "ƩKombinacie", "ΔƩKombinacie",
@@ -18,9 +20,7 @@ var archivHeader = []string{
 	"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5", "Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
 }
 
-// type Interface interface{}
-
-// Archiv aaa
+// Archiv
 type Archiv struct {
 	n, m int
 	Riadok
@@ -34,6 +34,9 @@ type Archiv struct {
 	riadky     []Riadok
 
 	Skupiny Skupiny
+
+	Predict1DO  Prediction
+	PredictODDO Prediction
 }
 
 func NewArchiv(workingDir string, n, m int) *Archiv {
@@ -153,11 +156,9 @@ type errFuncs struct {
 
 func (e errFuncs) run() error {
 	for _, f := range e.funcs {
-		if e.err != nil {
-			break
-		}
 		if err := f(); err != nil {
 			e.err = err
+			break
 		}
 	}
 	return e.err
@@ -171,11 +172,15 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 	if n < 2 || n >= m || m > 99 {
 		return nil, fmt.Errorf("Nesprávny rozmer databázy: %d/%d", n, m)
 	}
-	dir := strings.Split(filepath.Base(path), ".")[0]
-	dir = filepath.Join(workingDir, dir)
+	filename := strings.Split(filepath.Base(path), ".")[0]
+	dir := filepath.Join(workingDir, filename)
 
 	// Vytvorenie suboru
 	if err := os.Mkdir(dir, 0755); err != nil {
+		log.Printf("Archiv.Make(): %s\n", err)
+	}
+
+	if err := CopyFile(filepath.Join(dir, filename+".csv"), path); err != nil {
 		log.Printf("Archiv.Make(): %s\n", err)
 	}
 
@@ -197,6 +202,7 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 			archiv.statistikaNtice,
 			archiv.statistikaCifrovacky,
 			archiv.statistikaCislovacky,
+			archiv.predikcia,
 		},
 	}
 	if err := e.run(); err != nil {
@@ -210,5 +216,72 @@ func Make(path, workingDir string, n, m int) (*Archiv, error) {
 	}
 	archiv.Skupiny = hrxSkupiny
 
+	normalizePrediction(&archiv.Predict1DO, archiv.Skupiny)
+	normalizePrediction(&archiv.PredictODDO, archiv.Skupiny)
+	savePredictions(archiv.WorkingDir, archiv.Predict1DO, archiv.PredictODDO)
+
 	return archiv, nil
+}
+
+// CopyFile copies a file from src to dst. If src and dst files exist, and are
+// the same, then return success. Otherise, attempt to create a hard link
+// between the two files. If that fail, copy the file contents from src to dst.
+func CopyFile(dst, src string) (err error) {
+	sfi, err := os.Stat(src)
+	if err != nil {
+		return
+	}
+	if !sfi.Mode().IsRegular() {
+		// cannot copy non-regular files (e.g., directories,
+		// symlinks, devices, etc.)
+		return fmt.Errorf("CopyFile: non-regular source file %s (%q)", sfi.Name(), sfi.Mode().String())
+	}
+	dfi, err := os.Stat(dst)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return
+		}
+	} else {
+		if !(dfi.Mode().IsRegular()) {
+			return fmt.Errorf("CopyFile: non-regular destination file %s (%q)", dfi.Name(), dfi.Mode().String())
+		}
+		if os.SameFile(sfi, dfi) {
+			return
+		}
+	}
+	// Dont want to create hard link..
+	// if err = os.Link(src, dst); err == nil {
+	// 	return
+	// }
+
+	// instead we copy file
+	err = copyFileContents(src, dst)
+	return
+}
+
+// copyFileContents copies the contents of the file named src to the file named
+// by dst. The file will be created if it does not already exist. If the
+// destination file exists, all it's contents will be replaced by the contents
+// of the source file.
+func copyFileContents(src, dst string) (err error) {
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+	err = out.Sync()
+	return
 }

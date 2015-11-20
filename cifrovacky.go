@@ -51,7 +51,7 @@ type filterCifrovacky struct {
 	c Cifrovacky
 }
 
-func NewFilterCifrovacky(n, m int, c Cifrovacky) (Filter, error) {
+func NewFilterCifrovacky(c Cifrovacky, n, m int) (Filter, error) {
 	var sum int
 	for i := range c {
 		sum += int(c[i])

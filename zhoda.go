@@ -2,7 +2,6 @@ package psl
 
 import (
 	"sort"
-	"strconv"
 	"strings"
 )
 
@@ -45,7 +44,7 @@ func ZhodaPresun(k0, k1 Kombinacia) presun {
 func (p presun) String() string {
 	s := make([]string, len(p))
 	for i, p := range p {
-		s[i] = strconv.Itoa(int(p[0])) + "/" + strconv.Itoa(int(p[1]))
+		s[i] = itoa(int(p[0])) + "|" + itoa(int(p[1]))
 	}
 	return strings.Join(s, ", ")
 }
@@ -112,5 +111,5 @@ func (f filterZhoda) CheckSkupina(s Skupina) bool {
 }
 
 func (f filterZhoda) String() string {
-	return "Zh: " + strconv.Itoa(f.min) + "-" + strconv.Itoa(f.max)
+	return "Zh: " + itoa(f.min) + "-" + itoa(f.max)
 }

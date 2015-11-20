@@ -22,7 +22,9 @@ func NewFilterZakazaneFromString(s string, zhoda []byte, n, m int) (Filter, erro
 func NewFilterZakazane(ints []int, n, m int) Filter {
 	z := make([]bool, m)
 	for _, i := range ints {
-		z[i-1] = true
+		if i > 0 && i <= m {
+			z[i-1] = true
+		}
 	}
 	return filterZakazane{
 		cisla: z,
@@ -59,27 +61,28 @@ type filterZakazaneSTL struct {
 func NewFilterZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
 	p.Zhoda = zhoda
-	mi, err := p.ParseMapInts()
+	mapInts, err := p.ParseMapInts()
 	if err != nil {
 		return nil, err
-	}
-	var mapInts map[int][]int
-	for k, v := range mi {
-		mapInts[k] = v
 	}
 	return NewFilterZakazaneSTL(mapInts, n, m), nil
 }
 
-func NewFilterZakazaneSTL(mapInts map[int][]int, n, m int) Filter {
+func NewFilterZakazaneSTL(mapInts MapInts, n, m int) Filter {
 	z := filterZakazaneSTL{
 		zakazane: make([][]bool, n),
 	}
 	for i := range mapInts {
+		if i <= 0 {
+			continue
+		}
 		if z.zakazane[i-1] == nil {
 			z.zakazane[i-1] = make([]bool, m)
 		}
 		for _, j := range mapInts[i] {
-			z.zakazane[i-1][j-1] = true
+			if j > 0 && j <= m {
+				z.zakazane[i-1][j-1] = true
+			}
 		}
 	}
 	return z

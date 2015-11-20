@@ -23,7 +23,7 @@ func NewFilterR1MinusSTL1(d Delta, nums Nums, n int) Filter {
 	}
 }
 
-func R2MinusSTL2(d Delta, nums Nums, n int) Filter {
+func NewFilterR2MinusSTL2(d Delta, nums Nums, n int) Filter {
 	return filterRMinusSTL{
 		n:     n,
 		nums:  nums,
@@ -53,9 +53,9 @@ func (r filterRMinusSTL) String() string {
 	var s string
 	switch r.delta {
 	case POSSITIVE:
-		s = "+"
+		s = "+Δ"
 	case NEGATIVE:
-		s = "-"
+		s = "-Δ"
 	}
 	return r.fname + ": " + s
 }

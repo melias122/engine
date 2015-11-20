@@ -161,6 +161,8 @@ func (h *HrxTab) record() []string {
 		HHrx:   [2]float64{hhrxMin, hhrxMax},
 		R1:     [2]float64{h.r1Min, h.r1Max},
 		R2:     h.rod,
+		S1:     [2]float64{s1min, s1max},
+		S2:     [2]float64{s2min, s2max},
 		Sucet:  [2]uint16{uint16(h.min), uint16(h.max)},
 		Xcisla: h.r1.copy(),
 	})
@@ -302,8 +304,6 @@ func (h *HrxTab) Make(workingDir string) (Skupiny, error) {
 	h.skupinyN2 = skupinyN2
 	// skupiny cisel a ich zoradenie kvoli
 	// pridaniu do suboru pred hlavicku
-	// Pozn.: zbytocna blbost, pocetnosti,
-	// resp. skupiny je uz vidiet PocetnostR subore
 	mKeys := make([]int, 0, len(skupinyN1))
 	for k := range skupinyN1 {
 		mKeys = append(mKeys, k)

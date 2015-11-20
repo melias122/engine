@@ -211,7 +211,7 @@ func NewV1(a *Archiv) V1 {
 		header = append(header, strconv.Itoa(i))
 	}
 	header = append(header,
-		"P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC",
+		"P", "N", "Sled PN", "PR", "Sled PNPr", "Mc", "Vc", "Sled McVc", "C19", "C0", "cC", "Cc", "CC", "Sled prirodzené kritéria",
 		"ZH", "ZH presun (r/r+1)", "Sm", "Kk", "Ntica", "Ntica súčet",
 		"Ntica súčin pozície a stĺpca", "X-tice", "ƩR1-DO", "ΔƩR1-DO",
 		"ƩSTL1-DO", "ΔƩSTL1-DO", "Δ(ƩR1-DO-ƩSTL1-DO)", "HHRX", "ΔHHRX",
@@ -231,7 +231,7 @@ func NewV1(a *Archiv) V1 {
 
 func (v V1) Riadok(k Kombinacia) []string {
 	var (
-		line   = make([]string, 0, 35)
+		line   = make([]string, 0, len(v.Header)+v.n)
 		r1, s1 = k.SucetRSNext(v.hhrx.Cisla)
 		r2, s2 = k.SucetRSNext(v.hrx.Cisla)
 		hrx    = v.hrx.ValueKombinacia(k)
@@ -240,8 +240,16 @@ func (v V1) Riadok(k Kombinacia) []string {
 	for _, cislo := range k {
 		line = append(line, strconv.Itoa(int(cislo)))
 	}
-	cislovacky := k.Cislovacky()
-	line = append(line, cislovacky.Strings()...)
+	c := k.Cislovacky()
+	cislovacky := c.Strings()
+	line = append(line, cislovacky[0:2]...)
+	line = append(line, k.SledPN())
+	line = append(line, cislovacky[2])
+	line = append(line, k.SledPNPr())
+	line = append(line, cislovacky[3:5]...)
+	line = append(line, k.SledMcVc())
+	line = append(line, cislovacky[5:]...)
+	line = append(line, k.SledPrirodzene())
 	line = append(line,
 		itoa(Zhoda(v.riadok.K, k)),
 		ZhodaPresun(v.riadok.K, k).String(),

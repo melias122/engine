@@ -172,5 +172,5 @@ func (x filterXcisla) String() string {
 		str += strings.Join(str2, ",")
 		s = append(s, str)
 	}
-	return fmt.Sprintf("%s", strings.Join(s, ";"))
+	return "Xcisla: " + strings.Join(s, ";")
 }

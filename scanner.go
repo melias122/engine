@@ -108,31 +108,31 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 
 	switch buf.String() {
 	case "cC":
-		return Token(cC), buf.String()
+		return ca, buf.String()
 	case "Cc":
-		return Token(Cc), buf.String()
+		return cb, buf.String()
 	case "CC":
-		return Token(CC), buf.String()
+		return cc, buf.String()
 	}
 
 	// If the string matches a keyword then return that keyword.
 	switch strings.ToUpper(buf.String()) {
 	case "P":
-		return Token(P), buf.String()
+		return p, buf.String()
 	case "N":
-		return Token(N), buf.String()
+		return n, buf.String()
 	case "PR":
-		return Token(Pr), buf.String()
+		return pr, buf.String()
 	case "MC":
-		return Token(Mc), buf.String()
+		return mc, buf.String()
 	case "VC":
-		return Token(Vc), buf.String()
+		return vc, buf.String()
 	case "C19", "C1-C9":
-		return Token(C19), buf.String()
+		return c19, buf.String()
 	case "C0":
-		return Token(C0), buf.String()
-		// case "ZH":
-		// return Token(Zh), buf.String()
+		return c0, buf.String()
+	case "ZH":
+		return zh, buf.String()
 	}
 
 	// Otherwise return as a regular identifier.

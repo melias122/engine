@@ -81,12 +81,16 @@ func (r *Riadok) Add(k Kombinacia, n1, n2 Nums, hrx, hhrx float64) {
 func (r Riadok) record() []string {
 	rec := make([]string, 0, len(archivHeader))
 	rec = append(rec, itoa(int(r.Pc)), r.K.String())
-	rec = append(rec, r.C.Strings()...)
+	cislovacky := r.C.Strings()
+	rec = append(rec, cislovacky[0:2]...)
+	rec = append(rec, r.K.SledPN())
+	rec = append(rec, cislovacky[2])
+	rec = append(rec, r.K.SledPNPr())
+	rec = append(rec, cislovacky[3:5]...)
+	rec = append(rec, r.K.SledMcVc())
+	rec = append(rec, cislovacky[5:]...)
+	rec = append(rec, r.K.SledPrirodzene())
 	rec = append(rec,
-		r.K.SledPN(),
-		r.K.SledPNPr(),
-		r.K.SledMcVc(),
-		r.K.SledPrirodzene(),
 		itoa(r.Zh),
 		r.ZhPresun,
 		ftoa(r.Sm),

@@ -17,7 +17,7 @@ const (
 	Vc
 	C19
 	C0
-	cC
+	XcC
 	Cc
 	CC
 )
@@ -47,6 +47,20 @@ type Cislovacky [10]byte
 
 // FunCislovacky su funkcie, ktore vyhodnocuju ci je cislo danou cislovackou
 type CislovackaFunc func(int) bool
+
+func CislovackyMax(n, m int) Cislovacky {
+	var c Cislovacky
+	for i := 1; i <= m; i++ {
+		c2 := NewCislovacky(i)
+		c.Plus(c2)
+	}
+	for i := range c {
+		if c[i] > byte(n) {
+			c[i] = byte(n)
+		}
+	}
+	return c
+}
 
 // NewCislovacky vytvori Cislovacky pre cislo n. Cislovacky maju zmysel pre n z intervalu <1, 99>
 func NewCislovacky(n int) Cislovacky {
@@ -171,6 +185,16 @@ func NewFilterCislovackyRange(n, min, max int, c Cislovacka) Filter {
 		f:     c.Func(),
 		fname: c.String(),
 	}
+}
+
+func NewFilterCislovackyExactFromString(s string, c Cislovacka, n, m int) (Filter, error) {
+	r := strings.NewReader(s)
+	p := NewParser(r, n, m)
+	ints, err := p.ParseInts()
+	if err != nil {
+		return nil, err
+	}
+	return NewFilterCislovackyExact(n, ints, c), nil
 }
 
 func NewFilterCislovackyExact(n int, ints []int, c Cislovacka) Filter {

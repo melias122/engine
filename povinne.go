@@ -10,9 +10,9 @@ type filterPovinne struct {
 	n, count int
 }
 
-func NewFilterPovinneFromString(s string, last Kombinacia, n, m int) (Filter, error) {
+func NewFilterPovinneFromString(s string, k0 Kombinacia, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
-	p.Zhoda = last
+	p.Zhoda = k0
 	ints, err := p.ParseInts()
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func NewFilterPovinne(ints []int, n, m int) Filter {
 		n:       n,
 	}
 	for _, i := range ints {
-		if i >= 1 && i <= m && !p.povinne[i-1] {
+		if i > 0 && i <= m && !p.povinne[i-1] {
 			p.povinne[i-1] = true
 			p.count++
 		}
@@ -74,22 +74,17 @@ type filterPovinneSTL struct {
 	count   int
 }
 
-func NewFilterPovinneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
+func NewFilterPovinneSTLFromString(s string, k0 Kombinacia, n, m int) (Filter, error) {
 	parser := NewParser(strings.NewReader(s), n, m)
-	parser.Zhoda = zhoda
-	ma, err := parser.ParseMapInts()
+	parser.Zhoda = k0
+	mapInts, err := parser.ParseMapInts()
 	if err != nil {
 		return nil, err
-	}
-	// TODO: remove this conversion
-	var mapInts map[int][]int
-	for k, v := range ma {
-		mapInts[k] = v
 	}
 	return NewFilterPovinneSTL(mapInts, n, m), nil
 }
 
-func NewFilterPovinneSTL(mapInts map[int][]int, n, m int) Filter {
+func NewFilterPovinneSTL(mapInts MapInts, n, m int) Filter {
 	p := filterPovinneSTL{
 		povinne: make([][]bool, n),
 	}

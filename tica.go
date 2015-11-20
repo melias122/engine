@@ -1,6 +1,7 @@
 package psl
 
 import (
+	"bytes"
 	"strconv"
 	"strings"
 )
@@ -13,4 +14,8 @@ func (t Tica) String() string {
 		s[i] = strconv.Itoa(int(n))
 	}
 	return strings.Join(s, " ")
+}
+
+func (t0 Tica) Equal(t Tica) bool {
+	return bytes.Equal(t0, t)
 }

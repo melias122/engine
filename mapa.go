@@ -285,24 +285,24 @@ func (a *Archiv) mapaXtice() error {
 
 			style := xlsx.NewStyle()
 			switch (int(cislo) - 1) / 10 {
-			case 0:
-				style.Fill = *xlsx.NewFill("solid", "FF000000", "FF000000")
-			case 1:
-				style.Fill = *xlsx.NewFill("solid", "00FF0000", "00FF0000")
-			case 2:
-				style.Fill = *xlsx.NewFill("solid", "000000FF", "000000FF")
-			case 3:
-				style.Fill = *xlsx.NewFill("solid", "FFFF0000", "FFFF0000")
-			case 4:
-				style.Fill = *xlsx.NewFill("solid", "FF00FF00", "FF00FF00")
-			case 5:
-				style.Fill = *xlsx.NewFill("solid", "FF660000", "FF660000")
-			case 6:
-				style.Fill = *xlsx.NewFill("solid", "FF006600", "FF006600")
-			case 7:
-				style.Fill = *xlsx.NewFill("solid", "00006600", "00006600")
-			case 8:
-				style.Fill = *xlsx.NewFill("solid", "FF66CC00", "FF66CC00")
+			case 0: // light red
+				style.Fill = *xlsx.NewFill("solid", "DB7F7F", "DB7F7F")
+			case 1: // light green
+				style.Fill = *xlsx.NewFill("solid", "7FBF7F", "7FBF7F")
+			case 2: // blue
+				style.Fill = *xlsx.NewFill("solid", "6666FF", "6666FF")
+			case 3: // yelow
+				style.Fill = *xlsx.NewFill("solid", "FFFF99", "FFFF99")
+			case 4: // white
+				style.Fill = *xlsx.NewFill("solid", "FFFFFF", "FFFFFF")
+			case 5: // purple
+				style.Fill = *xlsx.NewFill("solid", "FFCCFF", "FFCCFF")
+			case 6: // nobody knows
+				style.Fill = *xlsx.NewFill("solid", "CCFFFF", "CCFFFF")
+			case 7: //  nobody knows 2
+				style.Fill = *xlsx.NewFill("solid", "FFCCCC", "FFCCCC")
+			case 8: // green ?
+				style.Fill = *xlsx.NewFill("solid", "80FF80", "80FF80")
 			default:
 			}
 			cell.SetStyle(style)

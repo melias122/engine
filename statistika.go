@@ -39,7 +39,8 @@ func (a *Archiv) statistikaZhoda() error {
 	}
 	//
 
-	header := []string{"Zhoda", "Pocetnost teor.", "Teoreticka moznost v %", "Pocetnost", "Realne dosiahnute %"}
+	header := []string{"Zhoda", "Pocetnost teor.", "Teoreticka moznost v %",
+		"Pocetnost", "Realne dosiahnute %"}
 
 	w := NewCsvMaxWriter(a.WorkingDir, "StatistikaZhoda", [][]string{header})
 	defer w.Close()
@@ -69,7 +70,11 @@ func (a *Archiv) statistikaZhoda() error {
 		s = append(s,
 			[]string{""},
 			[]string{fmt.Sprintf("Zhoda %d", i), "Pocetnost", "Realne %"},
-			[]string{fmt.Sprintf("Zhoda %d", i), itoa(stat.celkom[i]), ftoa((float64(stat.celkom[i]) / dbLen) * 100)},
+			[]string{
+				fmt.Sprintf("Zhoda %d", i),
+				itoa(stat.celkom[i]),
+				ftoa((float64(stat.celkom[i]) / dbLen) * 100),
+			},
 		)
 		for k, v := range stat.zh[i] {
 			s = append(s, []string{
@@ -192,8 +197,7 @@ func (a *Archiv) statistikaCislovacky() error {
 	}
 
 	header := []string{
-		"", "", "", "", "", "", "", "",
-		"P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC", "ZH",
+		"", "P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC", "ZH",
 	}
 	w := NewCsvMaxWriter(a.WorkingDir, "StatistikaCislovacky", [][]string{header})
 	defer w.Close()
@@ -214,7 +218,7 @@ func (a *Archiv) statistikaCislovacky() error {
 		return sc
 	}
 	stat1do := makeStatCifrovacky(a.n, a.m, a.riadky, f, tmax)
-	stat1doStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), stat1do, tmax)
+	stat1doStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), stat1do, tmax, false)
 	for _, s := range stat1doStrings {
 		if err := w.Write(s); err != nil {
 			return err
@@ -227,7 +231,7 @@ func (a *Archiv) statistikaCislovacky() error {
 	w.Write([]string{"R OD-DO"})
 	if a.Uc.Cislo != 0 && a.Uc.Riadok > 1 {
 		statoddo := makeStatCifrovacky(a.n, a.m, a.riadky[a.Uc.Riadok-1:], f, tmax)
-		statoddoStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), statoddo, tmax)
+		statoddoStrings := statCifrovackyStrings(a.n, a.m, len(a.origHeader), statoddo, tmax, false)
 		for _, s := range statoddoStrings {
 			if err := w.Write(s); err != nil {
 				return err
