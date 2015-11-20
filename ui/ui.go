@@ -1,5 +1,3 @@
-// +build windows
-
 package main
 
 import (
@@ -12,10 +10,7 @@ import (
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
-	"github.com/melias122/psl/archiv"
-	"github.com/melias122/psl/filter"
-	"github.com/melias122/psl/generator"
-	"github.com/melias122/psl/num"
+	"github.com/melias122/psl"
 )
 
 const (
@@ -26,6 +21,9 @@ const (
 	HRX   = "HRX"
 	HHRX  = "HHRX"
 	Sucet = "ƩKombinacie"
+
+	Delta1 = "Δ(ƩR 1-DO - ƩSTL OD-DO)"
+	Delta2 = "Δ(ƩR OD-DO - ƩSTL OD-DO)"
 
 	P     = "P"
 	N     = "N"
@@ -44,12 +42,13 @@ const (
 
 	Ntica      = "Ntica"
 	Xtica      = "Xtica"
+	Xcisla     = "Xcisla"
 	Cifrovacky = "Cifrovacky"
 	STLNtica   = "STL Ntica"
 )
 
-type Ui struct {
-	//UI
+//UI
+var (
 	mainWindow *walk.MainWindow
 	nacitajPB  *walk.PushButton
 	generujPB  *walk.PushButton
@@ -64,90 +63,119 @@ type Ui struct {
 	cifrovacky *CifrovackyPanel
 
 	//Vars
-	Archiv     *archiv.Archiv
+	Archiv     *psl.Archiv
 	workingDir string
 
-	lines map[string]Line
-}
+	lines = make(map[string]Line)
+)
 
-func (u *Ui) UpperFilters() Widget {
+func UpperFilters() Widget {
 	var widgets []Widget
 
 	r1 := NewUiLine(R1, 3)
-	r1.filter = func() (filter.Filter, error) {
+	r1.filter = func() (psl.Filter, error) {
 		min, max, err := r1.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewR(u.n(), min, max, u.Archiv.HHrx.Cisla, r1.name), nil
+		return psl.NewFilterR(n(), min, max, Archiv.HHrx.Cisla, r1.name), nil
 	}
 
 	r2 := NewUiLine(R2, 3)
-	r2.filter = func() (filter.Filter, error) {
+	r2.filter = func() (psl.Filter, error) {
 		min, max, err := r2.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewR(u.n(), min, max, u.Archiv.Hrx.Cisla, r2.name), nil
+		return psl.NewFilterR(n(), min, max, Archiv.Hrx.Cisla, r2.name), nil
+		// return filter.NewR(n(), min, max, Archiv.Hrx.Cisla, r2.name), nil
 	}
 
 	s1 := NewUiLine(STL1, 3)
-	s1.filter = func() (filter.Filter, error) {
+	s1.filter = func() (psl.Filter, error) {
 		min, max, err := s1.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewStl(u.n(), min, max, u.Archiv.HHrx.Cisla, s1.name), nil
+		return psl.NewFilterSTL(n(), min, max, Archiv.HHrx.Cisla, s1.name), nil
 	}
 
 	s2 := NewUiLine(STL2, 3)
-	s2.filter = func() (filter.Filter, error) {
+	s2.filter = func() (psl.Filter, error) {
 		min, max, err := s2.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewStl(u.n(), min, max, u.Archiv.Hrx.Cisla, s2.name), nil
+		return psl.NewFilterSTL(n(), min, max, Archiv.Hrx.Cisla, s2.name), nil
 	}
 
 	hhrx := NewUiLine(HHRX, 3)
-	hhrx.filter = func() (filter.Filter, error) {
+	hhrx.filter = func() (psl.Filter, error) {
 		min, max, err := hhrx.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewHrx(u.n(), min, max, u.Archiv.HHrx, hhrx.name), nil
+		return psl.NewFilterHHrx(n(), min, max, Archiv.HHrx), nil
 	}
 
 	hrx := NewUiLine(HRX, 3)
-	hrx.filter = func() (filter.Filter, error) {
+	hrx.filter = func() (psl.Filter, error) {
 		min, max, err := hrx.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewHrx(u.n(), min, max, u.Archiv.Hrx, hrx.name), nil
+		return psl.NewFilterHrx(n(), min, max, Archiv.Hrx), nil
 	}
 
 	sucet := NewUiLine(Sucet, 3)
-	sucet.filter = func() (filter.Filter, error) {
+	sucet.filter = func() (psl.Filter, error) {
 		min, max, err := sucet.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewSucet(u.n(), int(min), int(max)), nil
+		return psl.NewFilterSucet(n(), int(min), int(max)), nil
 	}
 
-	for _, line := range []UiLine{
+	delta1 := NewUiLine(Delta1, 0)
+	delta1.filter = func() (psl.Filter, error) {
+		if delta1.rbDelta1.Checked() {
+			return psl.NewFilterR1MinusSTL1(psl.POSSITIVE, Archiv.HHrx.Cisla, n()), nil
+		} else if delta1.rbDelta2.Checked() {
+			return psl.NewFilterR1MinusSTL1(psl.NEGATIVE, Archiv.HHrx.Cisla, n()), nil
+		}
+		return nil, errors.New("chyba")
+	}
+
+	delta2 := NewUiLine(Delta2, 0)
+	delta2.filter = func() (psl.Filter, error) {
+		if delta2.rbDelta1.Checked() {
+			return psl.NewFilterR2MinusSTL2(psl.POSSITIVE, Archiv.Hrx.Cisla, n()), nil
+		} else if delta2.rbDelta2.Checked() {
+			return psl.NewFilterR2MinusSTL2(psl.NEGATIVE, Archiv.Hrx.Cisla, n()), nil
+		}
+		return nil, errors.New("chyba")
+	}
+
+	widgets = append(widgets, UiLineToWidgetDelta(delta1))
+	widgets = append(widgets, UiLineToWidgetDelta(delta2))
+	lines[delta1.name] = delta1
+	lines[delta2.name] = delta2
+
+	for _, line := range []*UiLine{
 		r1,
 		r2,
 		s1,
 		s2,
 		hhrx,
 		hrx,
+		// delta1,
+		// delta2,
 		sucet,
 	} {
-		u.lines[line.name] = line
+		lines[line.name] = line
 		widgets = append(widgets, UiLineToWidget(line, 60))
 	}
+
 	return Composite{
 		Layout: VBox{
 			MarginsZero: true,
@@ -168,145 +196,168 @@ func (u *Ui) UpperFilters() Widget {
 	}
 }
 
-func (u *Ui) MiddleFilters() Widget {
+func MiddleFilters() Widget {
 	var widgets []Widget
 	p := NewUiLine(P, 3)
-	p.filter = func() (filter.Filter, error) {
-		min, max, err := p.MinMax()
-		if err != nil {
-			return nil, err
+	p.filter = func() (psl.Filter, error) {
+		if p.exactMode.Checked() {
+			s := p.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.P, n(), m())
+		} else {
+			min, max, err := p.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.P), nil
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsP, p.name), nil
 	}
 
 	mc := NewUiLine(Mc, 3)
-	mc.filter = func() (filter.Filter, error) {
+	mc.filter = func() (psl.Filter, error) {
 		min, max, err := mc.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsMc, mc.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Mc), nil
 	}
 
 	c0 := NewUiLine(C0, 3)
-	c0.filter = func() (filter.Filter, error) {
+	c0.filter = func() (psl.Filter, error) {
 		min, max, err := c0.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsC0, c0.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C0), nil
 	}
 
 	fCC := NewUiLine(CC, 3)
-	fCC.filter = func() (filter.Filter, error) {
+	fCC.filter = func() (psl.Filter, error) {
 		min, max, err := fCC.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsCC, fCC.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.CC), nil
 	}
 
-	n := NewUiLine(N, 3)
-	n.filter = func() (filter.Filter, error) {
-		min, max, err := n.MinMax()
+	nui := NewUiLine(N, 3)
+	nui.filter = func() (psl.Filter, error) {
+		min, max, err := nui.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsN, n.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.N), nil
 	}
 
 	vc := NewUiLine(Vc, 3)
-	vc.filter = func() (filter.Filter, error) {
+	vc.filter = func() (psl.Filter, error) {
 		min, max, err := vc.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsVc, vc.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Vc), nil
 	}
 
 	fcC := NewUiLine(cC, 3)
-	fcC.filter = func() (filter.Filter, error) {
+	fcC.filter = func() (psl.Filter, error) {
 		min, max, err := fcC.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IscC, fcC.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.XcC), nil
 	}
 
 	zhoda := NewUiLine(Zhoda, 3)
-	zhoda.filter = func() (filter.Filter, error) {
+	zhoda.filter = func() (psl.Filter, error) {
 		min, max, err := zhoda.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewZhoda(u.n(), int(min), int(max), u.Archiv.K), nil
+		return psl.NewFilterZhodaRange(n(), int(min), int(max), Archiv.K), nil
 	}
 
 	pr := NewUiLine(Pr, 3)
-	pr.filter = func() (filter.Filter, error) {
+	pr.filter = func() (psl.Filter, error) {
 		min, max, err := pr.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsPr, pr.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Pr), nil
 	}
 
 	c19 := NewUiLine(C19, 3)
-	c19.filter = func() (filter.Filter, error) {
+	c19.filter = func() (psl.Filter, error) {
 		min, max, err := c19.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsC19, c19.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C19), nil
 	}
 
 	fCc := NewUiLine(Cc, 3)
-	fCc.filter = func() (filter.Filter, error) {
+	fCc.filter = func() (psl.Filter, error) {
 		min, max, err := fCc.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCislovacky(u.n(), int(min), int(max), num.IsCc, fCc.name), nil
+		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Cc), nil
 	}
 
 	kk := NewUiLine(Kk, 3)
-	kk.filter = func() (filter.Filter, error) {
+	kk.filter = func() (psl.Filter, error) {
 		min, max, err := kk.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewKorelacia(u.n(), u.m(), min, max, u.Archiv.K), nil
+		return psl.NewFilterKorelacia(n(), m(), min, max, Archiv.K), nil
 	}
 
 	sm := NewUiLine(Sm, 3)
-	sm.filter = func() (filter.Filter, error) {
+	sm.filter = func() (psl.Filter, error) {
 		min, max, err := sm.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewSmernica(u.n(), u.m(), min, max), nil
+		return psl.NewFilterSmernica(n(), m(), min, max), nil
 	}
 
-	for _, line := range []UiLine{
-		p,
-		mc,
+	pw, nw := UiLineToWidgetPair(p, nui, 35)
+	lines[p.name] = p
+	lines[nui.name] = nui
+
+	mcw, vcw := UiLineToWidgetPair(mc, vc, 35)
+	lines[mc.name] = mc
+	lines[vc.name] = vc
+
+	widgets = append(widgets, pw, mcw)
+	for _, line := range []*UiLine{
 		c0,
 		fCC,
+	} {
+		widgets = append(widgets, UiLineToWidgetWithExact(line, 35))
+		lines[line.name] = line
+	}
 
-		n,
-		vc,
+	widgets = append(widgets, nw, vcw)
+	for _, line := range []*UiLine{
+		// nui,
+		// vc,
 		fcC,
 		zhoda,
 
 		pr,
 		c19,
 		fCc,
+	} {
+		widgets = append(widgets, UiLineToWidgetWithExact(line, 35))
+		lines[line.name] = line
+	}
 
+	for _, line := range []*UiLine{
 		kk,
 		sm,
 	} {
 		widgets = append(widgets, UiLineToWidget(line, 35))
-		u.lines[line.name] = line
+		lines[line.name] = line
 	}
 
 	return Composite{
@@ -331,80 +382,72 @@ func (u *Ui) MiddleFilters() Widget {
 	}
 }
 
-func (u *Ui) DownFilters() Widget {
+func DownFilters() Widget {
 	var widgets []Widget
 	povinne := NewUiLine("Povinne", 1)
-	povinne.filter = func() (filter.Filter, error) {
-		cisla, err := filter.ParseBytes(povinne.lines[0].Text())
-		if err != nil {
-			return nil, err
-		}
-		return filter.NewPovinne(u.n(), cisla), nil
+	povinne.filter = func() (psl.Filter, error) {
+		return psl.NewFilterPovinneFromString(povinne.lines[0].Text(), Archiv.K, n(), m())
 	}
+
 	povinneSTL := NewUiLine("Povinne STL", 1)
-	povinneSTL.filter = func() (filter.Filter, error) {
-		cisla, err := filter.ParseNBytes(u.n(), povinneSTL.lines[0].Text())
-		if err != nil {
-			return nil, err
-		}
-		return filter.NewPovinneStl(u.n(), cisla), nil
+	povinneSTL.filter = func() (psl.Filter, error) {
+		return psl.NewFilterPovinneSTLFromString(povinneSTL.lines[0].Text(), Archiv.K, n(), m())
 	}
+
 	zakazane := NewUiLine("Zakazane", 1)
-	zakazane.filter = func() (filter.Filter, error) {
-		cisla, err := filter.ParseBytes(zakazane.lines[0].Text())
-		if err != nil {
-			return nil, err
-		}
-		return filter.NewZakazane(u.m(), cisla), nil
+	zakazane.filter = func() (psl.Filter, error) {
+		return psl.NewFilterZakazaneFromString(zakazane.lines[0].Text(), Archiv.K, n(), m())
 	}
 
 	zakazaneSTL := NewUiLine("Zakazane STL", 1)
-	zakazaneSTL.filter = func() (filter.Filter, error) {
-		cisla, err := filter.ParseNBytes(u.n(), zakazaneSTL.lines[0].Text())
-		if err != nil {
-			return nil, err
-		}
-		return filter.NewZakazaneStl(u.n(), cisla), nil
+	zakazaneSTL.filter = func() (psl.Filter, error) {
+		return psl.NewFilterZakazaneSTLFromString(zakazaneSTL.lines[0].Text(), Archiv.K, n(), m())
 	}
 
 	ntica := NewUiLine(Ntica, 1)
-	ntica.filter = func() (filter.Filter, error) {
-		tica, err := filter.ParseNtica(u.n(), ntica.lines[0].Text())
+	ntica.filter = func() (psl.Filter, error) {
+		tica, err := psl.ParseNtica(n(), ntica.lines[0].Text())
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewNtica(u.n(), tica), nil
+		return psl.NewFilterNtica(n(), tica), nil
 	}
 
 	xtica := NewUiLine(Xtica, 1)
-	xtica.filter = func() (filter.Filter, error) {
-		tica, err := filter.ParseXtica(u.n(), u.m(), xtica.lines[0].Text())
+	xtica.filter = func() (psl.Filter, error) {
+		tica, err := psl.ParseXtica(n(), m(), xtica.lines[0].Text())
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewXtica(u.n(), u.m(), tica), nil
+		return psl.NewFilterXtica(n(), m(), tica), nil
 	}
 
-	for _, line := range []UiLine{
+	xcisla := NewUiLine(Xcisla, 1)
+	xcisla.filter = func() (psl.Filter, error) {
+		return psl.NewFilterXcislaFromString(xcisla.lines[0].Text(), n(), m())
+	}
+
+	for _, line := range []*UiLine{
 		povinne,
 		povinneSTL,
 		zakazane,
 		zakazaneSTL,
 		ntica,
 		xtica,
+		xcisla,
 	} {
 		widgets = append(widgets, UiLineToWidget2(line))
-		u.lines[line.name] = line
+		lines[line.name] = line
 	}
 
 	cifrovacky := new(CifrovackyPanel)
 	cifrovacky.name = Cifrovacky
-	cifrovacky.filter = func() (filter.Filter, error) {
-		c, err := filter.ParseCifrovacky(u.n(), u.m(), cifrovacky.String())
+	cifrovacky.filter = func() (psl.Filter, error) {
+		c, err := psl.ParseCifrovacky(cifrovacky.String(), n(), m())
 		if err != nil {
 			return nil, err
 		}
-		return filter.NewCifrovacky(u.n(), u.m(), c)
+		return psl.NewFilterCifrovacky(c, n(), m())
 	}
 	cifrovackyWidget := []Widget{
 		Label{
@@ -421,8 +464,8 @@ func (u *Ui) DownFilters() Widget {
 		Text:      "X",
 		OnClicked: func() { cifrovacky.Clear() },
 	})
-	// u.cifrovacky = &cifrovacky
-	u.lines[cifrovacky.name] = cifrovacky
+	// cifrovacky = &cifrovacky
+	lines[cifrovacky.name] = cifrovacky
 
 	widgets = append(widgets,
 		Composite{
@@ -433,14 +476,14 @@ func (u *Ui) DownFilters() Widget {
 		},
 	)
 
-	stlNtica := new(StlNtica)
+	stlNtica = new(StlNtica)
 	stlNtica.name = STLNtica
-	stlNtica.filter = func() (filter.Filter, error) {
-		tica, err := filter.ParseNtica(u.n(), ntica.lines[0].Text())
+	stlNtica.filter = func() (psl.Filter, error) {
+		tica, err := psl.ParseNtica(n(), ntica.lines[0].Text())
 		if err != nil {
 			return nil, errors.New("Nebola zadaná Ntica")
 		}
-		return filter.NewStlNtica(u.n(), tica, stlNtica.Pozicie()), nil
+		return psl.NewFilterSTLNtica(n(), tica, stlNtica.Pozicie()), nil
 	}
 	stlNticaWidget := []Widget{
 		Label{
@@ -461,8 +504,7 @@ func (u *Ui) DownFilters() Widget {
 			OnClicked: func() { stlNtica.Clear() },
 		},
 	)
-	u.stlNtica = stlNtica // kvoli zakrtavaniu...
-	u.lines[STLNtica] = stlNtica
+	lines[STLNtica] = stlNtica
 
 	widgets = append(widgets,
 		Composite{
@@ -481,108 +523,137 @@ func (u *Ui) DownFilters() Widget {
 	}
 }
 
-func (u *Ui) Buttons() Widget {
+func Buttons() Widget {
 	return Composite{
 		Layout: HBox{
 			MarginsZero: true,
 		},
 		Children: []Widget{
 			PushButton{
-				AssignTo:  &u.generujPB,
+				AssignTo:  &generujPB,
 				Text:      "Generuj r+1",
 				Enabled:   false,
-				OnClicked: func() { u.Generuj() },
+				OnClicked: func() { Generuj() },
 			},
 			PushButton{
-				AssignTo:  &u.filtrujPB,
+				AssignTo:  &filtrujPB,
 				Text:      "Filtruj r+1",
 				Enabled:   false,
-				OnClicked: func() { u.Filtruj() },
+				OnClicked: func() { Filtruj() },
 			},
 			// PushButton{
 			// Text: "Limity r+1",
 			// },
 			PushButton{
-				AssignTo:  &u.archivrPB,
+				AssignTo:  &archivrPB,
 				Text:      "Archív r",
 				Enabled:   false,
-				OnClicked: func() { u.ArchivR() },
+				OnClicked: func() { ArchivR() },
 			},
 			PushButton{
 				Text: "Zmaž limity",
 				OnClicked: func() {
-					for _, l := range u.lines {
+					for _, l := range lines {
 						l.Clear()
 					}
 				},
+			},
+			ToolButton{
+				Text:      "?",
+				OnClicked: help,
 			},
 		},
 	}
 }
 
-func (u *Ui) n() int {
-	return int(u.nNE.Value())
+func help() {
+	msg := `Navod k zadavaniu hodnot.
+Vo vseobecnosti plati...
+(a) oddelovac hodnot je: "," (ciarka)
+(b) oddelovac pozicii je: ";" (bodkociarka)
+(c) oddelovac pozicii od hodnot je: ":" (dvojbodka)
+
+(1) jedina hodnota: c1, c2, c3
+(2) rozmedzie: c1-c2 // c1 < c2
+(3) cislovacky + zhoda: P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC, Zh
+(4) zadanie pozicie: p1:(1),(2),(3); p2:(1),(2),(3) // p1 > 0 
+Dolezite je ze hodnoty sa oddeluju pomocou (a) a pozicie pomocou (b). Pozicie a hodnoty oddeluje (c)
+
+Priklad...
+Povinne/Zakazane: 			1, 2, 4-5, P, N
+Povinne STL/Zakazane STL: 	1:1,2,3-5,P,N; 5:Zh,23
+
+Ntica: 	5 0 0 0 0
+Xtica: 	1 2 0 2 1
+Xcisla: 1:1, 2-4; 2:3-4; 6:1
+
+Mod E pre P, N, ..., Zh. V tomto mode je mozne do stredneho policka zadavat presne hodnoty.`
+	walk.MsgBox(mainWindow, "?", msg, walk.MsgBoxIconInformation)
 }
 
-func (u *Ui) m() int {
-	return int(u.mNE.Value())
+func n() int {
+	return int(nNE.Value())
 }
 
-func (u *Ui) ArchivR() {
-	for k, v := range u.lines {
+func m() int {
+	return int(mNE.Value())
+}
+
+func ArchivR() {
+	for k, v := range lines {
 		var f float64
 		switch k {
 		case R1:
-			f = u.Archiv.R1
+			f = Archiv.R1
 		case R2:
-			f = u.Archiv.R2
+			f = Archiv.R2
 		case STL1:
-			f = u.Archiv.S1
+			f = Archiv.S1
 		case STL2:
-			f = u.Archiv.S2
+			f = Archiv.S2
 		case HRX:
-			f = u.Archiv.Riadok.Hrx
+			f = Archiv.Riadok.Hrx
 		case HHRX:
-			f = u.Archiv.Riadok.HHrx
+			f = Archiv.Riadok.HHrx
 		case Sucet:
-			f = float64(u.Archiv.Sucet)
+			f = float64(Archiv.Sucet)
 		case P:
-			f = float64(u.Archiv.C[0])
+			f = float64(Archiv.C[0])
 		case N:
-			f = float64(u.Archiv.C[1])
+			f = float64(Archiv.C[1])
 		case Pr:
-			f = float64(u.Archiv.C[2])
+			f = float64(Archiv.C[2])
 		case Mc:
-			f = float64(u.Archiv.C[3])
+			f = float64(Archiv.C[3])
 		case Vc:
-			f = float64(u.Archiv.C[4])
+			f = float64(Archiv.C[4])
 		case C19:
-			f = float64(u.Archiv.C[5])
+			f = float64(Archiv.C[5])
 		case C0:
-			f = float64(u.Archiv.C[6])
+			f = float64(Archiv.C[6])
 		case cC:
-			f = float64(u.Archiv.C[7])
+			f = float64(Archiv.C[7])
 		case Cc:
-			f = float64(u.Archiv.C[8])
+			f = float64(Archiv.C[8])
 		case CC:
-			f = float64(u.Archiv.C[9])
+			f = float64(Archiv.C[9])
 		case Zhoda:
-			f = float64(u.Archiv.Zh)
+			f = float64(Archiv.Zh)
 
 		case Kk:
-			f = u.Archiv.Kk
+			f = Archiv.Kk
 		case Sm:
-			f = u.Archiv.Sm
+			f = Archiv.Sm
 
 		case Ntica:
-			v.Set(u.Archiv.Ntica.String(), 1)
+			v.Set(Archiv.Ntica.String(), 1)
 			continue
 		case Xtica:
-			v.Set(u.Archiv.Xtica.String(), 1)
+			v.Set(Archiv.Xtica.String(), 1)
 			continue
 
 		case Cifrovacky:
-			for i, c := range u.Archiv.Cifrovacky {
+			for i, c := range Archiv.Cifrovacky {
 				v.Set(strconv.Itoa(int(c)), i)
 			}
 			continue
@@ -596,7 +667,7 @@ func (u *Ui) ArchivR() {
 	}
 }
 
-func NacitajSubor(parent *walk.MainWindow) (string, error) {
+func NacitajSuborMW(parent *walk.MainWindow) (string, error) {
 	var fileDialog walk.FileDialog
 	accepted, err := fileDialog.ShowOpen(parent)
 	if err != nil {
@@ -609,49 +680,49 @@ func NacitajSubor(parent *walk.MainWindow) (string, error) {
 	}
 }
 
-func (u *Ui) NacitajSubor() {
-	path, err := NacitajSubor(u.mainWindow)
+func NacitajSubor() {
+	path, err := NacitajSuborMW(mainWindow)
 	if err != nil {
-		u.infoL.SetText(err.Error())
+		infoL.SetText(err.Error())
 	} else {
 		done := make(chan error)
 		go func() {
-			u.infoL.SetText("Vytvarám Archív")
-			u.Archiv, err = archiv.Make(path, u.workingDir, u.n(), u.m())
+			infoL.SetText("Vytvarám Archív")
+			Archiv, err = psl.Make(path, workingDir, n(), m())
 			done <- err
 		}()
 		go func() {
 			err := <-done
 			if err != nil {
-				u.infoL.SetText(err.Error())
+				infoL.SetText(err.Error())
 			} else {
 				// Lock
-				u.nacitajPB.SetEnabled(false)
-				u.nNE.SetEnabled(false)
-				u.mNE.SetEnabled(false)
+				nacitajPB.SetEnabled(false)
+				nNE.SetEnabled(false)
+				mNE.SetEnabled(false)
 
 				// Unlock
-				u.generujPB.SetEnabled(true)
-				u.filtrujPB.SetEnabled(true)
-				u.archivrPB.SetEnabled(true)
-				for i := 0; i < u.n() && i < 30; i++ {
-					u.stlNtica.cb[i].SetEnabled(true)
+				generujPB.SetEnabled(true)
+				filtrujPB.SetEnabled(true)
+				archivrPB.SetEnabled(true)
+				for i := 0; i < n() && i < 30; i++ {
+					stlNtica.cb[i].SetEnabled(true)
 				}
 
-				u.riadokLE.SetText(u.Archiv.K.String())
-				u.ucL.SetText(u.ucL.Text() + strconv.Itoa(int(u.Archiv.Cislo)))
-				u.infoL.SetText("Archív úspešne vytvorený")
+				riadokLE.SetText(Archiv.K.String())
+				ucL.SetText(ucL.Text() + strconv.Itoa(int(Archiv.Cislo)))
+				infoL.SetText("Archív úspešne vytvorený")
 			}
 		}()
 	}
 }
 
-func (u *Ui) Filters() (filter.Filters, error) {
+func Filters() (psl.Filters, error) {
 	var (
-		f filter.Filters
+		f psl.Filters
 		e []error
 	)
-	for _, line := range u.lines {
+	for _, line := range lines {
 		if line.IsSet() {
 			filter, err := line.Filter()
 			if err != nil {
@@ -674,60 +745,58 @@ func (u *Ui) Filters() (filter.Filters, error) {
 	return f, nil
 }
 
-func (u *Ui) Generuj() {
-	filters, err := u.Filters()
+func Generuj() {
+	filters, err := Filters()
 	if err != nil {
-		walk.MsgBox(u.mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
+		walk.MsgBox(mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
 		return
 	}
 	msg := make(chan string)
 	go func() {
-		u.infoL.SetText(fmt.Sprintf("Generovanie dokončené. %s", <-msg))
+		infoL.SetText(fmt.Sprintf("Generovanie dokončené. %s", <-msg))
 	}()
 	go func() {
 		// btn lock
-		u.generujPB.SetEnabled(false)
-		defer u.generujPB.SetEnabled(true)
+		generujPB.SetEnabled(false)
+		defer generujPB.SetEnabled(true)
 
 		// info
-		u.infoL.SetText("Generujem kombinácie")
+		infoL.SetText("Generujem kombinácie")
 
-		generator.GenerateKombinacie(u.n(), u.Archiv, filters, msg)
+		psl.GenerateKombinacie(n(), Archiv, filters, msg)
 	}()
 }
 
-func (u *Ui) Filtruj() {
-	filters, err := u.Filters()
+func Filtruj() {
+	filters, err := Filters()
 	if err != nil {
-		walk.MsgBox(u.mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
+		walk.MsgBox(mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
 		return
 	}
 	msg := make(chan string)
 	go func() {
 		msg := <-msg
-		u.infoL.SetText(fmt.Sprintf("Filtrovanie dokončené. %s", msg))
+		infoL.SetText(fmt.Sprintf("Filtrovanie dokončené. %s", msg))
 	}()
 	go func() {
-		u.filtrujPB.SetEnabled(false)
-		defer u.filtrujPB.SetEnabled(true)
-		u.infoL.SetText("Vytváram filter pre r+1")
+		filtrujPB.SetEnabled(false)
+		defer filtrujPB.SetEnabled(true)
+		infoL.SetText("Vytváram filter pre r+1")
 
-		generator.GenerateFilter(u.n(), u.Archiv, filters, msg)
+		psl.GenerateFilter(n(), Archiv, filters, msg)
 	}()
 }
 
-func Main() error {
+func Main() (err error) {
 
-	var (
-		workingDir, _ = os.Getwd()
-		ui            = Ui{
-			workingDir: workingDir,
-			lines:      make(map[string]Line),
-		}
-	)
+	if wd, err := os.Getwd(); err != nil {
+		return err
+	} else {
+		workingDir = wd
+	}
 
-	_, err := MainWindow{
-		AssignTo: &ui.mainWindow,
+	if err := (MainWindow{
+		AssignTo: &mainWindow,
 		Title:    "Generator",
 		Layout:   VBox{},
 		MinSize:  Size{Width: 1400}, // 1397
@@ -740,43 +809,49 @@ func Main() error {
 				Children: []Widget{
 					//N
 					NumberEdit{
-						AssignTo: &ui.nNE,
+						AssignTo: &nNE,
 
 						MinValue: 1,
-						MaxValue: 89,
+						MaxValue: 30,
 						Value:    5.0,
 					},
 					//M
 					NumberEdit{
-						AssignTo: &ui.mNE,
+						AssignTo: &mNE,
 						MinValue: 2,
-						MaxValue: 99,
+						MaxValue: 90,
 						Value:    35.0,
 					},
 					PushButton{
-						AssignTo:  &ui.nacitajPB,
+						AssignTo:  &nacitajPB,
 						Text:      "Načítaj súbor",
-						OnClicked: func() { ui.NacitajSubor() },
+						OnClicked: func() { NacitajSubor() },
 					},
 					LineEdit{
-						AssignTo: &ui.riadokLE,
+						AssignTo: &riadokLE,
 						Enabled:  false,
 					},
 					Label{
-						AssignTo: &ui.ucL,
+						AssignTo: &ucL,
 						Text:     "Uc: ",
 					},
 				},
 			},
-			ui.UpperFilters(),
-			ui.MiddleFilters(),
-			ui.DownFilters(),
-			ui.Buttons(),
+			UpperFilters(),
+			MiddleFilters(),
+			DownFilters(),
+			Buttons(),
 			Label{
-				AssignTo: &ui.infoL,
+				AssignTo: &infoL,
 			},
 		},
-	}.Run()
+	}).Create(); err != nil {
+		return err
+	}
+	for _, v := range lines {
+		v.Clear()
+	}
+	mainWindow.Run()
 	return err
 }
 
