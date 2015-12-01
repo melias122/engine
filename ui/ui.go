@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
@@ -78,7 +79,7 @@ func UpperFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterR(n(), min, max, Archiv.HHrx.Cisla, r1.name), nil
+		return psl.NewFilterR1(min, max, Archiv.HHrx.Cisla, n()), nil
 	}
 
 	r2 := NewUiLine(R2, 3)
@@ -87,8 +88,7 @@ func UpperFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterR(n(), min, max, Archiv.Hrx.Cisla, r2.name), nil
-		// return filter.NewR(n(), min, max, Archiv.Hrx.Cisla, r2.name), nil
+		return psl.NewFilterR2(min, max, Archiv.Hrx.Cisla, n()), nil
 	}
 
 	s1 := NewUiLine(STL1, 3)
@@ -133,7 +133,7 @@ func UpperFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterSucet(n(), int(min), int(max)), nil
+		return psl.NewFilterSucet(int(min), int(max), n()), nil
 	}
 
 	delta1 := NewUiLine(Delta1, 0)
@@ -214,92 +214,142 @@ func MiddleFilters() Widget {
 
 	mc := NewUiLine(Mc, 3)
 	mc.filter = func() (psl.Filter, error) {
-		min, max, err := mc.MinMax()
-		if err != nil {
-			return nil, err
+		if mc.exactMode.Checked() {
+			s := mc.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.Mc, n(), m())
+		} else {
+			min, max, err := mc.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Mc), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Mc), nil
 	}
 
 	c0 := NewUiLine(C0, 3)
 	c0.filter = func() (psl.Filter, error) {
-		min, max, err := c0.MinMax()
-		if err != nil {
-			return nil, err
+		if c0.exactMode.Checked() {
+			s := c0.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.C0, n(), m())
+		} else {
+			min, max, err := c0.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C0), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C0), nil
 	}
 
 	fCC := NewUiLine(CC, 3)
 	fCC.filter = func() (psl.Filter, error) {
-		min, max, err := fCC.MinMax()
-		if err != nil {
-			return nil, err
+		if fCC.exactMode.Checked() {
+			s := fCC.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.CC, n(), m())
+		} else {
+			min, max, err := fCC.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.CC), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.CC), nil
 	}
 
 	nui := NewUiLine(N, 3)
 	nui.filter = func() (psl.Filter, error) {
-		min, max, err := nui.MinMax()
-		if err != nil {
-			return nil, err
+		if nui.exactMode.Checked() {
+			s := nui.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.N, n(), m())
+		} else {
+			min, max, err := nui.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.N), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.N), nil
 	}
 
 	vc := NewUiLine(Vc, 3)
 	vc.filter = func() (psl.Filter, error) {
-		min, max, err := vc.MinMax()
-		if err != nil {
-			return nil, err
+		if vc.exactMode.Checked() {
+			s := vc.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.Vc, n(), m())
+		} else {
+			min, max, err := vc.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Vc), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Vc), nil
 	}
 
 	fcC := NewUiLine(cC, 3)
 	fcC.filter = func() (psl.Filter, error) {
-		min, max, err := fcC.MinMax()
-		if err != nil {
-			return nil, err
+		if fcC.exactMode.Checked() {
+			s := fcC.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.XcC, n(), m())
+		} else {
+			min, max, err := fcC.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.XcC), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.XcC), nil
 	}
 
 	zhoda := NewUiLine(Zhoda, 3)
 	zhoda.filter = func() (psl.Filter, error) {
-		min, max, err := zhoda.MinMax()
-		if err != nil {
-			return nil, err
+		if zhoda.exactMode.Checked() {
+			s := zhoda.lines[1].Text()
+			return psl.NewFilterZhodaExactFromString(s, Archiv.K, n(), m())
+		} else {
+			min, max, err := zhoda.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterZhodaRange(int(min), int(max), Archiv.K, n()), nil
 		}
-		return psl.NewFilterZhodaRange(n(), int(min), int(max), Archiv.K), nil
 	}
 
 	pr := NewUiLine(Pr, 3)
 	pr.filter = func() (psl.Filter, error) {
-		min, max, err := pr.MinMax()
-		if err != nil {
-			return nil, err
+		if pr.exactMode.Checked() {
+			s := pr.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.Pr, n(), m())
+		} else {
+			min, max, err := pr.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Pr), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Pr), nil
 	}
 
 	c19 := NewUiLine(C19, 3)
 	c19.filter = func() (psl.Filter, error) {
-		min, max, err := c19.MinMax()
-		if err != nil {
-			return nil, err
+		if c19.exactMode.Checked() {
+			s := c19.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.C19, n(), m())
+		} else {
+			min, max, err := c19.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C19), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C19), nil
 	}
 
 	fCc := NewUiLine(Cc, 3)
 	fCc.filter = func() (psl.Filter, error) {
-		min, max, err := fCc.MinMax()
-		if err != nil {
-			return nil, err
+		if fCc.exactMode.Checked() {
+			s := fCc.lines[1].Text()
+			return psl.NewFilterCislovackyExactFromString(s, psl.Cc, n(), m())
+		} else {
+			min, max, err := fCc.MinMax()
+			if err != nil {
+				return nil, err
+			}
+			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Cc), nil
 		}
-		return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Cc), nil
 	}
 
 	kk := NewUiLine(Kk, 3)
@@ -681,38 +731,38 @@ func NacitajSuborMW(parent *walk.MainWindow) (string, error) {
 }
 
 func NacitajSubor() {
-	path, err := NacitajSuborMW(mainWindow)
+	csvPath, err := NacitajSuborMW(mainWindow)
 	if err != nil {
 		infoL.SetText(err.Error())
 	} else {
 		done := make(chan error)
 		go func() {
 			infoL.SetText("Vytvarám Archív")
-			Archiv, err = psl.Make(path, workingDir, n(), m())
+			Archiv, err = psl.NewArchiv(csvPath, workingDir, n(), m())
 			done <- err
 		}()
 		go func() {
 			err := <-done
 			if err != nil {
 				infoL.SetText(err.Error())
-			} else {
-				// Lock
-				nacitajPB.SetEnabled(false)
-				nNE.SetEnabled(false)
-				mNE.SetEnabled(false)
-
-				// Unlock
-				generujPB.SetEnabled(true)
-				filtrujPB.SetEnabled(true)
-				archivrPB.SetEnabled(true)
-				for i := 0; i < n() && i < 30; i++ {
-					stlNtica.cb[i].SetEnabled(true)
-				}
-
-				riadokLE.SetText(Archiv.K.String())
-				ucL.SetText(ucL.Text() + strconv.Itoa(int(Archiv.Cislo)))
-				infoL.SetText("Archív úspešne vytvorený")
+				return
 			}
+			// Lock
+			nacitajPB.SetEnabled(false)
+			nNE.SetEnabled(false)
+			mNE.SetEnabled(false)
+
+			// Unlock
+			generujPB.SetEnabled(true)
+			filtrujPB.SetEnabled(true)
+			archivrPB.SetEnabled(true)
+			for i := 0; i < n() && i < 30; i++ {
+				stlNtica.cb[i].SetEnabled(true)
+			}
+
+			riadokLE.SetText(Archiv.K.String())
+			ucL.SetText(ucL.Text() + strconv.Itoa(int(Archiv.Cislo)))
+			infoL.SetText("Archív úspešne vytvorený")
 		}()
 	}
 }
@@ -751,19 +801,27 @@ func Generuj() {
 		walk.MsgBox(mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
 		return
 	}
-	msg := make(chan string)
+	g := psl.NewGenerator2(Archiv, filters)
+	g.Start()
+
+	// buttons
 	go func() {
-		infoL.SetText(fmt.Sprintf("Generovanie dokončené. %s", <-msg))
-	}()
-	go func() {
-		// btn lock
 		generujPB.SetEnabled(false)
 		defer generujPB.SetEnabled(true)
+		g.Wait()
+	}()
 
-		// info
-		infoL.SetText("Generujem kombinácie")
+	// progress
+	go func() {
+		for {
+			time.Sleep(200 * time.Millisecond)
+			str, ok := g.Progress()
+			infoL.SetText(str)
+			if !ok {
+				return
+			}
 
-		psl.GenerateKombinacie(n(), Archiv, filters, msg)
+		}
 	}()
 }
 
@@ -773,17 +831,27 @@ func Filtruj() {
 		walk.MsgBox(mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
 		return
 	}
-	msg := make(chan string)
-	go func() {
-		msg := <-msg
-		infoL.SetText(fmt.Sprintf("Filtrovanie dokončené. %s", msg))
-	}()
+	f := psl.NewFilter2(Archiv, filters)
+	f.Start()
+
+	// buttons
 	go func() {
 		filtrujPB.SetEnabled(false)
 		defer filtrujPB.SetEnabled(true)
-		infoL.SetText("Vytváram filter pre r+1")
+		f.Wait()
+	}()
 
-		psl.GenerateFilter(n(), Archiv, filters, msg)
+	// progress
+	go func() {
+		for {
+			time.Sleep(200 * time.Millisecond)
+			str, ok := f.Progress()
+			infoL.SetText(str)
+			if !ok {
+				return
+			}
+
+		}
 	}()
 }
 
