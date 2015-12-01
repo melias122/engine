@@ -51,26 +51,26 @@ func TestFilterPovinneSTL(t *testing.T) {
 		f Filter
 		r bool
 	}{
-		{k: Kombinacia{1}, f: NewFilterPovinneSTL(map[int][]int{1: {1}}, 3, 10), r: true},
-		{k: Kombinacia{1, 2}, f: NewFilterPovinneSTL(map[int][]int{1: {1}}, 3, 10), r: true},
-		{k: Kombinacia{1, 2, 3}, f: NewFilterPovinneSTL(map[int][]int{1: {1}}, 3, 10), r: true},
+		{k: Kombinacia{1}, f: NewFilterPovinneSTL(MapInts{1: {1}}, 3, 10), r: true},
+		{k: Kombinacia{1, 2}, f: NewFilterPovinneSTL(MapInts{1: {1}}, 3, 10), r: true},
+		{k: Kombinacia{1, 2, 3}, f: NewFilterPovinneSTL(MapInts{1: {1}}, 3, 10), r: true},
 
-		{k: Kombinacia{2}, f: NewFilterPovinneSTL(map[int][]int{1: {1}}, 3, 10), r: false},
-		{k: Kombinacia{2, 3}, f: NewFilterPovinneSTL(map[int][]int{1: {1}}, 3, 10), r: false},
-		{k: Kombinacia{2, 3, 4}, f: NewFilterPovinneSTL(map[int][]int{1: {1}}, 3, 10), r: false},
+		{k: Kombinacia{2}, f: NewFilterPovinneSTL(MapInts{1: {1}}, 3, 10), r: false},
+		{k: Kombinacia{2, 3}, f: NewFilterPovinneSTL(MapInts{1: {1}}, 3, 10), r: false},
+		{k: Kombinacia{2, 3, 4}, f: NewFilterPovinneSTL(MapInts{1: {1}}, 3, 10), r: false},
 
-		{k: Kombinacia{1}, f: NewFilterPovinneSTL(map[int][]int{2: {2}}, 3, 10), r: true},
-		{k: Kombinacia{1, 2}, f: NewFilterPovinneSTL(map[int][]int{2: {2}}, 3, 10), r: true},
-		{k: Kombinacia{1, 2, 3}, f: NewFilterPovinneSTL(map[int][]int{2: {2}}, 3, 10), r: true},
+		{k: Kombinacia{1}, f: NewFilterPovinneSTL(MapInts{2: {2}}, 3, 10), r: true},
+		{k: Kombinacia{1, 2}, f: NewFilterPovinneSTL(MapInts{2: {2}}, 3, 10), r: true},
+		{k: Kombinacia{1, 2, 3}, f: NewFilterPovinneSTL(MapInts{2: {2}}, 3, 10), r: true},
 
-		{k: Kombinacia{1, 3}, f: NewFilterPovinneSTL(map[int][]int{2: {2}}, 3, 10), r: false},
-		{k: Kombinacia{2, 3}, f: NewFilterPovinneSTL(map[int][]int{2: {2}}, 3, 10), r: false},
+		{k: Kombinacia{1, 3}, f: NewFilterPovinneSTL(MapInts{2: {2}}, 3, 10), r: false},
+		{k: Kombinacia{2, 3}, f: NewFilterPovinneSTL(MapInts{2: {2}}, 3, 10), r: false},
 
-		{k: Kombinacia{1}, f: NewFilterPovinneSTL(map[int][]int{1: {2}, 3: {4}}, 3, 10), r: false},
-		{k: Kombinacia{2}, f: NewFilterPovinneSTL(map[int][]int{1: {2}, 3: {4}}, 3, 10), r: true},
-		{k: Kombinacia{2, 3}, f: NewFilterPovinneSTL(map[int][]int{1: {2}, 3: {4}}, 3, 10), r: true},
-		{k: Kombinacia{2, 3, 4}, f: NewFilterPovinneSTL(map[int][]int{1: {2}, 3: {4}}, 3, 10), r: true},
-		{k: Kombinacia{2, 3, 5}, f: NewFilterPovinneSTL(map[int][]int{1: {2}, 3: {4}}, 3, 10), r: false},
+		{k: Kombinacia{1}, f: NewFilterPovinneSTL(MapInts{1: {2}, 3: {4}}, 3, 10), r: false},
+		{k: Kombinacia{2}, f: NewFilterPovinneSTL(MapInts{1: {2}, 3: {4}}, 3, 10), r: true},
+		{k: Kombinacia{2, 3}, f: NewFilterPovinneSTL(MapInts{1: {2}, 3: {4}}, 3, 10), r: true},
+		{k: Kombinacia{2, 3, 4}, f: NewFilterPovinneSTL(MapInts{1: {2}, 3: {4}}, 3, 10), r: true},
+		{k: Kombinacia{2, 3, 5}, f: NewFilterPovinneSTL(MapInts{1: {2}, 3: {4}}, 3, 10), r: false},
 	}
 	for _, test := range tests {
 		r := test.f.Check(test.k)

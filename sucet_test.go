@@ -10,19 +10,19 @@ func TestFilterSucet(t *testing.T) {
 		f Filter
 		w bool
 	}{
-		{Kombinacia{1}, NewFilterSucet(3, 14, 14), true},
-		{Kombinacia{1, 11}, NewFilterSucet(3, 14, 14), true},
-		{Kombinacia{1, 2, 10}, NewFilterSucet(3, 14, 14), false},
-		{Kombinacia{1, 2, 11}, NewFilterSucet(3, 14, 14), true},
-		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(5, 0, 14), false},
-		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(5, 0, 15), true},
-		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(5, 15, 15), true},
-		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(5, 15, 55), true},
-		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(5, 16, 16), false},
+		{Kombinacia{1}, NewFilterSucet(14, 14, 3), true},
+		{Kombinacia{1, 11}, NewFilterSucet(14, 14, 3), true},
+		{Kombinacia{1, 2, 10}, NewFilterSucet(14, 14, 3), false},
+		{Kombinacia{1, 2, 11}, NewFilterSucet(14, 14, 3), true},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(0, 14, 5), false},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(0, 15, 5), true},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(15, 15, 5), true},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(15, 55, 5), true},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(16, 16, 5), false},
 
-		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(5, 30, 50), false},
-		{Kombinacia{1, 2, 3, 4, 25}, NewFilterSucet(5, 30, 50), true},
-		{Kombinacia{1, 2, 3, 4, 45}, NewFilterSucet(5, 30, 50), false},
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterSucet(30, 50, 5), false},
+		{Kombinacia{1, 2, 3, 4, 25}, NewFilterSucet(30, 50, 5), true},
+		{Kombinacia{1, 2, 3, 4, 45}, NewFilterSucet(30, 50, 5), false},
 	}
 	for _, test := range tests {
 		ok := test.f.Check(test.k)

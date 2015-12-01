@@ -9,7 +9,7 @@ type filterSucet struct {
 	min, max int
 }
 
-func NewFilterSucet(n int, min, max int) Filter {
+func NewFilterSucet(min, max, n int) Filter {
 	if min < 0 {
 		min = 0
 	}

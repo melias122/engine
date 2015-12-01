@@ -3,7 +3,7 @@ package psl
 import "math/big"
 
 var (
-	fcache = make(map[key]float64)
+	fcache = make(map[key]float64, 2048)
 )
 
 type key struct {

@@ -29,15 +29,15 @@ func TestFilterZakazaneSTL(t *testing.T) {
 		f Filter
 		w bool
 	}{
-		{Kombinacia{1}, NewFilterZakazaneSTL(map[int][]int{1: {1}}, 5, 35), false},
-		{Kombinacia{1}, NewFilterZakazaneSTL(map[int][]int{1: {2}}, 5, 35), true},
-		{Kombinacia{2, 3, 5}, NewFilterZakazaneSTL(map[int][]int{2: {3}}, 5, 35), false},
-		{Kombinacia{2, 3, 6}, NewFilterZakazaneSTL(map[int][]int{2: {4}}, 5, 35), true},
-		{Kombinacia{2, 3, 6}, NewFilterZakazaneSTL(map[int][]int{3: {7}}, 5, 35), true},
+		{Kombinacia{1}, NewFilterZakazaneSTL(MapInts{1: {1}}, 5, 35), false},
+		{Kombinacia{1}, NewFilterZakazaneSTL(MapInts{1: {2}}, 5, 35), true},
+		{Kombinacia{2, 3, 5}, NewFilterZakazaneSTL(MapInts{2: {3}}, 5, 35), false},
+		{Kombinacia{2, 3, 6}, NewFilterZakazaneSTL(MapInts{2: {4}}, 5, 35), true},
+		{Kombinacia{2, 3, 6}, NewFilterZakazaneSTL(MapInts{3: {7}}, 5, 35), true},
 
-		{Kombinacia{2}, NewFilterZakazaneSTL(map[int][]int{3: {3}}, 5, 35), true},
-		{Kombinacia{2, 3}, NewFilterZakazaneSTL(map[int][]int{1: {2}, 2: {3}}, 5, 35), false},
-		{Kombinacia{2, 4, 6}, NewFilterZakazaneSTL(map[int][]int{1: {2}, 2: {4}, 3: {6}}, 5, 35), false},
+		{Kombinacia{2}, NewFilterZakazaneSTL(MapInts{3: {3}}, 5, 35), true},
+		{Kombinacia{2, 3}, NewFilterZakazaneSTL(MapInts{1: {2}, 2: {3}}, 5, 35), false},
+		{Kombinacia{2, 4, 6}, NewFilterZakazaneSTL(MapInts{1: {2}, 2: {4}, 3: {6}}, 5, 35), false},
 	}
 	for i, test := range tests {
 		ok := test.f.Check(test.k)

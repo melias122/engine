@@ -1,19 +1,11 @@
 package psl
 
-import (
-	"bytes"
-	"strconv"
-	"strings"
-)
+import "bytes"
 
 type Tica []byte
 
 func (t Tica) String() string {
-	s := make([]string, len(t))
-	for i, n := range t {
-		s[i] = strconv.Itoa(int(n))
-	}
-	return strings.Join(s, " ")
+	return bytesToString(t)
 }
 
 func (t0 Tica) Equal(t Tica) bool {

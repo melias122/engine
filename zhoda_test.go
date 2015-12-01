@@ -60,23 +60,23 @@ func TestFilterZhodaRange(t *testing.T) {
 		f Filter
 		w bool
 	}{
-		{Kombinacia{1}, NewFilterZhodaRange(3, 2, 3, Kombinacia{1}), true},
-		{Kombinacia{1}, NewFilterZhodaRange(3, 0, 0, Kombinacia{1}), false},
-		{Kombinacia{1}, NewFilterZhodaRange(3, 0, 3, Kombinacia{1}), true},
-		{Kombinacia{1}, NewFilterZhodaRange(3, 0, 3, Kombinacia{2}), true},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 2, 2, Kombinacia{1, 2}), true},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 0, 2, Kombinacia{1, 2, 3}), false},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 0, 3, Kombinacia{4, 5, 6}), true},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 1, 3, Kombinacia{4, 5, 6}), false},
+		{Kombinacia{1}, NewFilterZhodaRange(2, 3, Kombinacia{1}, 3), true},
+		{Kombinacia{1}, NewFilterZhodaRange(0, 0, Kombinacia{1}, 3), false},
+		{Kombinacia{1}, NewFilterZhodaRange(0, 3, Kombinacia{1}, 3), true},
+		{Kombinacia{1}, NewFilterZhodaRange(0, 3, Kombinacia{2}, 3), true},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(2, 2, Kombinacia{1, 2}, 3), true},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(0, 2, Kombinacia{1, 2, 3}, 3), false},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(0, 3, Kombinacia{4, 5, 6}, 3), true},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(1, 3, Kombinacia{4, 5, 6}, 3), false},
 
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 0, 3, Kombinacia{1, 2, 3}), true},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 1, 3, Kombinacia{1, 2, 3}), true},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 2, 3, Kombinacia{1, 2, 3}), true},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 3, 3, Kombinacia{1, 2, 3}), true},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(0, 3, Kombinacia{1, 2, 3}, 3), true},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(1, 3, Kombinacia{1, 2, 3}, 3), true},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(2, 3, Kombinacia{1, 2, 3}, 3), true},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 3, Kombinacia{1, 2, 3}, 3), true},
 
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 0, 2, Kombinacia{1, 2, 3}), false},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 0, 1, Kombinacia{1, 2, 3}), false},
-		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(3, 0, 0, Kombinacia{1, 2, 3}), false},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(0, 2, Kombinacia{1, 2, 3}, 3), false},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(0, 1, Kombinacia{1, 2, 3}, 3), false},
+		{Kombinacia{1, 2, 3}, NewFilterZhodaRange(0, 0, Kombinacia{1, 2, 3}, 3), false},
 	}
 	for i, test := range tests {
 		ok := test.f.Check(test.k)

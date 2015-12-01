@@ -8,10 +8,19 @@ type filterR struct {
 	n        int
 	min, max float64
 	cisla    Nums
-	fname    string
+
+	typ int // 1 alebo 2
 }
 
-func NewFilterR(n int, min, max float64, cisla Nums, fname string) Filter {
+func NewFilterR1(min, max float64, HHrxCisla Nums, n int) Filter {
+	return newFilterR(min, max, HHrxCisla, n, 1)
+}
+
+func NewFilterR2(min, max float64, HrxCisla Nums, n int) Filter {
+	return newFilterR(min, max, HrxCisla, n, 2)
+}
+
+func newFilterR(min, max float64, cisla Nums, n int, typ int) Filter {
 	if min < 0 {
 		min = 0
 	}
@@ -21,7 +30,7 @@ func NewFilterR(n int, min, max float64, cisla Nums, fname string) Filter {
 		min:   nextLSS(min),
 		max:   nextGRT(max),
 		cisla: cisla,
-		fname: fname,
+		typ:   typ,
 	}
 }
 
@@ -37,12 +46,13 @@ func (r filterR) Check(k Kombinacia) bool {
 }
 
 func (r filterR) CheckSkupina(skupina Skupina) bool {
-	switch r.fname {
-	case "ƩR 1-DO":
+	if r.typ == 1 {
+		// R 1-DO
 		if skupina.R1[0] > r.max || skupina.R1[1] < r.min {
 			return false
 		}
-	case "ƩR OD-DO":
+	} else if r.typ == 2 {
+		// R OD-DO
 		if skupina.R2 > r.max || skupina.R2 < r.min {
 			return false
 		}
@@ -51,5 +61,11 @@ func (r filterR) CheckSkupina(skupina Skupina) bool {
 }
 
 func (r filterR) String() string {
-	return fmt.Sprintf("%s: %f-%f", r.fname, r.min, r.max)
+	var fname string
+	if r.typ == 1 {
+		fname = "ƩR 1-DO"
+	} else if r.typ == 2 {
+		fname = "ƩR OD-DO"
+	}
+	return fmt.Sprintf("%s: %f-%f", fname, r.min, r.max)
 }

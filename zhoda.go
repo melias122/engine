@@ -1,6 +1,7 @@
 package psl
 
 import (
+	"fmt"
 	"sort"
 	"strings"
 )
@@ -55,7 +56,7 @@ type filterZhoda struct {
 	exact       []bool
 }
 
-func NewFilterZhodaRange(n, min, max int, kombinacia Kombinacia) Filter {
+func NewFilterZhodaRange(min, max int, k Kombinacia, n int) Filter {
 	if min < 0 {
 		min = 0
 	}
@@ -66,11 +67,21 @@ func NewFilterZhodaRange(n, min, max int, kombinacia Kombinacia) Filter {
 		n:          n,
 		min:        min,
 		max:        max,
-		kombinacia: kombinacia,
+		kombinacia: k,
 	}
 }
 
-func NewFilterZhodaExact(n int, ints []int, kombinacia Kombinacia) Filter {
+func NewFilterZhodaExactFromString(s string, k Kombinacia, n, m int) (Filter, error) {
+	r := strings.NewReader(s)
+	p := NewParser(r, n, m)
+	ints, err := p.ParseInts()
+	if err != nil {
+		return nil, err
+	}
+	return NewFilterZhodaExact(ints, k, n), nil
+}
+
+func NewFilterZhodaExact(ints []int, k Kombinacia, n int) Filter {
 	sort.Ints(ints)
 	min := ints[0]
 	max := ints[len(ints)-1]
@@ -90,7 +101,7 @@ func NewFilterZhodaExact(n int, ints []int, kombinacia Kombinacia) Filter {
 		n:          n,
 		min:        min,
 		max:        max,
-		kombinacia: kombinacia,
+		kombinacia: k,
 		exact:      exact,
 	}
 }
@@ -106,10 +117,23 @@ func (f filterZhoda) Check(k Kombinacia) bool {
 	return true
 }
 
-func (f filterZhoda) CheckSkupina(s Skupina) bool {
+func (f filterZhoda) CheckSkupina(skupina Skupina) bool {
+	// if skupina.Zh[0] > f.max || skupina.Zh[1] < f.min {
+	// return false
+	// }
 	return true
 }
 
 func (f filterZhoda) String() string {
-	return "Zh: " + itoa(f.min) + "-" + itoa(f.max)
+	fname := "Zh"
+	if f.exact != nil {
+		var s []string
+		for i, ok := range f.exact {
+			if ok {
+				s = append(s, itoa(i))
+			}
+		}
+		return fmt.Sprintf("%s: %s", fname, strings.Join(s, ", "))
+	}
+	return fmt.Sprintf("%s: %d-%d", fname, f.min, f.max)
 }

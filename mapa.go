@@ -77,7 +77,7 @@ func (z *zhodaRiadok) Strings() []string {
 	pZH := []string{}
 	for i, c := range z.presun {
 		if c > 0 {
-			pZH = append(pZH, strconv.Itoa(c)+"/"+strconv.Itoa(i+1))
+			pZH = append(pZH, strconv.Itoa(c)+"|"+strconv.Itoa(i+1))
 		}
 	}
 	s = append(s, strings.Join(pZH, ", "))
@@ -88,7 +88,7 @@ func (z *zhodaRiadok) Strings() []string {
 	}
 	for i, c := range z.presun {
 		if c > 0 {
-			s = append(s, strconv.Itoa(c)+"/"+strconv.Itoa(i+1))
+			s = append(s, strconv.Itoa(c)+"|"+strconv.Itoa(i+1))
 		} else {
 			s = append(s, "")
 		}

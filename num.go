@@ -1,6 +1,9 @@
 package psl
 
-import "strconv"
+import (
+	"sort"
+	"strconv"
+)
 
 type Num struct {
 	n, m  byte
@@ -84,6 +87,7 @@ func (n Nums) Is101() bool {
 func (c Nums) Len() int           { return len(c) }
 func (c Nums) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 func (c Nums) Less(i, j int) bool { return c[i].Cislo() < c[j].Cislo() }
+func (n Nums) Sort()              { sort.Sort(n) }
 
 type ByPocetR struct {
 	Nums
