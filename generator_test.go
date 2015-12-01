@@ -1,74 +1,70 @@
 package psl
 
 import (
+	"fmt"
 	"testing"
+	"time"
 )
 
-func Get412() (int, int, *H, *H, []Xcisla) {
-	const n = 4
-	const m = 12
-	k_hrx := [][]int{
-		[]int{1, 3, 5, 7},
-		[]int{2, 4, 6, 8},
-		[]int{3, 6, 9, 12},
-		[]int{4, 8, 10, 12},
-		[]int{5, 9, 10, 11},
-		[]int{6, 7, 8, 12},
+// 1. BenchmarkGenerator-4 	   30000	     49036 ns/op	    1264 B/op	      53 allocs/op  // old
+// 2. BenchmarkKombinator-4	   30000	     53144 ns/op	    1536 B/op	      48 allocs/op 	// new
+func BenchmarkKombinator(b *testing.B) {
+	archiv, err := NewArchiv("profile/412.csv", "-", 4, 12)
+	if err != nil {
+		b.Fatal(err)
 	}
-	k_hhrx := [][]int{
-		[]int{1, 2, 3, 4},
-		[]int{5, 6, 7, 8},
-		[]int{9, 10, 11, 12},
-		[]int{1, 3, 5, 7},
-		[]int{2, 4, 6, 8},
-		[]int{3, 6, 9, 12},
-		[]int{4, 8, 10, 12},
-		[]int{5, 9, 10, 11},
-		[]int{6, 7, 8, 12},
-	}
-
-	Hrx := NewHrx(n, m)
-	for _, i := range k_hrx {
-		for y, x := range i {
-			Hrx.Add(x, y)
-		}
-	}
-
-	HHrx := NewHHrx(n, m)
-	for _, i := range k_hhrx {
-		for y, x := range i {
-			HHrx.Add(x, y)
-		}
-	}
-	presuny := []Xcisla{
-		Xcisla{Tab{1, 3}, Tab{2, 1}},            // 0 3 1
-		Xcisla{Tab{1, 3}, Tab{3, 1}},            // 0 3 0 1
-		Xcisla{Tab{1, 2}, Tab{2, 2}},            // 0 2 2
-		Xcisla{Tab{1, 2}, Tab{2, 1}, Tab{3, 1}}, // 0 2 1 1
-		Xcisla{Tab{1, 2}, Tab{3, 2}},            // 0 2 0 2
-		Xcisla{Tab{1, 1}, Tab{2, 3}},            // 0 1 3
-		Xcisla{Tab{1, 1}, Tab{2, 2}, Tab{3, 1}}, // 0 1 2 1
-		Xcisla{Tab{1, 1}, Tab{2, 1}, Tab{3, 2}}, // 0 1 1 2
-		Xcisla{Tab{1, 1}, Tab{3, 3}},            // 0 1 0 3
-		Xcisla{Tab{2, 4}},                       // 0 0 4
-		Xcisla{Tab{2, 3}, Tab{3, 1}},            // 0 0 3 1
-		Xcisla{Tab{2, 2}, Tab{3, 2}},            // 0 0 2 2
-		Xcisla{Tab{2, 1}, Tab{3, 3}},            // 0 0 1 3
-	}
-	return n, m, Hrx, HHrx, presuny
-}
-
-// BenchmarkGenerator-4	  200000	      8942 ns/op	     640 B/op	      14 allocs/op
-func BenchmarkGenerator(b *testing.B) {
-	n, _, Hrx, _, presuny := Get412()
-	filters := Filters{}
-	ch := make(chan Kombinacia)
-	Generator := NewGenerator(n, Hrx.Cisla, ch, filters)
-	go func() {
+	var (
+		k     = kombinator{}
+		cisla = cisla(archiv.Hrx.Cisla, archiv.Skupiny[2].Xcisla)
+		n     = 4
+	)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ch := k.run(cisla, nil, n)
 		for range ch {
 		}
-	}()
-	for i := 0; i < b.N; i++ {
-		Generator.Generate(presuny[0])
 	}
+	b.ReportAllocs()
+}
+
+func TestKombinator(t *testing.T) {
+	archiv, err := NewArchiv("profile/412.csv", "-", 4, 12)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var (
+		k = kombinator{}
+
+		cisla = cisla(archiv.Hrx.Cisla, archiv.Skupiny[0].Xcisla)
+		n     = archiv.n
+	)
+	ch := k.run(cisla, nil, n)
+	for range ch {
+	}
+}
+
+func TestGenerator2(t *testing.T) {
+	t.SkipNow()
+	archiv, err := NewArchiv("profile/590.csv", "-", 5, 90)
+	if err != nil {
+		t.Fatal(err)
+	}
+	filters := Filters{
+		NewFilterSucet(archiv.n, 100, 130),
+	}
+	g := NewGenerator2(archiv, filters)
+	g.Start()
+	// go func() {
+	for {
+		str, ok := g.Progress()
+		fmt.Println(str)
+		if !ok {
+			return
+		}
+		time.Sleep(250 * time.Millisecond)
+	}
+	// }()
+	// g.Stop()
+	// g.Wait()
+	// time.Sleep(250 * time.Millisecond)
 }
