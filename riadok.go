@@ -1,5 +1,31 @@
 package psl
 
+var archivRiadokHeader = []string{
+	"Poradové číslo",
+	"Kombinacie",
+	"P", "N", "Sled PN",
+	"Pr", "Sled PNPr",
+	"Mc", "Vc", "Sled McVc",
+	"C19", "C0", "cC", "Cc", "CC", "Sled prirodzené kritéria",
+	"ZH", "SPZH",
+	"Sm", "ΔSm",
+	"Kk", "ΔKk",
+	"Ntica", "Ntica súčet", "Ntica súčin pozície a stĺpca",
+	"Xtica",
+	"ƩR 1-DO", "ΔƩR 1-DO", "ƩR 1-DO \"r+1\"",
+	"ƩSTL1-DO", "ΔƩSTL 1-DO", "ƩSTL 1-DO \"r+1\"",
+	"Δ(ƩR 1-DO - ƩSTL 1-DO)",
+	"HHRX", "ΔHHRX",
+	"ƩR OD-DO", "ΔƩR OD-DO",
+	"ƩSTL OD-DO", "ΔƩSTL OD-DO",
+	"Δ(ƩR OD-DO - ƩSTL OD-DO)",
+	"HRX", "ΔHRX",
+	"ƩKombinacie", "ΔƩKombinacie",
+	"UC číslo", "UC riadok",
+	"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5",
+	"Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
+}
+
 type Uc struct {
 	Cislo  byte
 	Riadok int
@@ -79,7 +105,7 @@ func (r *Riadok) Add(k Kombinacia, n1, n2 Nums, hrx, hhrx float64) {
 }
 
 func (r Riadok) record() []string {
-	rec := make([]string, 0, len(archivHeader))
+	rec := make([]string, 0, len(archivRiadokHeader))
 	rec = append(rec, itoa(int(r.Pc)), r.K.String())
 	cislovacky := r.C.Strings()
 	rec = append(rec, cislovacky[0:2]...)

@@ -51,6 +51,9 @@ func NewCsvMaxWriter(dir, fileName string, header [][]string) *CsvMaxWriter {
 }
 
 func (w *CsvMaxWriter) Reset() error {
+	if w.dir == "-" {
+		return nil
+	}
 	if w.file != nil {
 		if err := w.Close(); err != nil {
 			return err
@@ -72,6 +75,9 @@ func (w *CsvMaxWriter) Reset() error {
 }
 
 func (w *CsvMaxWriter) Close() error {
+	if w.dir == "-" {
+		return nil
+	}
 	if w.file != nil {
 		defer w.file.Close()
 		w.writer.Flush()
@@ -81,6 +87,9 @@ func (w *CsvMaxWriter) Close() error {
 }
 
 func (w *CsvMaxWriter) Write(record []string) error {
+	if w.dir == "-" {
+		return nil
+	}
 	if w.file == nil || w.writer == nil || w.count > w.max {
 		if err := w.Reset(); err != nil {
 			return err

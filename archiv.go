@@ -9,24 +9,14 @@ import (
 	"strings"
 )
 
-var archivHeader = []string{
-	"Poradové číslo", "Kombinacie", "P", "N", "Sled PN", "Pr", "Sled PNPr", "Mc", "Vc", "Sled McVc", "C19", "C0", "cC", "Cc",
-	"CC", "Sled prirodzené kritéria", "ZH", "SPZH", "Sm", "\u0394Sm", "Kk", "\u0394Kk", "N-tice", "Ntica súčet",
-	"Ntica súčin pozície a stĺpca", "X-tice", "ƩR1-DO", "ΔƩR1-DO",
-	"ƩR1-DO \"r+1\"", "ƩSTL1-DO", "ΔƩSTL1-DO", "ƩSTL1-DO \"r+1\"", "Δ(ƩR1-DO-ƩSTL1-DO)",
-	"HHRX", "ΔHHRX", "ƩR OD-DO", "ΔƩR OD-DO", "ƩSTL OD-DO", "ΔƩSTL OD-DO",
-	"Δ(ƩROD-DO-ƩSTLOD-DO)", "HRX", "ΔHRX", "ƩKombinacie", "ΔƩKombinacie",
-	"UC číslo", "UC riadok",
-	"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5", "Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
-}
-
 // Archiv
 type Archiv struct {
-	n, m int
 	Riadok
+
 	Hrx  *H
 	HHrx *H
 
+	CsvPath    string
 	WorkingDir string
 	Suffix     string
 
@@ -39,10 +29,50 @@ type Archiv struct {
 	PredictODDO Prediction
 }
 
-func NewArchiv(workingDir string, n, m int) *Archiv {
+// NewArchiv funkcia vytvori archiv aj z vystupmi. V pripade ze currentWorkingDir
+// je "-" archiv nevytvori vystupy a len sa interne nacita.
+func NewArchiv(csvPath, currentWorkingDir string, n, m int) (*Archiv, error) {
+	// Cesta k suboru musi byt zadana
+	if csvPath == "" {
+		log.Println("Archiv: csvPath: ", csvPath)
+		return nil, fmt.Errorf("Archiv: Nebola zadana cesta k súboru!")
+	}
+
+	// Aktualny pracovny priecinok musi byt zadany
+	if currentWorkingDir == "" {
+		log.Println("Archiv: cwd: ", currentWorkingDir)
+		return nil, fmt.Errorf("Archiv: Nebol zadany pracovny priecinok")
+	}
+
+	// Skontrolovanie minimalneho a maximalneho rozmeru databazy
+	if n < 2 || n >= m || m > 99 {
+		log.Println("Archiv: Zadany rozmer: ", n, "/", m)
+		return nil, fmt.Errorf("Archiv: Nesprávny rozmer databázy: %d/%d", n, m)
+	}
+
+	var filename string
+	if s := strings.Split(filepath.Base(csvPath), ".csv"); len(s) != 2 {
+		log.Printf("Archiv: %s not a .csv", s)
+		return nil, fmt.Errorf("Archiv: Subor %s musi byt typu csv", csvPath)
+	} else {
+		filename = s[0]
+	}
+
+	var (
+		WorkingDir string
+		CsvPath    string
+		Suffix     string
+	)
+	if currentWorkingDir == "-" {
+		WorkingDir = currentWorkingDir
+		CsvPath = csvPath
+	} else {
+		WorkingDir = filepath.Join(currentWorkingDir, filename)
+		CsvPath = filepath.Join(WorkingDir, filename+".csv")
+		Suffix = filepath.Base(WorkingDir)
+	}
+
 	archiv := &Archiv{
-		n: n,
-		m: m,
 		Riadok: Riadok{
 			n: n,
 			m: m,
@@ -50,16 +80,54 @@ func NewArchiv(workingDir string, n, m int) *Archiv {
 		Hrx:  NewHrx(n, m),
 		HHrx: NewHHrx(n, m),
 
-		WorkingDir: workingDir,
-		Suffix:     filepath.Base(workingDir),
+		CsvPath:    CsvPath,
+		WorkingDir: WorkingDir,
+		Suffix:     Suffix,
 	}
-	return archiv
+
+	// Vytvorenie suboru
+	if archiv.WorkingDir != "-" {
+		if err := os.Mkdir(archiv.WorkingDir, 0755); err != nil {
+			log.Printf("Archiv: %s\n", err)
+		}
+		// Skopirovanie originalnej databazy (.csv)
+		if err := CopyFile(archiv.CsvPath, csvPath); err != nil {
+			log.Printf("Archiv: %s\n", err)
+			return nil, fmt.Errorf("Archiv: Nepodarilo sa skopirovat subor %s", csvPath)
+		}
+	}
+	// vytvorenie archivu
+	if err := archiv.loadCsv(Parse(archiv.CsvPath, n, m)); err != nil {
+		return nil, err
+	}
+	// vystupy
+	if err := archiv.makeFiles(); err != nil {
+		return nil, err
+	}
+
+	if err := archiv.skupiny(); err != nil {
+		return nil, err
+	}
+
+	normalizePrediction(&archiv.Predict1DO, archiv.Skupiny)
+	normalizePrediction(&archiv.PredictODDO, archiv.Skupiny)
+	if err := savePredictions(archiv.WorkingDir, archiv.Predict1DO, archiv.PredictODDO); err != nil {
+		return nil, err
+	}
+
+	return archiv, nil
 }
 
-func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
+func (a *Archiv) skupiny() (err error) {
+	// vytvorenie HrxHHrx vystupu a skupiny na filtrovanie/generovanie
+	a.Skupiny, err = makeSkupiny(a)
+	return
+}
 
-	w := NewCsvMaxWriter(a.WorkingDir, "Archiv", [][]string{archivHeader})
-	defer w.Close()
+func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) error {
+
+	writter := NewCsvMaxWriter(a.WorkingDir, "Archiv", [][]string{archivRiadokHeader})
+	defer writter.Close()
 
 	var (
 		kombinacie = make([][]byte, 0, 64)
@@ -138,89 +206,38 @@ func (a *Archiv) write(chanErrKomb chan ErrKomb) error {
 		}
 		a.origHeader = errKomb.Header
 		a.Riadok.origStrings = errKomb.Orig
-		// fmt.Println(a.Riadok.origStrings)
 		a.riadky = append(a.riadky, a.Riadok)
-		// fmt.Println(a.Riadok.origStrings)
 
-		if err := w.Write(a.Riadok.record()); err != nil {
+		if err := writter.Write(a.Riadok.record()); err != nil {
+			log.Println(err)
 			return err
 		}
 	}
 	return nil
 }
 
-type errFuncs struct {
-	funcs []func() error
-	err   error
-}
-
-func (e errFuncs) run() error {
-	for _, f := range e.funcs {
-		if err := f(); err != nil {
-			e.err = err
-			break
+func (a *Archiv) makeFiles() (err error) {
+	if a.WorkingDir == "-" {
+		return
+	}
+	for _, f := range []func() error{
+		a.PocetnostR,
+		a.PocetnostS,
+		a.mapaXtice,
+		a.mapaZhoda,
+		a.statistikaZhoda,
+		a.mapaNtice,
+		a.statistikaNtice,
+		a.statistikaCifrovacky,
+		a.statistikaCislovacky,
+		a.predikcia,
+	} {
+		e := f()
+		if e != nil {
+			return e
 		}
 	}
-	return e.err
-}
-
-func Make(path, workingDir string, n, m int) (*Archiv, error) {
-
-	if path == "" {
-		return nil, fmt.Errorf("Nebola zadana cesta k súboru!")
-	}
-	if n < 2 || n >= m || m > 99 {
-		return nil, fmt.Errorf("Nesprávny rozmer databázy: %d/%d", n, m)
-	}
-	filename := strings.Split(filepath.Base(path), ".")[0]
-	dir := filepath.Join(workingDir, filename)
-
-	// Vytvorenie suboru
-	if err := os.Mkdir(dir, 0755); err != nil {
-		log.Printf("Archiv.Make(): %s\n", err)
-	}
-
-	if err := CopyFile(filepath.Join(dir, filename+".csv"), path); err != nil {
-		log.Printf("Archiv.Make(): %s\n", err)
-	}
-
-	archiv := NewArchiv(dir, n, m)
-	chanErrKomb := Parse(path, n, m)
-
-	if err := archiv.write(chanErrKomb); err != nil {
-		return nil, err
-	}
-
-	e := errFuncs{
-		funcs: []func() error{
-			archiv.PocetnostR,
-			archiv.PocetnostS,
-			archiv.mapaXtice,
-			archiv.mapaZhoda,
-			archiv.statistikaZhoda,
-			archiv.mapaNtice,
-			archiv.statistikaNtice,
-			archiv.statistikaCifrovacky,
-			archiv.statistikaCislovacky,
-			archiv.predikcia,
-		},
-	}
-	if err := e.run(); err != nil {
-		return nil, err
-	}
-
-	hrxtab := NewHrxTab(archiv.Hrx, archiv.HHrx, n, m)
-	hrxSkupiny, err := hrxtab.Make(archiv.WorkingDir)
-	if err != nil {
-		return nil, err
-	}
-	archiv.Skupiny = hrxSkupiny
-
-	normalizePrediction(&archiv.Predict1DO, archiv.Skupiny)
-	normalizePrediction(&archiv.PredictODDO, archiv.Skupiny)
-	savePredictions(archiv.WorkingDir, archiv.Predict1DO, archiv.PredictODDO)
-
-	return archiv, nil
+	return
 }
 
 // CopyFile copies a file from src to dst. If src and dst files exist, and are
