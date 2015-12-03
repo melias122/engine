@@ -5,7 +5,7 @@ import (
 	"math"
 )
 
-func Korelacia(n, m int, k0, k1 Kombinacia) float64 {
+func Korelacia(k0, k1 Kombinacia, n, m int) float64 {
 	if len(k0) != n || len(k1) != n {
 		return 0.0
 	}
@@ -30,12 +30,12 @@ type filterKorelacia struct {
 	k0       Kombinacia
 }
 
-func NewFilterKorelacia(n, m int, min, max float64, k0 Kombinacia) Filter {
+func NewFilterKorelacia(min, max float64, k0 Kombinacia, n, m int) Filter {
 	if min < -1 {
-		min = -1
+		min = -1.1
 	}
-	if max > 1 {
-		max = 1
+	if max > 2 {
+		max = 1.9
 	}
 	return filterKorelacia{
 		n:   n,
@@ -52,7 +52,7 @@ func (k filterKorelacia) String() string {
 
 func (k filterKorelacia) Check(k1 Kombinacia) bool {
 	if len(k1) == k.n {
-		korelacia := Korelacia(k.n, k.m, k.k0, k1)
+		korelacia := Korelacia(k.k0, k1, k.n, k.m)
 		if korelacia < k.min || korelacia > k.max {
 			return false
 		}

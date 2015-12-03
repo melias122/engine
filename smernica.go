@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func Smernica(n, m int, k Kombinacia) float64 {
+func Smernica(k Kombinacia, n, m int) float64 {
 	if len(k) < 2 {
 		return .0
 	}
@@ -28,7 +28,7 @@ type filterSmernica struct {
 	min, max float64
 }
 
-func NewFilterSmernica(n, m int, min, max float64) Filter {
+func NewFilterSmernica(min, max float64, n, m int) Filter {
 	if min < 0 {
 		min = 0
 	}
@@ -45,7 +45,7 @@ func NewFilterSmernica(n, m int, min, max float64) Filter {
 
 func (s filterSmernica) Check(k Kombinacia) bool {
 	if len(k) == s.n {
-		smernica := Smernica(s.n, s.m, k)
+		smernica := Smernica(k, s.n, s.m)
 		if smernica < s.min || smernica > s.max {
 			return false
 		}

@@ -20,7 +20,7 @@ func TestKorelacia(t *testing.T) {
 		{5, 35, Kombinacia{17, 21, 29, 32, 34}, Kombinacia{1, 2, 13, 21, 31}, "0.18197335"},
 	}
 	for _, test := range tests {
-		korelacia := strconv.FormatFloat(Korelacia(test.n, test.m, test.k0, test.k1), 'f', 8, 64)
+		korelacia := strconv.FormatFloat(Korelacia(test.k0, test.k1, test.n, test.m), 'f', 8, 64)
 		if korelacia != test.w {
 			t.Fatalf("Excepted: (%s), Have: (%s)", test.w, korelacia)
 		}
@@ -33,11 +33,11 @@ func TestFilterKorelacia(t *testing.T) {
 		f Filter
 		w bool
 	}{
-		{Kombinacia{1, 14, 15, 17, 19}, NewFilterKorelacia(5, 35, 0.0, 1.0, Kombinacia{2, 7, 13, 32, 35}), true},   // "0.34137300"
-		{Kombinacia{1, 14, 15, 17, 19}, NewFilterKorelacia(5, 35, 0.0, 0.34, Kombinacia{2, 7, 13, 32, 35}), true},  // "0.34137300"
-		{Kombinacia{1, 14, 15, 17, 19}, NewFilterKorelacia(5, 35, 0.41, 1.0, Kombinacia{2, 7, 13, 32, 35}), false}, // "0.34137300"
-		{Kombinacia{1, 2, 3, 4, 5}, NewFilterKorelacia(5, 35, 1.0, 1.0, Kombinacia{1, 2, 3, 4, 5}), true},
-		{Kombinacia{1, 2, 3, 4}, NewFilterKorelacia(5, 35, 1.0, 1.0, Kombinacia{1, 2, 3, 4}), true},
+		{Kombinacia{1, 14, 15, 17, 19}, NewFilterKorelacia(0.0, 1.0, Kombinacia{2, 7, 13, 32, 35}, 5, 35), true},   // "0.34137300"
+		{Kombinacia{1, 14, 15, 17, 19}, NewFilterKorelacia(0.0, 0.34, Kombinacia{2, 7, 13, 32, 35}, 5, 35), true},  // "0.34137300"
+		{Kombinacia{1, 14, 15, 17, 19}, NewFilterKorelacia(0.41, 1.0, Kombinacia{2, 7, 13, 32, 35}, 5, 35), false}, // "0.34137300"
+		{Kombinacia{1, 2, 3, 4, 5}, NewFilterKorelacia(1.0, 1.0, Kombinacia{1, 2, 3, 4, 5}, 5, 35), true},
+		{Kombinacia{1, 2, 3, 4}, NewFilterKorelacia(1.0, 1.0, Kombinacia{1, 2, 3, 4}, 5, 35), true},
 	}
 	for _, test := range tests {
 		ok := test.f.Check(test.k)
