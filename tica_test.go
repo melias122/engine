@@ -5,7 +5,7 @@ import "testing"
 func BenchmarkTicaString(b *testing.B) {
 	t := make(Tica, 30)
 	for i := 0; i < b.N; i++ {
-		_ := t.String()
+		t.String()
 	}
 }
 
