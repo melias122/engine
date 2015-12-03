@@ -79,13 +79,31 @@ func (h *H) Value() float64 {
 	return h.valuePresun(h.xcisla)
 }
 
+// var xcislaPool = sync.Pool{
+// 	New: func() interface{} {
+// 		return make(Xcisla, 0, 30)
+// 	},
+// }
+
 func (h *H) ValueKombinacia(k Kombinacia) float64 {
-	p := h.xcisla.copy() // use chan xcisla to reduce presure on GC
+	// Get xcisla from pool
+	// xcisla := xcislaPool.Get().(Xcisla)
+	// make copy
+	// xcisla = xcisla[:0]
+	// for _, x := range h.xcisla {
+	// xcisla = append(xcisla, x)
+	// }
+	xcisla := h.xcisla.copy()
+	// move
 	for _, cislo := range k {
 		sk := h.GetNum(int(cislo)).PocetR()
-		p.move(1, sk, sk+1)
+		xcisla.move(1, sk, sk+1)
 	}
-	return h.valuePresun(p)
+	// compute
+	valuePresun := h.valuePresun(xcisla)
+	// put xcisla back for later use
+	// xcislaPool.Put(xcisla)
+	return valuePresun
 }
 
 //Vypocita hodnotu Presun p
@@ -112,66 +130,65 @@ func (h *H) Xcisla() Xcisla {
 	return h.xcisla.copy()
 }
 
+func NewFilterHrx(min, max float64, Hrx *H, n int) Filter {
+	return filterHrx{newFilterH("Hrx", min, max, Hrx, n)}
+}
+
+func NewFilterHHrx(min, max float64, HHrx *H, n int) Filter {
+	return filterHHrx{newFilterH("HHrx", min, max, HHrx, n)}
+}
+
+type filterHrx struct{ filterH }
+
+func (f filterHrx) Check(Kombinacia) bool { return true }
+
+func (f filterHrx) CheckSkupina(s Skupina) bool {
+	return f.checkSkupina(s.Hrx, s.Hrx)
+}
+
+type filterHHrx struct{ filterH }
+
+func (f filterHHrx) CheckSkupina(s Skupina) bool {
+	return f.checkSkupina(s.HHrx[0], s.HHrx[1])
+}
+
 type filterH struct {
 	n        int
 	min, max float64
 	h        *H
-	typ      int // 0 == Hrx, 1 == HHrx
+	fname    string
 }
 
-func newFilterH(n int, min, max float64, h *H, typ int) Filter {
-	if min < 0 {
-		min = 0
+func newFilterH(fname string, min, max float64, h *H, n int) filterH {
+	if min <= 0 {
+		min = 0.1
 	}
 	if max > 100 {
 		max = 99.99999999999
 	}
 	return filterH{
-		n:   n,
-		min: nextLSS(min),
-		max: nextGRT(max),
-		h:   h,
-		typ: typ,
+		n:     n,
+		min:   nextLSS(min),
+		max:   nextGRT(max),
+		h:     h,
+		fname: fname,
 	}
-}
-
-func NewFilterHrx(n int, min, max float64, Hrx *H) Filter {
-	return newFilterH(n, min, max, Hrx, 0)
-}
-
-func NewFilterHHrx(n int, min, max float64, HHrx *H) Filter {
-	return newFilterH(n, min, max, HHrx, 1)
 }
 
 func (h filterH) Check(k Kombinacia) bool {
-	if h.typ == 1 {
-		value := h.h.ValueKombinacia(k)
-		if value < h.min || (len(k) == h.n && value > h.max) {
+	value := h.h.ValueKombinacia(k)
+	if len(k) == h.n {
+		if value < h.min || value > h.max {
 			return false
 		}
 	}
 	return true
 }
 
-func (h filterH) CheckSkupina(skupina Skupina) bool {
-	if h.typ == 0 {
-		if skupina.Hrx > h.max || skupina.Hrx < h.min {
-			return false
-		}
-	} else if h.typ == 1 {
-		if skupina.HHrx[0] > h.max || skupina.HHrx[1] < h.min {
-			return false
-		}
-	}
-	return true
+func (h filterH) checkSkupina(min, max float64) bool {
+	return !outOfRangeFloats64(h.min, h.max, min, max)
 }
 
 func (h filterH) String() string {
-	var s string
-	if h.typ == 0 {
-		s = "Hrx"
-	} else if h.typ == 1 {
-		s = "HHrx"
-	}
-	return fmt.Sprintf("%s: %f-%f", s, h.min, h.max)
+	return fmt.Sprintf("%s: %s-%s", h.fname, ftoa(h.min), ftoa(h.max))
 }

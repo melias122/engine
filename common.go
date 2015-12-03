@@ -1,6 +1,7 @@
 package psl
 
 import (
+	"math"
 	"strconv"
 	"unicode/utf8"
 )
@@ -40,4 +41,19 @@ func min(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func lessFloat64(a, b float64) bool {
+	return math.Float64bits(a) < math.Float64bits(b)
+}
+
+func greaterFloat64(a, b float64) bool {
+	return math.Float64bits(a) > math.Float64bits(b)
+}
+
+func outOfRangeFloats64(x1, x2, y1, y2 float64) bool {
+	if greaterFloat64(x1, y2) || lessFloat64(x2, y1) {
+		return true
+	}
+	return false
 }
