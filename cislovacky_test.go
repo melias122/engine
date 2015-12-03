@@ -178,6 +178,36 @@ func TestIsCC(t *testing.T) {
 	}
 }
 
+var (
+	// PRFilter30 = NewFilterCislovackyRange(30, 15, 30, P)
+	NRFilter30  = NewFilterCislovackyRange(30, 0, 15, N)
+	PrRFilter30 = NewFilterCislovackyRange(30, 0, 10, Pr)
+	McRFilter30 = NewFilterCislovackyRange(30, 0, 15, Mc)
+	// VcRFilter30 = NewFilterCislovackyRange(30, 0, 15, Vc)
+	C19RFilter30 = NewFilterCislovackyRange(30, 0, 6, C19)
+	C0RFilter30  = NewFilterCislovackyRange(30, 0, 6, C0)
+	cCRFilter30  = NewFilterCislovackyRange(30, 0, 6, XcC)
+	CcRFilter30  = NewFilterCislovackyRange(30, 0, 6, Cc)
+	CCRFilter30  = NewFilterCislovackyRange(30, 0, 6, CC)
+
+	// // PRFilter30 = NewFilterCislovackyRange(30, 15, 30, P)
+	// NRFilter30  = NewFilterCislovackyExact(30, 0, 15, N)
+	// PrRFilter30 = NewFilterCislovackyRange(30, 0, 15, Pr)
+	// McRFilter30 = NewFilterCislovackyRange(30, 0, 15, Mc)
+	// // VcRFilter30 = NewFilterCislovackyRange(30, 0, 15, Vc)
+	// C19RFilter30  = NewFilterCislovackyRange(30, 0, 15, C19)
+	// C0RFilter30   = NewFilterCislovackyRange(30, 0, 15, C0)
+	// XcCPRFilter30 = NewFilterCislovackyRange(30, 0, 15, XcC)
+	// CcPRFilter30  = NewFilterCislovackyRange(30, 0, 15, Cc)
+	// CCPRFilter30  = NewFilterCislovackyRange(30, 0, 15, CC)
+)
+
+func BenchmarkCislovackyRange(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		NRFilter30.Check(K30)
+	}
+}
+
 func TestFilterCislovackyRange(t *testing.T) {
 	tests := []struct {
 		k Kombinacia

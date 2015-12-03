@@ -73,16 +73,25 @@ func NewCislovacky(n int) Cislovacky {
 	return c
 }
 
-// Plus scita dve Cislovacky
+// Plus pricita k c c2. Teda c = c + c2.
+// W: Moze prist k preteceniu!
 func (c *Cislovacky) Plus(c2 Cislovacky) {
 	for i, j := range c2 {
 		c[i] += j
 	}
 }
 
+// Minus odcita z c c2. Teda c = c - c2.
+// W: Moze prist k preteceniu!
+func (c *Cislovacky) Minus(c2 Cislovacky) {
+	for i, j := range c2 {
+		c[i] -= j
+	}
+}
+
 // String implementuje interface Stringer
 func (c *Cislovacky) String() string {
-	return strings.Join(c.Strings(), " ")
+	return bytesToString(c[:])
 }
 
 // Strings je pomocna funkcia pre vypis jednotlivych cislovacie
@@ -166,8 +175,7 @@ func IsCC(n int) bool {
 // Cislovacky implementuju Filter pre P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
 type filterCislovacky struct {
 	n, min, max int
-	fname       string
-	f           CislovackaFunc
+	c           Cislovacka
 	exact       []bool
 }
 
@@ -178,12 +186,11 @@ func NewFilterCislovackyRange(n, min, max int, c Cislovacka) Filter {
 	if max > n {
 		max = n
 	}
-	return &filterCislovacky{
-		n:     n,
-		min:   min,
-		max:   max,
-		f:     c.Func(),
-		fname: c.String(),
+	return filterCislovacky{
+		n:   n,
+		min: min,
+		max: max,
+		c:   c,
 	}
 }
 
@@ -213,24 +220,22 @@ func NewFilterCislovackyExact(n int, ints []int, c Cislovacka) Filter {
 			exact[i] = true
 		}
 	}
-	return &filterCislovacky{
+	return filterCislovacky{
 		n:     n,
 		min:   min,
 		max:   max,
-		f:     c.Func(),
-		fname: c.String(),
+		c:     c,
 		exact: exact,
 	}
 }
 
-func (c *filterCislovacky) String() string {
-	return fmt.Sprintf("%s: %d-%d", c.fname, c.min, c.max)
-}
-
-func (c *filterCislovacky) Check(k Kombinacia) bool {
-	var count int
+func (c filterCislovacky) Check(k Kombinacia) bool {
+	var (
+		fun   = c.c.Func()
+		count int
+	)
 	for _, n := range k {
-		if c.f(int(n)) {
+		if fun(int(n)) {
 			count++
 		}
 	}
@@ -243,6 +248,24 @@ func (c *filterCislovacky) Check(k Kombinacia) bool {
 	return true
 }
 
-func (c *filterCislovacky) CheckSkupina(skupina Skupina) bool {
+func (f filterCislovacky) CheckSkupina(s Skupina) bool {
+	min := int(s.Cislovacky[0][f.c])
+	max := int(s.Cislovacky[1][f.c])
+	if min > f.max || max < f.min {
+		return false
+	}
 	return true
+}
+
+func (c filterCislovacky) String() string {
+	if c.exact != nil {
+		var s []string
+		for i, ok := range c.exact {
+			if ok {
+				s = append(s, itoa(i))
+			}
+		}
+		return fmt.Sprintf("%s: %s", c.c.String(), strings.Join(s, ", "))
+	}
+	return fmt.Sprintf("%s: %d-%d", c.c.String(), c.min, c.max)
 }

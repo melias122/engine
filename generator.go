@@ -13,13 +13,13 @@ import (
 type generator2 struct {
 	archiv  *Archiv
 	filters Filters
-	w       *CsvMaxWriter
 
 	lenSkupiny int
 	progress   int
 	err        error
 
 	startTime string
+	subDir    string
 
 	nworkers       int
 	workers        []worker
@@ -29,7 +29,11 @@ type generator2 struct {
 	quit           chan struct{}
 	done           chan struct{}
 
-	running bool
+	collected chan int
+
+	writer *CsvMaxWriter
+
+	RowsWriten int
 }
 
 func newGenerator2(archiv *Archiv, filters Filters) *generator2 {
@@ -47,18 +51,22 @@ func newGenerator2(archiv *Archiv, filters Filters) *generator2 {
 		collectorQueue: make(chan []string, nworkers),
 		workQueue:      make(chan work, nworkers),
 		quit:           make(chan struct{}),
-		done:           make(chan struct{}),
+		done:           make(chan struct{}, 1),
+
+		collected: make(chan int, 1),
 	}
 }
 
 func NewGenerator2(archiv *Archiv, filters Filters) *generator2 {
 	g := newGenerator2(archiv, filters)
+	g.subDir = g.startTime + "_Generator"
+	g.writer = NewCsvMaxWriter(g.startTime, g.archiv.WorkingDir,
+		setSubdir(g.subDir),
+		setSuffixFunc(IntSuffix()),
+		setHeader(NewV1(g.archiv).Header),
+	)
 
-	g.w = NewCsvMaxWriter(g.archiv.WorkingDir, g.startTime, [][]string{NewV1(g.archiv).Header})
-	g.w.Suffix = IntSuffix()
-	g.w.SubDir = g.startTime + "_Generator"
-
-	g.protokol(g.startTime + "_Generator")
+	g.protokol(g.subDir)
 	g.startWorkers()
 	g.collect()
 	// g.start()
@@ -70,12 +78,14 @@ func NewGenerator2(archiv *Archiv, filters Filters) *generator2 {
 
 func NewFilter2(archiv *Archiv, filters Filters) *generator2 {
 	g := newGenerator2(archiv, filters)
+	g.subDir = g.startTime + "_Filter"
+	g.writer = NewCsvMaxWriter(g.startTime, g.archiv.WorkingDir,
+		setSubdir(g.subDir),
+		setSuffixFunc(IntSuffix()),
+		setHeader(HeaderV2),
+	)
 
-	g.w = NewCsvMaxWriter(g.archiv.WorkingDir, g.startTime, [][]string{HeaderV2})
-	g.w.Suffix = IntSuffix()
-	g.w.SubDir = g.startTime + "_Filter"
-
-	g.protokol(g.startTime + "_Filter")
+	g.protokol(g.subDir)
 	g.startWorkers()
 	g.collect()
 	// g.start()
@@ -86,15 +96,9 @@ func NewFilter2(archiv *Archiv, filters Filters) *generator2 {
 }
 
 func (g *generator2) Start() {
-	g.running = true
 	go func() {
 		defer func() {
-			go func() {
-				time.Sleep(500 * time.Millisecond)
-				close(g.collectorQueue)
-			}()
-			g.running = false
-			g.done <- struct{}{}
+			close(g.collectorQueue)
 		}()
 		for {
 			select {
@@ -105,10 +109,25 @@ func (g *generator2) Start() {
 				} else {
 					g.nworkers--
 				}
+				if g.nworkers == 0 {
+					g.Stop()
+				}
 			case <-g.quit:
+				// zastavenie workerov
 				for _, worker := range g.workers {
 					worker.stop()
 				}
+
+				// pockanie kym dokoncia aktualnu pracu
+				if g.nworkers != 0 {
+					for range g.workerQueue {
+						g.nworkers--
+						if g.nworkers == 0 {
+							break
+						}
+					}
+				}
+
 				// Treba vypraznit workQueue ak generator
 				// skoncil pouzivatel
 				go func() {
@@ -116,9 +135,6 @@ func (g *generator2) Start() {
 					}
 				}()
 				return
-			}
-			if g.nworkers == 0 {
-				g.Stop()
 			}
 		}
 	}()
@@ -132,16 +148,34 @@ func (g *generator2) Stop() {
 
 func (g *generator2) Wait() {
 	<-g.done
+
+	// zatvorime done chan, aby sme viacej krat nemohli cakat
+	close(g.done)
 }
 
-func (g *generator2) Progress() (s string, running bool) {
-	running = g.running
-	if running {
-		s = fmt.Sprintf("Prehladavam skupinu %d z %d", g.progress, g.lenSkupiny)
-	} else {
-		s = fmt.Sprintf("Hotovo. Zapisanych %d riadkov", g.w.NWrites)
-	}
-	return
+// Progress sleduje stav generatora/filtra vracia stav
+// aktualne prehladavanych skupin v intervale 0.5 sekund.
+// Po skonceni generatora hlasi pocet zapisanych riadkov
+// Viacnasobne volanie tejto funkcie sposobi panic !
+func (g *generator2) Progress() chan string {
+	ch := make(chan string)
+	go func() {
+		// signal ze sme skoncili
+		defer close(ch)
+
+		// zatvorime collected chan aby sme nemohli zavolat viackrat Progress
+		defer close(g.collected)
+		for {
+			select {
+			case g.RowsWriten = <-g.collected:
+				ch <- fmt.Sprintf("Hotovo. Zapisanych %d riadkov", g.RowsWriten)
+				return
+			case <-time.After(500 * time.Millisecond):
+				ch <- fmt.Sprintf("Prehladavam skupinu %d z %d", g.progress, g.lenSkupiny)
+			}
+		}
+	}()
+	return ch
 }
 
 func (g *generator2) Error() error {
@@ -221,14 +255,21 @@ func (g *generator2) produceFilter() {
 
 func (g *generator2) collect() {
 	go func() {
+		w := g.writer
 		defer func() {
-			if err := g.w.Close(); err != nil {
+			if err := w.Close(); err != nil {
+				log.Println(err)
 				g.err = err
 			}
+			// progresu posleme pocet zapisanych riadkov
+			g.collected <- w.TotalRowsWriten()
+
+			// skoncili sme az ked je vsetko zapisane
+			g.done <- struct{}{}
 		}()
 
 		for r := range g.collectorQueue {
-			if err := g.w.Write(r); err != nil {
+			if err := w.Write(r); err != nil {
 				log.Println(err)
 				g.err = err
 				g.Stop()
@@ -283,17 +324,13 @@ func (w worker) start() {
 					// vykoname pracu
 					if work.v1 != nil {
 						for k := range ch {
-							// fmt.Println(k)
 							work.ch <- work.v1.Riadok(k)
 							ch <- nil
-							// PoolKombinacia.Put(k)
 						}
 					} else if work.v2 != nil {
 						for k := range ch {
-							// fmt.Println(k)
 							work.v2.Add(k)
 							ch <- nil
-							// PoolKombinacia.Put(k)
 						}
 						if !work.v2.Empty() {
 							work.ch <- work.v2.Riadok()
@@ -303,10 +340,9 @@ func (w worker) start() {
 					// po skoncime sa pridame do fronty
 					w.workerQueue <- w.work
 				}()
-				// skoncili sme
 			case <-w.quit:
+				// skoncili sme
 				w.k.stop()
-				// log.Printf("worker: %d stopped\n", w.id)
 				return
 			}
 		}
@@ -328,10 +364,8 @@ func (g kombinator) run(cisla []cislo, filters Filters, n int) chan Kombinacia {
 	go func() {
 		var (
 			indices = make([]int, 1, n)
-			// k       = PoolKombinacia.Get().(Kombinacia)
-			k = make(Kombinacia, 0, n)
+			k       = make(Kombinacia, 0, n)
 		)
-		// k = k[:0]
 		for len(indices) > 0 && !g.stopped() {
 			j := len(indices)
 
@@ -380,7 +414,6 @@ func (g kombinator) run(cisla []cislo, filters Filters, n int) chan Kombinacia {
 				indices = append(indices, i+1)
 				continue
 			}
-			// ch <- k.Copy()
 			ch <- k
 			<-ch
 		}

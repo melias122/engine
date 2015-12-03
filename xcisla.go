@@ -62,30 +62,33 @@ func (p Xcisla) Max() int {
 	return p[len(p)-1].Sk
 }
 
-func (p Xcisla) copy() Xcisla {
-	presun := make(Xcisla, len(p))
-	copy(presun, p)
-	return presun
+func (x Xcisla) copy() Xcisla {
+	xcisla := make(Xcisla, len(x))
+	copy(xcisla, x)
+	return xcisla
 }
 
 func (p Xcisla) Len() int           { return len(p) }
 func (p Xcisla) Less(i, j int) bool { return p[i].Sk < p[j].Sk }
 func (p Xcisla) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
-func (p Xcisla) String() string {
+func (x Xcisla) String() string {
 	var (
-		i int
-		s = make([]string, 0, 2*len(p))
+		zero  = []byte("0 ")
+		space = []byte(" ")
+		buf   = make([]byte, 0, 128)
+		i     int
 	)
-	for _, p := range p {
-		for i < p.Sk {
-			s = append(s, "0")
+	for _, t := range x {
+		for i < t.Sk {
+			buf = append(buf, zero...)
 			i++
 		}
-		s = append(s, strconv.Itoa(p.Max))
+		buf = strconv.AppendUint(buf, uint64(t.Max), 10)
+		buf = append(buf, space...)
 		i++
 	}
-	return strings.Join(s, " ")
+	return string(buf[:len(buf)])
 }
 
 func (p Xcisla) Contains(t Tab) bool {

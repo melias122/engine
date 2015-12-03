@@ -61,14 +61,14 @@ type Riadok struct {
 
 func (r *Riadok) Add(k Kombinacia, n1, n2 Nums, hrx, hhrx float64) {
 
-	Sm := Smernica(r.n, r.m, k)
+	Sm := Smernica(k, r.n, r.m)
 	R1, S1 := k.SucetRS(n1)
 	R2, S2 := k.SucetRS(n2)
 
 	if r.K != nil {
 		r.Zh = Zhoda(r.K, k)
 		r.ZhPresun = ZhodaPresun(r.K, k).String()
-		Kk := Korelacia(r.n, r.m, r.K, k)
+		Kk := Korelacia(r.K, k, r.n, r.m)
 		r.DtKk = Kk - r.Kk
 		r.Kk = Kk
 

@@ -58,5 +58,5 @@ func (s filterSmernica) CheckSkupina(skupina Skupina) bool {
 }
 
 func (s filterSmernica) String() string {
-	return fmt.Sprintf("Sm: %f-%f", s.min, s.max)
+	return fmt.Sprintf("Sm: %s-%s", ftoa(s.min), ftoa(s.max))
 }

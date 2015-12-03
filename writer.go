@@ -128,12 +128,16 @@ func (w *CsvMaxWriter) TotalRowsWriten() int {
 
 // Write zapise retazce record do suboru
 func (w *CsvMaxWriter) Write(record []string) error {
+
+	// uplne prvy zapis ked este nebol vytvoreny subor
+	// je potrebne inicializovat file a writer
 	if !w.initialized {
 		if err := w.add(); err != nil {
 			return err
 		}
 		w.initialized = true
 	}
+
 	// ak sme dosiali limit pre zapis do suboru
 	// aktualny subor zatvorime a otvorime novy
 	if w.rowsWritten == MaxWrite {
@@ -149,8 +153,6 @@ func (w *CsvMaxWriter) Write(record []string) error {
 	if err := w.writer.Write(record); err != nil {
 		return err
 	}
-
-	// aktualny pocet zapisanych do suboru
 	w.rowsWritten++
 
 	return nil

@@ -1,10 +1,6 @@
 package psl
 
-import (
-	"fmt"
-	"testing"
-	"time"
-)
+import "testing"
 
 // 1. BenchmarkGenerator-4 	   30000	     49036 ns/op	    1264 B/op	      53 allocs/op  // old
 // 2. BenchmarkKombinator-4	   30000	     53144 ns/op	    1536 B/op	      48 allocs/op 	// new
@@ -27,21 +23,21 @@ func BenchmarkKombinator(b *testing.B) {
 	b.ReportAllocs()
 }
 
-func TestKombinator(t *testing.T) {
-	archiv, err := NewArchiv("profile/412.csv", "-", 4, 12)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var (
-		k = kombinator{}
+// func TestKombinator(t *testing.T) {
+// 	archiv, err := NewArchiv("profile/412.csv", "-", 4, 12)
+// 	if err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	var (
+// 		k = kombinator{}
 
-		cisla = cisla(archiv.Hrx.Cisla, archiv.Skupiny[0].Xcisla)
-		n     = archiv.n
-	)
-	ch := k.run(cisla, nil, n)
-	for range ch {
-	}
-}
+// 		cisla = cisla(archiv.Hrx.Cisla, archiv.Skupiny[0].Xcisla)
+// 		n     = archiv.n
+// 	)
+// 	ch := k.run(cisla, nil, n)
+// 	for range ch {
+// 	}
+// }
 
 func TestGenerator2(t *testing.T) {
 	t.SkipNow()
@@ -54,17 +50,7 @@ func TestGenerator2(t *testing.T) {
 	}
 	g := NewGenerator2(archiv, filters)
 	g.Start()
-	// go func() {
-	for {
-		str, ok := g.Progress()
-		fmt.Println(str)
-		if !ok {
-			return
-		}
-		time.Sleep(250 * time.Millisecond)
-	}
-	// }()
 	// g.Stop()
-	// g.Wait()
+	g.Wait()
 	// time.Sleep(250 * time.Millisecond)
 }

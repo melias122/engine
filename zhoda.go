@@ -117,10 +117,12 @@ func (f filterZhoda) Check(k Kombinacia) bool {
 	return true
 }
 
-func (f filterZhoda) CheckSkupina(skupina Skupina) bool {
-	// if skupina.Zh[0] > f.max || skupina.Zh[1] < f.min {
-	// return false
-	// }
+func (f filterZhoda) CheckSkupina(s Skupina) bool {
+	min := int(s.Zh[0])
+	max := int(s.Zh[1])
+	if min > f.max || max < f.min {
+		return false
+	}
 	return true
 }
 

@@ -451,7 +451,7 @@ func normalizePrediction(p *Prediction, s Skupiny) {
 }
 
 func savePredictions(workingDir string, p1DO, pODDO Prediction) error {
-	w := NewCsvMaxWriter(workingDir, "Predikcia", [][]string{})
+	w := NewCsvMaxWriter("Predikcia", workingDir)
 	defer w.Close()
 
 	s1 := p1DO.Record("Predikcia 1-DO")

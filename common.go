@@ -3,6 +3,7 @@ package psl
 import (
 	"math"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -43,6 +44,13 @@ func min(a, b int) int {
 	return b
 }
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func lessFloat64(a, b float64) bool {
 	return math.Float64bits(a) < math.Float64bits(b)
 }
@@ -56,4 +64,26 @@ func outOfRangeFloats64(x1, x2, y1, y2 float64) bool {
 		return true
 	}
 	return false
+}
+
+func dt(f float64) float64 {
+	var (
+		s  = strconv.FormatFloat(f, 'f', -1, 64)
+		dt = 1.0
+	)
+	if strings.Contains(s, ".") {
+		s = strings.Split(s, ".")[1]
+		for i := 0; i < len(s); i++ {
+			dt /= 10
+		}
+	}
+	return dt
+}
+
+func nextGRT(f float64) float64 {
+	return f + dt(f)
+}
+
+func nextLSS(f float64) float64 {
+	return f - dt(f)
 }

@@ -5,6 +5,54 @@ import (
 	"testing"
 )
 
+var K30 Kombinacia
+
+func init() {
+	K30 = make(Kombinacia, 30)
+	for i := range K30 {
+		K30[i] = byte(i + 1)
+	}
+}
+
+var Filters30 = Filters{
+	// NewFilterR(n, min, max, cisla, fname),
+	// NewFilterSTL(n, min, max, cisla, fname),
+	// NewFilterHHrx(30, min, max, Hrx),
+
+	// NewFilterR(n, min, max, cisla, fname),
+	// NewFilterSTL(n, min, max, cisla, fname),
+	// NewFilterHrx(30, min, max, Hrx),
+
+	// NewFilterSucet(n, min, max),
+
+	NewFilterCislovackyRange(30, 0, 15, N),
+	NewFilterCislovackyRange(30, 0, 15, Pr),
+	NewFilterCislovackyRange(30, 0, 15, Mc),
+	NewFilterCislovackyRange(30, 0, 15, C19),
+	NewFilterCislovackyRange(30, 0, 15, C0),
+	NewFilterCislovackyRange(30, 0, 15, XcC),
+	NewFilterCislovackyRange(30, 0, 15, Cc),
+	NewFilterCislovackyRange(30, 0, 15, CC),
+	// NewFilterZhodaRange(min, max, k, n),
+
+	// NewFilterSmernica(n, m, min, max),
+	// NewFilterKorelacia(n, m, min, max, k0),
+
+	// NewFilterZakazane(ints, n, m),
+	// NewFilterZakazaneSTL(mapInts, n, m),
+
+	// NewFilterPovinne(ints, n, m),
+	// NewFilterPovinneSTL(mapInts, n, m),
+
+	filterCifrovacky{n: 30, c: Cifrovacky{3, 3, 3, 3, 3, 3, 3, 3, 3, 3}},
+}
+
+func BenchmarkFilter(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Filters30.Check(K30)
+	}
+}
+
 func TestGRTLSS(t *testing.T) {
 	tests := []struct {
 		f float64
@@ -17,15 +65,23 @@ func TestGRTLSS(t *testing.T) {
 		{f: 0.19},
 		{f: 0.0156977747110574},
 		{f: 32.3354},
+		{f: 1.58809155486105E-005},
+		{f: 9.34969738146142E-006},
+		{f: 9.34969738146142E-027},
 	}
 	for _, test := range tests {
 		LSS := nextLSS(test.f)
 		GRT := nextGRT(test.f)
 		if !(LSS < test.f) {
+			t.Fail()
 			t.Errorf("%f expected to be smaller than %f", LSS, test.f)
 		}
 		if !(GRT > test.f) {
+			t.Fail()
 			t.Errorf("%f expected to be greater than %f", GRT, test.f)
+		}
+		if !(LSS < test.f && GRT > test.f) {
+			t.Fail()
 		}
 	}
 

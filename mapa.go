@@ -101,7 +101,7 @@ func (a *Archiv) mapaZhoda() error {
 	copy(header, a.origHeader)
 	header = append(header, zhodaRiadokHeader(a.n)...)
 
-	w := NewCsvMaxWriter(a.WorkingDir, "MapaZhoda", [][]string{header})
+	w := NewCsvMaxWriter("MapaZhoda", a.WorkingDir, setHeader(header))
 	defer w.Close()
 
 	var zh0 *zhodaRiadok
@@ -177,7 +177,7 @@ func (a *Archiv) mapaNtice() error {
 	header = append(header, "Sucet N-tic", "Sucin pozicie a stlpca")
 	header = append(header, nticeVsetky...)
 
-	w := NewCsvMaxWriter(a.WorkingDir, "MapaNtice", [][]string{header})
+	w := NewCsvMaxWriter("MapaNtice", a.WorkingDir, setHeader(header))
 	defer w.Close()
 
 	for i, r := range a.riadky {

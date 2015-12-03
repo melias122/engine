@@ -7,6 +7,44 @@ import (
 	"strconv"
 )
 
+var HeaderV2 = []string{
+	"HRX (r+1)",
+	"ΔHRX",
+	"Xcisla",
+	"ƩR OD-DO",
+	"Ntice",
+	"Xtice",
+	"ƩSTL OD-DO (min)",
+	"ƩSTL OD-DO (max)",
+	"ƩSTL OD-DO (počet)",
+	"ƩKombinacie (min)",
+	"ƩKombinacie (max)",
+	"ƩKombinacie (počet)",
+	"#Kombinacie",
+	"HHrx (min)",
+	"HHrx (max)",
+	"HHrx (počet)",
+	// "ΔHHrx (min)",
+	// "ΔHHrx (max)",
+	"ƩR 1-DO (min)",
+	"ƩR 1-DO (max)",
+	"ƩR 1-DO (počet)",
+	"ƩSTL 1-DO (min)",
+	"ƩSTL 1-DO (max)",
+	"ƩSTL 1-DO (počet)",
+	"P (min)", "P (max)",
+	"N (min)", "N (max)",
+	"Pr (min)", "Pr (max)",
+	"Mc (min)", "Mc (max)",
+	"Vc (min)", "Vc (max)",
+	"C19 (min)", "C19 (max)",
+	"C0 (min)", "C0 (max)",
+	"cC (min)", "cC (max)",
+	"Cc (min)", "Cc (max)",
+	"CC (min)", "CC (max)",
+	"Zh (min)", "Zh (max)",
+}
+
 // vystup filter
 type V2 struct {
 	n, m      int
@@ -14,11 +52,13 @@ type V2 struct {
 	r         Riadok
 	p         Xcisla
 
-	hrx                  float64
-	zhoda, sucet         map[int]int
-	hhrx, r1, s1, r2, s2 map[float64]int
-	nKombi               uint64
-	ntice, xtice         map[string]int
+	hrx              float64
+	sucet            map[int]int
+	hhrx, r1, s1, s2 map[float64]int
+	nKombi           int
+	ntice, xtice     map[string]int
+	cislovacky       []Cislovacky
+	zhoda            [2]int
 }
 
 func NewV2(a *Archiv, sk Skupina) V2 {
@@ -31,43 +71,34 @@ func NewV2(a *Archiv, sk Skupina) V2 {
 		p:    sk.Xcisla,
 
 		hrx:   sk.Hrx,
-		zhoda: make(map[int]int),
 		sucet: make(map[int]int),
 		hhrx:  make(map[float64]int),
 		r1:    make(map[float64]int),
 		s1:    make(map[float64]int),
-		r2:    make(map[float64]int),
 		s2:    make(map[float64]int),
 		ntice: make(map[string]int),
 		xtice: make(map[string]int),
+		zhoda: [2]int{99, 0},
 	}
 }
 
-var HeaderV2 = []string{
-	"ZH \"r\"/\"r+1\"", "HRX pre r+1", "ΔHRX", "X-cisla",
-	"Počet Kombi",
-	"ƩROD-DO (min)", "ƩROD-DO (max)", "ƩROD-DO (počet)",
-	"N-tice", "X-tice",
-	"ƩSTLOD-DO (min)", "ƩSTLOD-DO (max)", "ƩSTLOD-DO (počet)",
-	"ƩKombinacie (min)", "ƩKombinacie (max)", "ƩKombinacie (počet)",
-	"HHRX (min)", "HHRX (max)", "HHRX (počet)",
-	"ƩR1-DO (min)", "ƩR1-DO (max)", "ƩR1-DO (počet)",
-	"ƩSTL1-DO (min)", "ƩSTL1-DO (max)", "ƩSTL1-DO (počet)",
-}
-
 func (v *V2) Add(k Kombinacia) {
-	v.zhoda[Zhoda(v.r.K, k)]++
+	v.nKombi++
+
+	// zhoda min, max
+	zhoda := Zhoda(v.r.K, k)
+	v.zhoda[0] = min(v.zhoda[0], zhoda)
+	v.zhoda[1] = max(v.zhoda[1], zhoda)
 
 	sucet := k.Sucet()
 	if _, ok := v.sucet[sucet]; !ok {
 		v.sucet[sucet] = 1
 	}
-	v.nKombi++
 
-	R2, S2 := k.SucetRSNext(v.Hrx.Cisla)
-	if _, ok := v.r2[R2]; !ok {
-		v.r2[R2] = 1
-	}
+	_, S2 := k.SucetRSNext(v.Hrx.Cisla)
+	// if _, ok := v.r2[R2]; !ok {
+	// 	v.r2[R2] = 1
+	// }
 	if _, ok := v.s2[S2]; !ok {
 		v.s2[S2] = 1
 	}
@@ -87,47 +118,73 @@ func (v *V2) Add(k Kombinacia) {
 
 	v.ntice[Ntica(k).String()]++
 	v.xtice[Xtica(v.m, k).String()]++
+
+	v.cislovacky = append(v.cislovacky, k.Cislovacky())
 }
 
 func (v V2) Riadok() []string {
-	var r []string
-	r = append(r,
-		v.formatZhoda(v.zhoda),
-		ftoa(v.hrx),
-		ftoa(v.r.Hrx-v.hrx),
-		v.p.String(),
-		strconv.FormatUint(v.nKombi, 10),
-	)
-	r = append(r, v.formatFloatMap(v.r2)...)
-	r = append(r, v.formatTica(v.ntice), v.formatTica(v.xtice))
+	r := make([]string, 0, len(HeaderV2))
+	r = append(r, ftoa(v.hrx))
+	r = append(r, ftoa(v.hrx-v.r.Hrx))
+	r = append(r, v.p.String())
+	r = append(r, ftoa(v.r.R2))
+	r = append(r, v.formatTica(v.ntice))
+	r = append(r, v.formatTica(v.xtice))
 	r = append(r, v.formatFloatMap(v.s2)...)
 	r = append(r, v.formatIntMap(v.sucet)...)
+	r = append(r, itoa(v.nKombi))
 	r = append(r, v.formatFloatMap(v.hhrx)...)
 	r = append(r, v.formatFloatMap(v.r1)...)
 	r = append(r, v.formatFloatMap(v.s1)...)
+	r = append(r, v.formatCislovacky()...)
+	r = append(r, itoa(v.zhoda[0]), itoa(v.zhoda[1]))
 	return r
 }
 
-func (v *V2) formatZhoda(m map[int]int) string {
-	if len(m) == 0 {
-		return "0:(0)"
+func (v *V2) formatCislovacky() []string {
+	var cmin, cmax Cislovacky
+	for i := range cmax {
+		cmin[i] = byte(99)
 	}
-	var keys []int
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Ints(keys)
-
-	var buf bytes.Buffer
-	for i, k := range keys {
-		v := m[k]
-		if i > 0 {
-			buf.WriteString(", ")
+	for _, c := range v.cislovacky {
+		for i := range c {
+			cmin[i] = byte(min(int(c[i]), int(cmin[i])))
+			cmax[i] = byte(max(int(c[i]), int(cmax[i])))
 		}
-		buf.WriteString(itoa(k) + ":(" + itoa(v) + ")")
 	}
-	return buf.String()
+	s := make([]string, 20)
+	for i := 0; i < 10; i++ {
+		j := i * 2
+		s[j] = itoa(int(cmin[i]))
+		s[j+1] = itoa(int(cmax[i]))
+	}
+	return s
 }
+
+// func (v *V2) formatZhoda(m map[int]int) []string {
+// if len(m) == 0 {
+// 	return []string{"0", "0"}
+// }
+// zmin, zmax int
+// for range m {
+
+// }
+// var keys []int
+// for k := range m {
+// 	keys = append(keys, k)
+// }
+// sort.Ints(keys)
+
+// var buf bytes.Buffer
+// for i, k := range keys {
+// 	v := m[k]
+// 	if i > 0 {
+// 		buf.WriteString(", ")
+// 	}
+// 	buf.WriteString(itoa(k) + ":(" + itoa(v) + ")")
+// }
+// return buf.String()
+// }
 
 func (v *V2) formatFloatMap(m map[float64]int) []string {
 	if len(m) == 0 {
@@ -136,7 +193,7 @@ func (v *V2) formatFloatMap(m map[float64]int) []string {
 	var (
 		n   int
 		min = math.MaxFloat64
-		max float64
+		max = math.SmallestNonzeroFloat64
 	)
 	for k, v := range m {
 		n += v
@@ -211,12 +268,44 @@ func NewV1(a *Archiv) V1 {
 		header = append(header, strconv.Itoa(i))
 	}
 	header = append(header,
-		"P", "N", "Sled PN", "PR", "Sled PNPr", "Mc", "Vc", "Sled McVc", "C19", "C0", "cC", "Cc", "CC", "Sled prirodzené kritéria",
-		"ZH", "ZH presun (r/r+1)", "Sm", "Kk", "Ntica", "Ntica súčet",
-		"Ntica súčin pozície a stĺpca", "X-tice", "ƩR1-DO", "ΔƩR1-DO",
-		"ƩSTL1-DO", "ΔƩSTL1-DO", "Δ(ƩR1-DO-ƩSTL1-DO)", "HHRX", "ΔHHRX",
-		"ƩR OD-DO", "ΔƩR OD-DO", "ƩSTL OD-DO", "ΔƩSTL OD-DO", "Δ(ƩROD-DO-ƩSTLOD-DO)",
-		"HRX", "ΔHRX", "ƩKombinacie", "Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5",
+		"P",
+		"N",
+		"Sled PN",
+		"PR",
+		"Sled PNPr",
+		"Mc",
+		"Vc",
+		"Sled McVc",
+		"C19",
+		"C0",
+		"cC",
+		"Cc",
+		"CC",
+		"Sled prirodzené kritéria",
+		"ZH",
+		"ZH presun (r/r+1)",
+		"Sm",
+		"Kk",
+		"Ntica",
+		"Ntica súčet",
+		"Ntica súčin pozície a stĺpca",
+		"Xtica",
+		"ƩR 1-DO",
+		"ΔƩR 1-DO",
+		"ƩSTL 1-DO",
+		"ΔƩSTL 1-DO",
+		"Δ(ƩR1-DO-ƩSTL1-DO)",
+		"HHrx",
+		"ΔHHrx",
+		"ƩR OD-DO",
+		"ΔƩR OD-DO",
+		"ƩSTL OD-DO",
+		"ΔƩSTL OD-DO",
+		"Δ(ƩROD-DO-ƩSTLOD-DO)",
+		"Hrx",
+		"ΔHrx",
+		"ƩKombinacie",
+		"Cifra 1", "Cifra 2", "Cifra 3", "Cifra 4", "Cifra 5",
 		"Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
 	)
 	return V1{
@@ -253,28 +342,28 @@ func (v V1) Riadok(k Kombinacia) []string {
 	line = append(line,
 		itoa(Zhoda(v.riadok.K, k)),
 		ZhodaPresun(v.riadok.K, k).String(),
-		ftoa(Smernica(v.n, v.m, k)),
-		ftoa(Korelacia(v.n, v.m, v.riadok.K, k)),
+		ftoa(Smernica(k, v.n, v.m)),
+		ftoa(Korelacia(v.riadok.K, k, v.n, v.m)),
 		Ntica(k).String(),
 		NticaSucet(k).String(),
 		NticaSucin(k).String(),
 		Xtica(v.m, k).String(),
 
 		ftoa(r1),
-		ftoa(v.riadok.R1-r1), //dt
+		ftoa(r1-v.riadok.R1), //dt
 		ftoa(s1),
-		ftoa(v.riadok.S1-s1), //dt
+		ftoa(s1-v.riadok.S1), //dt
 		ftoa(r1-s1),
 		ftoa(hhrx),
-		ftoa(v.riadok.HHrx-hhrx), //dt
+		ftoa(hhrx-v.riadok.HHrx), //dt
 
 		ftoa(r2),
-		ftoa(v.riadok.R2-r2), //dt
+		ftoa(r2-v.riadok.R2), //dt
 		ftoa(s2),
-		ftoa(v.riadok.S2-s2), //dt
+		ftoa(s2-v.riadok.S2), //dt
 		ftoa(r2-s2),
 		ftoa(hrx),
-		ftoa(v.riadok.Hrx-hrx), //dt
+		ftoa(hrx-v.riadok.Hrx), //dt
 
 		itoa(k.Sucet()),
 	)

@@ -13,7 +13,7 @@ func (a *Archiv) PocetnostR() error {
 		"Pocet R1-DO", "% R1-DO", "Pocet R1-DO (r+1)", "% R1-DO (r+1)",
 		"Pocet ROD-DO", "% ROD-DO", "Pocet ROD-DO (r+1)", "% ROD-DO (r+1)",
 	}
-	w := NewCsvMaxWriter(a.WorkingDir, "PocetnostR", [][]string{header})
+	w := NewCsvMaxWriter("PocetnostR", a.WorkingDir, setHeader(header))
 	defer w.Close()
 	var (
 		max    = big.NewInt(0).Binomial(int64(a.m-1), int64(a.n-1)).String()
@@ -67,7 +67,7 @@ func (a *Archiv) PocetnostS() error {
 		"Pocet STLOD-DO", "% STLOD-DO", "Pocet STLOD-DO (r+1)", "% STLOD-DO (r+1)",
 	}
 
-	w := NewCsvMaxWriter(a.WorkingDir, "PocetnostSTL", [][]string{header})
+	w := NewCsvMaxWriter("PocetnostSTL", a.WorkingDir, setHeader(header))
 	defer w.Close()
 
 	var (

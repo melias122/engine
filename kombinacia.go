@@ -2,18 +2,34 @@ package psl
 
 import (
 	"bytes"
-	"strconv"
 	"strings"
 )
 
 type Kombinacia []byte
 
+func (k *Kombinacia) Append(b byte) {
+	*k = append(*k, b)
+}
+
+func (k *Kombinacia) Pop() byte {
+	i := len(*k)
+	b := (*k)[i-1]
+	*k = (*k)[:i-1]
+	return b
+}
+
+func (k Kombinacia) Len() int {
+	return len(k)
+}
+
+func (k Kombinacia) Copy() Kombinacia {
+	cp := make(Kombinacia, len(k))
+	copy(cp, k)
+	return cp
+}
+
 func (k Kombinacia) String() string {
-	s := make([]string, len(k))
-	for i, n := range k {
-		s[i] = strconv.Itoa(int(n))
-	}
-	return strings.Join(s, " ")
+	return bytesToString(k)
 }
 
 func (k Kombinacia) Contains(cislo byte) bool {

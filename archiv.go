@@ -124,10 +124,12 @@ func (a *Archiv) skupiny() (err error) {
 	return
 }
 
-func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) error {
+func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 
-	writter := NewCsvMaxWriter(a.WorkingDir, "Archiv", [][]string{archivRiadokHeader})
-	defer writter.Close()
+	writter := NewCsvMaxWriter("Archiv", a.WorkingDir, setHeader(archivRiadokHeader))
+	defer func() {
+		e = writter.Close()
+	}()
 
 	var (
 		kombinacie = make([][]byte, 0, 64)
@@ -213,7 +215,7 @@ func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) error {
 			return err
 		}
 	}
-	return nil
+	return
 }
 
 func (a *Archiv) makeFiles() (err error) {

@@ -46,10 +46,6 @@ func NewFilterKorelacia(min, max float64, k0 Kombinacia, n, m int) Filter {
 	}
 }
 
-func (k filterKorelacia) String() string {
-	return fmt.Sprintf("Kk: %f-%f", k.min, k.max)
-}
-
 func (k filterKorelacia) Check(k1 Kombinacia) bool {
 	if len(k1) == k.n {
 		korelacia := Korelacia(k.k0, k1, k.n, k.m)
@@ -62,4 +58,8 @@ func (k filterKorelacia) Check(k1 Kombinacia) bool {
 
 func (k filterKorelacia) CheckSkupina(skupina Skupina) bool {
 	return true
+}
+
+func (k filterKorelacia) String() string {
+	return fmt.Sprintf("Kk: %s-%s", ftoa(k.min), ftoa(k.max))
 }

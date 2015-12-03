@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
@@ -795,6 +794,16 @@ func Filters() (psl.Filters, error) {
 	return f, nil
 }
 
+func lockBtns() {
+	generujPB.SetEnabled(false)
+	filtrujPB.SetEnabled(false)
+}
+
+func unlockBtns() {
+	generujPB.SetEnabled(true)
+	filtrujPB.SetEnabled(true)
+}
+
 func Generuj() {
 	filters, err := Filters()
 	if err != nil {
@@ -806,21 +815,15 @@ func Generuj() {
 
 	// buttons
 	go func() {
-		generujPB.SetEnabled(false)
-		defer generujPB.SetEnabled(true)
+		lockBtns()
+		defer unlockBtns()
 		g.Wait()
 	}()
 
 	// progress
 	go func() {
-		for {
-			time.Sleep(200 * time.Millisecond)
-			str, ok := g.Progress()
-			infoL.SetText(str)
-			if !ok {
-				return
-			}
-
+		for msg := range g.Progress() {
+			infoL.SetText(msg)
 		}
 	}()
 }
@@ -836,21 +839,15 @@ func Filtruj() {
 
 	// buttons
 	go func() {
-		filtrujPB.SetEnabled(false)
-		defer filtrujPB.SetEnabled(true)
+		lockBtns()
+		defer unlockBtns()
 		f.Wait()
 	}()
 
 	// progress
 	go func() {
-		for {
-			time.Sleep(200 * time.Millisecond)
-			str, ok := f.Progress()
-			infoL.SetText(str)
-			if !ok {
-				return
-			}
-
+		for msg := range f.Progress() {
+			infoL.SetText(msg)
 		}
 	}()
 }
