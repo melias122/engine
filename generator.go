@@ -461,7 +461,7 @@ type cislo struct {
 }
 
 func (c *cislo) debug() {
-	fmt.Printf("%2d: %2d(%p), %2d(%p)\n", c.cislo, *c.pocet, c.pocet)
+	fmt.Printf("%2d: %2d(%p)\n", c.cislo, *c.pocet, c.pocet)
 }
 
 func (c cislo) zeroGroup() bool {

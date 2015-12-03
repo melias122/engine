@@ -22,7 +22,7 @@ func TestContains(t *testing.T) {
 		for i, n := range test.numbers {
 			ok := test.k.Contains(n)
 			if ok != test.w[i] {
-				t.Errorf("Excepted: (%b), Got: (%b)", ok, test.w[i])
+				t.Errorf("Excepted: (%v), Got: (%v)", ok, test.w[i])
 			}
 		}
 	}
