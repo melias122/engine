@@ -10,6 +10,14 @@ import (
 	"time"
 )
 
+type Generator interface {
+	Start()
+	Stop()
+	Wait()
+	Progress() chan string
+	Error() error
+}
+
 type generator2 struct {
 	archiv  *Archiv
 	filters Filters
@@ -57,7 +65,7 @@ func newGenerator2(archiv *Archiv, filters Filters) *generator2 {
 	}
 }
 
-func NewGenerator2(archiv *Archiv, filters Filters) *generator2 {
+func NewGenerator2(archiv *Archiv, filters Filters) Generator {
 	g := newGenerator2(archiv, filters)
 	g.subDir = g.startTime + "_Generator"
 	g.writer = NewCsvMaxWriter(g.startTime, g.archiv.WorkingDir,
@@ -76,7 +84,7 @@ func NewGenerator2(archiv *Archiv, filters Filters) *generator2 {
 	return g
 }
 
-func NewFilter2(archiv *Archiv, filters Filters) *generator2 {
+func NewFilter2(archiv *Archiv, filters Filters) Generator {
 	g := newGenerator2(archiv, filters)
 	g.subDir = g.startTime + "_Filter"
 	g.writer = NewCsvMaxWriter(g.startTime, g.archiv.WorkingDir,

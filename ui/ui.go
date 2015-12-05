@@ -53,6 +53,7 @@ var (
 	nacitajPB  *walk.PushButton
 	generujPB  *walk.PushButton
 	filtrujPB  *walk.PushButton
+	stopPB     *walk.PushButton
 	archivrPB  *walk.PushButton
 	mNE, nNE   *walk.NumberEdit
 	riadokLE   *walk.LineEdit
@@ -63,7 +64,9 @@ var (
 	cifrovacky *CifrovackyPanel
 
 	//Vars
-	Archiv     *psl.Archiv
+	Archiv *psl.Archiv
+	// Generator  psl.Generator = nil
+	stop       = make(chan struct{})
 	workingDir string
 
 	lines = make(map[string]Line)
@@ -96,7 +99,7 @@ func UpperFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterSTL(n(), min, max, Archiv.HHrx.Cisla, s1.name), nil
+		return psl.NewFilterSTL1(min, max, Archiv.HHrx.Cisla, n()), nil
 	}
 
 	s2 := NewUiLine(STL2, 3)
@@ -105,7 +108,7 @@ func UpperFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterSTL(n(), min, max, Archiv.Hrx.Cisla, s2.name), nil
+		return psl.NewFilterSTL2(min, max, Archiv.Hrx.Cisla, n()), nil
 	}
 
 	hhrx := NewUiLine(HHRX, 3)
@@ -114,7 +117,7 @@ func UpperFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterHHrx(n(), min, max, Archiv.HHrx), nil
+		return psl.NewFilterHHrx(min, max, Archiv.HHrx, n()), nil
 	}
 
 	hrx := NewUiLine(HRX, 3)
@@ -123,7 +126,7 @@ func UpperFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterHrx(n(), min, max, Archiv.Hrx), nil
+		return psl.NewFilterHrx(min, max, Archiv.Hrx, n()), nil
 	}
 
 	sucet := NewUiLine(Sucet, 3)
@@ -357,7 +360,7 @@ func MiddleFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterKorelacia(n(), m(), min, max, Archiv.K), nil
+		return psl.NewFilterKorelacia(min, max, Archiv.K, n(), m()), nil
 	}
 
 	sm := NewUiLine(Sm, 3)
@@ -366,7 +369,7 @@ func MiddleFilters() Widget {
 		if err != nil {
 			return nil, err
 		}
-		return psl.NewFilterSmernica(n(), m(), min, max), nil
+		return psl.NewFilterSmernica(min, max, n(), m()), nil
 	}
 
 	pw, nw := UiLineToWidgetPair(p, nui, 35)
@@ -590,9 +593,12 @@ func Buttons() Widget {
 				Enabled:   false,
 				OnClicked: func() { Filtruj() },
 			},
-			// PushButton{
-			// Text: "Limity r+1",
-			// },
+			PushButton{
+				AssignTo:  &stopPB,
+				Text:      "Stop",
+				Enabled:   false,
+				OnClicked: func() { Stop() },
+			},
 			PushButton{
 				AssignTo:  &archivrPB,
 				Text:      "Archív r",
@@ -797,11 +803,45 @@ func Filters() (psl.Filters, error) {
 func lockBtns() {
 	generujPB.SetEnabled(false)
 	filtrujPB.SetEnabled(false)
+	stopPB.SetEnabled(true)
 }
 
 func unlockBtns() {
 	generujPB.SetEnabled(true)
 	filtrujPB.SetEnabled(true)
+	stopPB.SetEnabled(false)
+}
+
+func run(g psl.Generator) {
+	g.Start()
+
+	// buttons
+	go func() {
+		lockBtns()
+		defer unlockBtns()
+
+		msg := g.Progress()
+		for {
+			select {
+			// pripad ze vsetko prebehne ako ma
+			case m, ok := <-msg:
+				if !ok {
+					return
+				}
+				infoL.SetText(m)
+				// pouzivatel stlacil stop
+			case <-stop:
+				g.Stop()
+			}
+		}
+	}()
+}
+
+func Stop() {
+	go func() {
+		stop <- struct{}{}
+	}()
+	stopPB.SetEnabled(false)
 }
 
 func Generuj() {
@@ -811,21 +851,7 @@ func Generuj() {
 		return
 	}
 	g := psl.NewGenerator2(Archiv, filters)
-	g.Start()
-
-	// buttons
-	go func() {
-		lockBtns()
-		defer unlockBtns()
-		g.Wait()
-	}()
-
-	// progress
-	go func() {
-		for msg := range g.Progress() {
-			infoL.SetText(msg)
-		}
-	}()
+	run(g)
 }
 
 func Filtruj() {
@@ -835,21 +861,7 @@ func Filtruj() {
 		return
 	}
 	f := psl.NewFilter2(Archiv, filters)
-	f.Start()
-
-	// buttons
-	go func() {
-		lockBtns()
-		defer unlockBtns()
-		f.Wait()
-	}()
-
-	// progress
-	go func() {
-		for msg := range f.Progress() {
-			infoL.SetText(msg)
-		}
-	}()
+	run(f)
 }
 
 func Main() (err error) {
