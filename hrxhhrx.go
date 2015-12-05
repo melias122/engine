@@ -418,6 +418,7 @@ func (h *hrxHHrxTab) precompute() {
 			cislovacky.Plus(c2)
 		}
 
+		// navyssi mozny pocet zhod z poslednym riadkom v skupine
 		var zhodaK Kombinacia
 		for _, num := range skN {
 			zhodaK.Append(byte(num.Cislo()))
@@ -426,6 +427,7 @@ func (h *hrxHHrxTab) precompute() {
 
 		for ; max > 0; max-- {
 
+			// min, max zhoda v skupine
 			h.zhodaCache[newTab(t.Sk, max)] = [2]int{
 				h.minimum(zhodaMax, max, len(skN)),
 				h.maximum(zhodaMax, max),
@@ -498,7 +500,7 @@ func (h *hrxHHrxTab) header() [][]string {
 		// "ƩSTL OD-DO (počet)",
 		"ƩKombinacie (min)",
 		"ƩKombinacie (max)",
-		"ƩKombinacie (počet)",
+		"Kombinacie (počet)",
 		"HHrx (min)",
 		"HHrx (max)",
 		// "HHrx (počet)",

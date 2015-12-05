@@ -19,8 +19,7 @@ var HeaderV2 = []string{
 	"ƩSTL OD-DO (počet)",
 	"ƩKombinacie (min)",
 	"ƩKombinacie (max)",
-	"ƩKombinacie (počet)",
-	"#Kombinacie",
+	"Kombinacie (počet)",
 	"HHrx (min)",
 	"HHrx (max)",
 	"HHrx (počet)",
@@ -53,7 +52,7 @@ type V2 struct {
 	p         Xcisla
 
 	hrx              float64
-	sucet            map[int]int
+	sucet            [2]int
 	hhrx, r1, s1, s2 map[float64]int
 	nKombi           int
 	ntice, xtice     map[string]int
@@ -71,14 +70,14 @@ func NewV2(a *Archiv, sk Skupina) V2 {
 		p:    sk.Xcisla,
 
 		hrx:   sk.Hrx,
-		sucet: make(map[int]int),
+		sucet: [2]int{math.MaxInt32, 0},
 		hhrx:  make(map[float64]int),
 		r1:    make(map[float64]int),
 		s1:    make(map[float64]int),
 		s2:    make(map[float64]int),
 		ntice: make(map[string]int),
 		xtice: make(map[string]int),
-		zhoda: [2]int{99, 0},
+		zhoda: [2]int{math.MaxInt32, 0},
 	}
 }
 
@@ -90,19 +89,18 @@ func (v *V2) Add(k Kombinacia) {
 	v.zhoda[0] = min(v.zhoda[0], zhoda)
 	v.zhoda[1] = max(v.zhoda[1], zhoda)
 
+	// sucet min, max
 	sucet := k.Sucet()
-	if _, ok := v.sucet[sucet]; !ok {
-		v.sucet[sucet] = 1
-	}
+	v.sucet[0] = min(v.sucet[0], sucet)
+	v.sucet[1] = max(v.sucet[1], sucet)
 
+	// STL2 min, max, pocet
 	_, S2 := k.SucetRSNext(v.Hrx.Cisla)
-	// if _, ok := v.r2[R2]; !ok {
-	// 	v.r2[R2] = 1
-	// }
 	if _, ok := v.s2[S2]; !ok {
 		v.s2[S2] = 1
 	}
 
+	// R1, STL2 min, max, pocet
 	R1, S1 := k.SucetRSNext(v.HHrx.Cisla)
 	if _, ok := v.r1[R1]; !ok {
 		v.r1[R1] = 1
@@ -111,14 +109,19 @@ func (v *V2) Add(k Kombinacia) {
 		v.s1[S1] = 1
 	}
 
+	// HHrx min, max, pocet
 	hhrx := v.HHrx.ValueKombinacia(k)
 	if _, ok := v.hhrx[hhrx]; !ok {
 		v.hhrx[hhrx] = 1
 	}
 
+	//  pocet Ntic
 	v.ntice[Ntica(k).String()]++
+
+	// pocet Xtic
 	v.xtice[Xtica(v.m, k).String()]++
 
+	// cislovacky
 	v.cislovacky = append(v.cislovacky, k.Cislovacky())
 }
 
@@ -131,7 +134,7 @@ func (v V2) Riadok() []string {
 	r = append(r, v.formatTica(v.ntice))
 	r = append(r, v.formatTica(v.xtice))
 	r = append(r, v.formatFloatMap(v.s2)...)
-	r = append(r, v.formatIntMap(v.sucet)...)
+	r = append(r, itoa(v.sucet[0]), itoa(v.sucet[1]))
 	r = append(r, itoa(v.nKombi))
 	r = append(r, v.formatFloatMap(v.hhrx)...)
 	r = append(r, v.formatFloatMap(v.r1)...)
@@ -160,31 +163,6 @@ func (v *V2) formatCislovacky() []string {
 	}
 	return s
 }
-
-// func (v *V2) formatZhoda(m map[int]int) []string {
-// if len(m) == 0 {
-// 	return []string{"0", "0"}
-// }
-// zmin, zmax int
-// for range m {
-
-// }
-// var keys []int
-// for k := range m {
-// 	keys = append(keys, k)
-// }
-// sort.Ints(keys)
-
-// var buf bytes.Buffer
-// for i, k := range keys {
-// 	v := m[k]
-// 	if i > 0 {
-// 		buf.WriteString(", ")
-// 	}
-// 	buf.WriteString(itoa(k) + ":(" + itoa(v) + ")")
-// }
-// return buf.String()
-// }
 
 func (v *V2) formatFloatMap(m map[float64]int) []string {
 	if len(m) == 0 {
