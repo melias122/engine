@@ -6,15 +6,17 @@ import (
 	"math/big"
 )
 
-func (a *Archiv) PocetnostR() error {
+func (a *Archiv) PocetnostR() (err error) {
 	var header = []string{
-		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC",
-		"Cislo", "Teor. pocet", "Teor. %",
-		"Pocet R1-DO", "% R1-DO", "Pocet R1-DO (r+1)", "% R1-DO (r+1)",
-		"Pocet ROD-DO", "% ROD-DO", "Pocet ROD-DO (r+1)", "% ROD-DO (r+1)",
+		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "C19", "C0", "cC", "Cc", "CC",
+		"Cislo", "Teor. pocet", "Teor. max Ʃ",
+		"Pocet R 1-DO", "R 1-DO", "Pocet R 1-DO (r+1)", "R 1-DO (r+1)",
+		"Pocet R OD-DO", "R OD-DO", "Pocet R OD-DO (r+1)", "R OD-DO (r+1)",
 	}
 	w := NewCsvMaxWriter("PocetnostR", a.WorkingDir, setHeader(header))
-	defer w.Close()
+	defer func() {
+		err = w.Close()
+	}()
 	var (
 		max    = big.NewInt(0).Binomial(int64(a.m-1), int64(a.n-1)).String()
 		riadok = make([]string, 0, len(header))
@@ -38,9 +40,6 @@ func (a *Archiv) PocetnostR() error {
 		// Cislovacky
 		cislovacky := NewCislovacky(i)
 		riadok = append(riadok, cislovacky.Strings()...)
-		// for _, e := range num.NewC(i) {
-		// 	riadok = append(riadok, itoa(int(e)))
-		// }
 		riadok = append(riadok,
 			N1.String(), max, "1",
 			itoa(N1.PocetR()),
@@ -53,22 +52,24 @@ func (a *Archiv) PocetnostR() error {
 			itoa(N2.PocetR()+1),
 			ftoa(Value(N2.PocetR()+1, 1, 1, a.n, a.m)),
 		)
-		if err := w.Write(riadok); err != nil {
-			return err
+		if err = w.Write(riadok); err != nil {
+			return
 		}
 	}
-	return nil
+	return
 }
 
-func (a *Archiv) PocetnostS() error {
+func (a *Archiv) PocetnostS() (err error) {
 	var header = []string{
-		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC", "Stlpec/Cislo",
-		"Teor. pocet", "Teor. %", "Pocet STL1-DO", "% STL1-DO", "Pocet STL1-DO (r+1)", "% STL1-DO (r+1)",
-		"Pocet STLOD-DO", "% STLOD-DO", "Pocet STLOD-DO (r+1)", "% STLOD-DO (r+1)",
+		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "C19", "C0", "cC", "Cc", "CC", "Stlpec/Cislo",
+		"Teor. pocet", "Teor. max Ʃ", "Pocet STL 1-DO", "STL 1-DO", "Pocet STL 1-DO (r+1)", "STL 1-DO (r+1)",
+		"Pocet STL OD-DO", "STL OD-DO", "Pocet STL OD-DO (r+1)", "STL OD-DO (r+1)",
 	}
 
 	w := NewCsvMaxWriter("PocetnostSTL", a.WorkingDir, setHeader(header))
-	defer w.Close()
+	defer func() {
+		err = w.Close()
+	}()
 
 	var (
 		teorPocet, bi big.Int
@@ -84,7 +85,6 @@ func (a *Archiv) PocetnostS() error {
 			r = append(r, N1.String())
 
 			// Zhoda s r
-			// if bytes.Contains(a.K, []byte{byte(N1.Cislo())}) {
 			if int(a.K[j-1]) == i {
 				r = append(r, "1")
 			} else {
@@ -94,7 +94,6 @@ func (a *Archiv) PocetnostS() error {
 			// Cislovacky
 			cislovacky := NewCislovacky(i)
 			r = append(r, cislovacky.Strings()...)
-			// teorPoc := num.Max(i, j, a.n, a.m)
 
 			teorPocet.Mul(teorPocet.Binomial(int64(a.m-i), int64(a.n-j)), bi.Binomial(int64(i-1), int64(j-1)))
 			r = append(r,
@@ -122,11 +121,10 @@ func (a *Archiv) PocetnostS() error {
 				pocS2,
 				s2,
 			)
-			if err := w.Write(r); err != nil {
-				return err
+			if err = w.Write(r); err != nil {
+				return
 			}
 		}
 	}
-	// w.Flush()
-	return nil
+	return
 }

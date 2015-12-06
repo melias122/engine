@@ -183,6 +183,7 @@ func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky, tmax f
 			s[i+7] = append(s[i+7], itoa(ap+last))
 			s[i+8] = append(s[i+8], itoa(hp+last))
 			s[i+9] = append(s[i+9], itoa(vp+last))
+			s[i+10] = append(s[i+10], itoa(gp+last))
 		}
 	}
 	s = append([][]string{[]string{}}, s...)
