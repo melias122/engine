@@ -16,6 +16,7 @@ type Generator interface {
 	Wait()
 	Progress() chan string
 	Error() error
+	RowsWritten() int
 }
 
 type generator2 struct {
@@ -41,7 +42,7 @@ type generator2 struct {
 
 	writer *CsvMaxWriter
 
-	RowsWriten int
+	rowsWritten int
 }
 
 func newGenerator2(archiv *Archiv, filters Filters) *generator2 {
@@ -175,8 +176,8 @@ func (g *generator2) Progress() chan string {
 		defer close(g.collected)
 		for {
 			select {
-			case g.RowsWriten = <-g.collected:
-				ch <- fmt.Sprintf("Hotovo. Zapisanych %d riadkov", g.RowsWriten)
+			case g.rowsWritten = <-g.collected:
+				ch <- fmt.Sprintf("Hotovo. Zapisanych %d riadkov", g.rowsWritten)
 				return
 			case <-time.After(500 * time.Millisecond):
 				ch <- fmt.Sprintf("Prehladavam skupinu %d z %d", g.progress, g.lenSkupiny)
@@ -188,6 +189,10 @@ func (g *generator2) Progress() chan string {
 
 func (g *generator2) Error() error {
 	return g.err
+}
+
+func (g *generator2) RowsWritten() int {
+	return g.rowsWritten
 }
 
 func (g *generator2) protokol(subdir string) {

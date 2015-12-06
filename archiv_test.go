@@ -77,8 +77,8 @@ func TestZnamyRiadok745(t *testing.T) {
 		t.Log(msg)
 	}
 
-	if g.RowsWriten != 1 {
-		t.Fatalf("Generator mal najst 1 kombinaciu ale nasiel %d", g.RowsWriten)
+	if g.RowsWritten() != 1 {
+		t.Fatalf("Generator mal najst 1 kombinaciu ale nasiel %d", g.RowsWritten())
 	}
 
 	f := NewFilter2(a, filters)
@@ -87,7 +87,7 @@ func TestZnamyRiadok745(t *testing.T) {
 		t.Log(msg)
 	}
 
-	if f.RowsWriten != 1 {
-		t.Fatalf("Filter mal najst 1 kombinaciu ale nasiel %d", f.RowsWriten)
+	if f.RowsWritten() != 1 {
+		t.Fatalf("Filter mal najst 1 kombinaciu ale nasiel %d", f.RowsWritten())
 	}
 }
