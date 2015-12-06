@@ -166,7 +166,7 @@ func (w *CsvMaxWriter) Close() error {
 	return w.close()
 }
 
-func (w *CsvMaxWriter) close() error {
+func (w *CsvMaxWriter) close() (err error) {
 
 	if w.file == nil {
 		return errors.New("CsvMaxWriter: close: pokus o zatvorenie nevytvoreneho suboru")
@@ -176,18 +176,27 @@ func (w *CsvMaxWriter) close() error {
 		return errors.New("CsvMaxWriter: close: writer nema byt nil")
 	}
 
-	writer := w.writer
+	// defer aby sme zakazdym zatvorenim urcite zavreli subor
+	defer func() {
+		// zatvorenie suboru
+		if e := w.file.Close(); e != nil {
+			err = e
+		}
+
+		// vynulovanie suboru
+		w.file = nil
+	}()
+
+	// flushnutie buffera
+	w.writer.Flush()
+
+	// kontrola chyby
+	if err = w.writer.Error(); err != nil {
+		return
+	}
 
 	// vynulovanie writera
 	w.writer = nil
-
-	// flushnutie buffera
-	writer.Flush()
-
-	// kontrola chyby
-	if err := writer.Error(); err != nil {
-		return err
-	}
 
 	// celkom zapisanych riadkov
 	w.totalRowsWritten += w.rowsWritten
@@ -196,17 +205,7 @@ func (w *CsvMaxWriter) close() error {
 	// hlavicka sa nerata
 	w.rowsWritten = 0
 
-	// if err := w.file.Sync(); err != nil {
-	// 	return err
-	// }
-
-	file := w.file
-
-	// vynulovanie suboru
-	w.file = nil
-
-	// zatvorenie suboru
-	return file.Close()
+	return
 }
 
 func (w *CsvMaxWriter) add() (err error) {
@@ -219,14 +218,12 @@ func (w *CsvMaxWriter) add() (err error) {
 	filename := w.nextFilename()
 
 	// vytvorime subor
-	w.file, err = os.Create(filename)
-	if err != nil {
+	if w.file, err = os.Create(filename); err != nil {
 		return
 	}
 
 	// zapiseme BOM, kvoli MS Excelu. TODO: UTF-8 BOM... :( remove this...
-	_, err = w.file.Write([]byte{0xEF, 0xBB, 0xBF})
-	if err != nil {
+	if _, err = w.file.Write([]byte{0xEF, 0xBB, 0xBF}); err != nil {
 		return
 	}
 
