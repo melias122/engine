@@ -26,6 +26,20 @@ func NewNum(x, n, m int) *Num {
 	return new
 }
 
+func (n *Num) Copy() *Num {
+	new := &Num{
+		n:     n.n,
+		m:     n.m,
+		cislo: n.cislo,
+		r:     n.r,
+		s:     make([]ph, n.n),
+	}
+	for i := range n.s {
+		new.s[i] = n.s[i]
+	}
+	return new
+}
+
 func (n *Num) Cislo() int {
 	return int(n.cislo)
 }
@@ -74,6 +88,19 @@ func (n *Num) String() string {
 }
 
 type Nums []*Num
+
+func (n Nums) rplus1() Nums {
+	nums := make(Nums, n.Len())
+	for i, num := range n {
+		cp := num.Copy()
+		cp.r.inc()
+		for j := range cp.s {
+			cp.s[j].inc()
+		}
+		nums[i] = cp
+	}
+	return nums
+}
 
 func (n Nums) Is101() bool {
 	for _, N := range n {

@@ -218,6 +218,30 @@ func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 	return
 }
 
+func (a *Archiv) rPlus1() error {
+	writter := NewCsvMaxWriter("ArchivR+1", a.WorkingDir, setHeader(archivRiadokHeader))
+	defer func() {
+		writter.Close()
+	}()
+	var (
+		hrxNums  = a.Hrx.Cisla.rplus1()
+		hhrxNums = a.HHrx.Cisla.rplus1()
+		r0       = Riadok{n: a.n, m: a.m}
+	)
+	for _, r := range a.riadky {
+		r0.Add(r.K,
+			hhrxNums,
+			hrxNums,
+			a.Hrx.ValueKombinacia(r.K),
+			a.HHrx.ValueKombinacia(r.K),
+		)
+		if err := writter.Write(r0.record()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (a *Archiv) makeFiles() (err error) {
 	if a.WorkingDir == "-" {
 		return
@@ -233,6 +257,7 @@ func (a *Archiv) makeFiles() (err error) {
 		a.statistikaCifrovacky,
 		a.statistikaCislovacky,
 		a.predikcia,
+		a.rPlus1,
 	} {
 		e := f()
 		if e != nil {
