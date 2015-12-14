@@ -15,6 +15,15 @@ type key struct {
 // podla pocetnosti p.. n a m je rozmer databazy
 // Vzorec: hodnota = pocetnostCisla / (binom(m-x nad n-y) * binom(x-1 nad y-1))
 func Value(pocet, x, y, n, m int) float64 {
+	// Kvoli symetrickosti binomickych cisiel
+	// maju cisla na poziciach rovnaku pocetnost
+	// Priklad db n=5, m=35..
+	// cislo 1 == 35, 2 == 34 ...
+	// stlpec 1 == 5, 2 == 4 ...
+	if x > (m/2)+m%2 {
+		x = (x - (m + 1)) * (-1)
+		y = n - y + 1
+	}
 	var key = key{byte(x), byte(y), byte(n), byte(m), uint32(pocet)}
 	v, ok := fcache[key]
 	if !ok {

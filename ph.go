@@ -7,15 +7,6 @@ type ph struct {
 }
 
 func newph(x, y, n, m int) ph {
-	// Kvoli symetrickosti binomickych cisiel
-	// maju cisla na poziciach rovnaku pocetnost
-	// Priklad db n=5, m=35..
-	// cislo 1 == 35, 2 == 34 ...
-	// stlpec 1 == 5, 2 == 4 ...
-	if x > (m/2)+m%2 {
-		x = (x - (m + 1)) * (-1)
-		y = n - y + 1
-	}
 	return ph{
 		key:         key{x: byte(x), y: byte(y), n: byte(n), m: byte(m)},
 		hodnotaNext: Value(1, x, y, n, m),
