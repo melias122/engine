@@ -319,7 +319,7 @@ func (v V1) Riadok(k Kombinacia) []string {
 	line = append(line, k.SledPrirodzene())
 	line = append(line,
 		itoa(Zhoda(v.riadok.K, k)),
-		ZhodaPresun(v.riadok.K, k).String(),
+		NewZhodaPresun(v.riadok.K, k).String(),
 		ftoa(Smernica(k, v.n, v.m)),
 		ftoa(Korelacia(v.riadok.K, k, v.n, v.m)),
 		Ntica(k).String(),

@@ -7,6 +7,9 @@ import (
 )
 
 func Zhoda(k0, k1 Kombinacia) int {
+	if k0 == nil || k1 == nil {
+		return 0
+	}
 	var zhoda int
 	for i, j := 0, 0; i < len(k0) && j < len(k1); {
 		if k0[i] == k1[j] {
@@ -22,15 +25,20 @@ func Zhoda(k0, k1 Kombinacia) int {
 	return zhoda
 }
 
-// presun urcuje poziciu presunu cisla
+// ZhodaPresun urcuje poziciu presunu cisla
 // z Kombinacie k0 do Kombinacie k1
-type presun [][2]byte
+type ZhodaPresun struct {
+	p [][2]int
+}
 
-func ZhodaPresun(k0, k1 Kombinacia) presun {
-	var p presun
+func NewZhodaPresun(k0, k1 Kombinacia) ZhodaPresun {
+	if k0 == nil || k1 == nil {
+		return ZhodaPresun{}
+	}
+	var zp ZhodaPresun
 	for i, j := 0, 0; i < len(k0) && j < len(k1); {
 		if k0[i] == k1[j] {
-			p = append(p, [2]byte{byte(i + 1), byte(j + 1)})
+			zp.p = append(zp.p, [2]int{i + 1, j + 1})
 			i++
 			j++
 		} else if k0[i] < k1[j] {
@@ -39,12 +47,12 @@ func ZhodaPresun(k0, k1 Kombinacia) presun {
 			j++
 		}
 	}
-	return p
+	return zp
 }
 
-func (p presun) String() string {
-	s := make([]string, len(p))
-	for i, p := range p {
+func (zp ZhodaPresun) String() string {
+	s := make([]string, len(zp.p))
+	for i, p := range zp.p {
 		s[i] = itoa(int(p[0])) + "|" + itoa(int(p[1]))
 	}
 	return strings.Join(s, ", ")

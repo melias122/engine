@@ -1,6 +1,9 @@
 package psl
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // func TestNewArchiv(t *testing.T) {
 // 	currentWorkingDir, err := ioutil.TempDir("profile", "")
@@ -29,6 +32,37 @@ import "testing"
 // 	}
 // }
 
+func TestH(t *testing.T) {
+	n, m := 4, 12
+	a, err := NewArchiv("profile/412.csv", DiscardCSV, n, m)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := map[int]int{}
+	for _, t := range a.Skupiny[0].Xcisla {
+		s[t.Sk] = t.Max
+	}
+	var nums Nums
+	for _, num := range a.Hrx.Cisla {
+		sk := num.PocetR()
+		if _, ok := s[sk]; ok {
+			nums = append(nums, num)
+		}
+	}
+	fmt.Println(a.Skupiny[0].Xcisla)
+	for _, num := range nums {
+		fmt.Printf("(%2d) %2d: ", num.PocetR(), num.Cislo())
+		for i, s := range num.s {
+			fmt.Printf("%2d: %.6f", i+1, s.HodnotaNext())
+		}
+		fmt.Println("")
+	}
+
+	// phs = make([][]ph, n)
+
+}
+
 func TestZnamyRiadok745(t *testing.T) {
 	n, m := 7, 45
 	a, err := NewArchiv("profile/745_r.csv", DiscardCSV, n, m)
@@ -46,14 +80,14 @@ func TestZnamyRiadok745(t *testing.T) {
 
 		NewFilterSucet(139, 139, n),
 
-		NewFilterCislovackyRange(n, 3, 3, N),
-		NewFilterCislovackyRange(n, 3, 3, Pr),
-		NewFilterCislovackyRange(n, 5, 5, Mc),
-		NewFilterCislovackyRange(n, 2, 2, C19),
-		NewFilterCislovackyRange(n, 0, 0, C0),
-		NewFilterCislovackyRange(n, 3, 3, XcC),
-		NewFilterCislovackyRange(n, 1, 1, Cc),
-		NewFilterCislovackyRange(n, 1, 1, CC),
+		NewFilterCislovackyRange(3, 3, N, n),
+		NewFilterCislovackyRange(3, 3, Pr, n),
+		NewFilterCislovackyRange(5, 5, Mc, n),
+		NewFilterCislovackyRange(2, 2, C19, n),
+		NewFilterCislovackyRange(0, 0, C0, n),
+		NewFilterCislovackyRange(3, 3, XcC, n),
+		NewFilterCislovackyRange(1, 1, Cc, n),
+		NewFilterCislovackyRange(1, 1, CC, n),
 		NewFilterZhodaRange(0, 0, a.K, n),
 
 		NewFilterSmernica(0.8037878788, 0.8037878788, n, m),

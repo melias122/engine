@@ -237,7 +237,10 @@ func (w *CsvMaxWriter) add() (err error) {
 	w.writer.Comma = Comma
 
 	// zapisem hlavicku
-	return w.writer.WriteAll(w.header)
+	if w.header != nil {
+		err = w.writer.WriteAll(w.header)
+	}
+	return
 }
 
 func (w *CsvMaxWriter) nextFilename() string {

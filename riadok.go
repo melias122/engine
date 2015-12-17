@@ -35,7 +35,7 @@ type Riadok struct {
 	n, m        int
 	origStrings []string
 
-	Pc             uint16
+	Pc             int
 	K              Kombinacia
 	C              Cislovacky
 	Zh             int
@@ -67,7 +67,7 @@ func (r *Riadok) Add(k Kombinacia, n1, n2 Nums, hrx, hhrx float64) {
 
 	if r.K != nil {
 		r.Zh = Zhoda(r.K, k)
-		r.ZhPresun = ZhodaPresun(r.K, k).String()
+		r.ZhPresun = NewZhodaPresun(r.K, k).String()
 		Kk := Korelacia(r.K, k, r.n, r.m)
 		r.DtKk = Kk - r.Kk
 		r.Kk = Kk
