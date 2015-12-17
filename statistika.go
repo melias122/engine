@@ -80,7 +80,7 @@ func (a *Archiv) statistikaZhoda() error {
 func (a *Archiv) statistikaNtice2() error {
 	stat := newStatistikaNtice(a.riadky, a.n, a.m)
 
-	w := NewCsvMaxWriter("StatistikaNtice", a.WorkingDir)
+	w := NewCsvMaxWriter("StatistikaNtice2", a.WorkingDir)
 	defer w.Close()
 
 	for _, s := range stat.strings() {

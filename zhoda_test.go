@@ -4,27 +4,27 @@ import (
 	"testing"
 )
 
-func TestZhodaPresun(t *testing.T) {
-	tests := []struct {
-		k0, k1 Kombinacia
-		presun
-	}{
-		{Kombinacia{1, 2, 3}, Kombinacia{4, 5, 6}, presun{}},
-		{Kombinacia{1, 2, 3}, Kombinacia{1, 4, 5}, presun{{1, 1}}},
-		{Kombinacia{1, 2, 3}, Kombinacia{1, 2, 3}, presun{{1, 1}, {2, 2}, {3, 3}}},
-		{
-			Kombinacia{1, 2, 10, 20, 30, 40, 50},
-			Kombinacia{10, 20, 30, 50, 60, 61, 62},
-			presun{{3, 1}, {4, 2}, {5, 3}, {7, 4}},
-		},
-	}
-	for _, test := range tests {
-		presun := ZhodaPresun(test.k0, test.k1)
-		if test.presun.String() != presun.String() {
-			t.Errorf("Expected: %s, Got: %s", test.presun, presun)
-		}
-	}
-}
+// func TestZhodaPresun(t *testing.T) {
+// 	tests := []struct {
+// 		k0, k1 Kombinacia
+// 		presun
+// 	}{
+// 		{Kombinacia{1, 2, 3}, Kombinacia{4, 5, 6}, presun{}},
+// 		{Kombinacia{1, 2, 3}, Kombinacia{1, 4, 5}, presun{{1, 1}}},
+// 		{Kombinacia{1, 2, 3}, Kombinacia{1, 2, 3}, presun{{1, 1}, {2, 2}, {3, 3}}},
+// 		{
+// 			Kombinacia{1, 2, 10, 20, 30, 40, 50},
+// 			Kombinacia{10, 20, 30, 50, 60, 61, 62},
+// 			presun{{3, 1}, {4, 2}, {5, 3}, {7, 4}},
+// 		},
+// 	}
+// 	for _, test := range tests {
+// 		presun := ZhodaPresun(test.k0, test.k1)
+// 		if test.presun.String() != presun.String() {
+// 			t.Errorf("Expected: %s, Got: %s", test.presun, presun)
+// 		}
+// 	}
+// }
 
 func TestZhoda(t *testing.T) {
 	tests := []struct {

@@ -210,7 +210,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.P), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.P, n()), nil
 		}
 	}
 
@@ -224,7 +224,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Mc), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.Mc, n()), nil
 		}
 	}
 
@@ -238,7 +238,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C0), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.C0, n()), nil
 		}
 	}
 
@@ -252,7 +252,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.CC), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.CC, n()), nil
 		}
 	}
 
@@ -266,7 +266,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.N), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.N, n()), nil
 		}
 	}
 
@@ -280,7 +280,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Vc), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.Vc, n()), nil
 		}
 	}
 
@@ -294,7 +294,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.XcC), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.XcC, n()), nil
 		}
 	}
 
@@ -322,7 +322,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Pr), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.Pr, n()), nil
 		}
 	}
 
@@ -336,7 +336,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.C19), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.C19, n()), nil
 		}
 	}
 
@@ -350,7 +350,7 @@ func MiddleFilters() Widget {
 			if err != nil {
 				return nil, err
 			}
-			return psl.NewFilterCislovackyRange(n(), int(min), int(max), psl.Cc), nil
+			return psl.NewFilterCislovackyRange(int(min), int(max), psl.Cc, n()), nil
 		}
 	}
 
