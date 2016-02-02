@@ -5,6 +5,26 @@ import (
 	"sort"
 )
 
+type hrxHHrxCacheItem struct {
+	ps         *big.Int
+	mm         [2]int
+	rod        float64
+	r          [2]float64
+	cislovacky [2]Cislovacky
+	zhoda      [2]int
+}
+
+type hrxHHrxCache map[Tab]*hrxHHrxCacheItem
+
+func (c *hrxHHrxCache) get(t Tab) *hrxHHrxCacheItem {
+	v, ok := (*c)[t]
+	if !ok {
+		v = &hrxHHrxCacheItem{}
+		(*c)[t] = v
+	}
+	return v
+}
+
 type hrxHHrxTab struct {
 	n, m        int
 	HrxXcisla   Xcisla
@@ -33,12 +53,7 @@ type hrxHHrxTab struct {
 
 	w *CsvMaxWriter
 
-	psCache         map[Tab]*big.Int
-	mmCache         map[Tab][2]int
-	rodCache        map[Tab]float64
-	rCache          map[Tab][2]float64
-	cislovackyCache map[Tab][2]Cislovacky
-	zhodaCache      map[Tab][2]int
+	cache hrxHHrxCache
 
 	headerLen int
 }
@@ -64,12 +79,7 @@ func makeSkupiny(archiv *Archiv) (Skupiny, error) {
 		HrxNums:  make(map[int]Nums),
 		HHrxNums: make(map[int]Nums),
 
-		psCache:         make(map[Tab]*big.Int),
-		mmCache:         make(map[Tab][2]int),
-		rodCache:        make(map[Tab]float64),
-		rCache:          make(map[Tab][2]float64),
-		cislovackyCache: make(map[Tab][2]Cislovacky),
-		zhodaCache:      make(map[Tab][2]int),
+		cache: make(hrxHHrxCache),
 	}
 
 	// priradenie skutocnych cisel (Num)
@@ -260,31 +270,32 @@ func (h *hrxHHrxTab) append(t Tab) {
 		h.hhrxMax.move(1, N2[N2LastIndex-i].PocetR(), N2[N2LastIndex-i].PocetR()+1)
 	}
 
+	// vyber cache
+	c := h.cache.get(t)
+
 	// pocet suctov
-	h.pocetSucet.Mul(&h.pocetSucet, h.psCache[t])
+	h.pocetSucet.Mul(&h.pocetSucet, c.ps)
 
 	// min, max sucet
-	mm := h.mmCache[t]
-	h.min += mm[0]
-	h.max += mm[1]
+	h.min += c.mm[0]
+	h.max += c.mm[1]
 
 	// max ROD-DO
-	h.rod += h.rodCache[t]
+	h.rod += c.rod
 
 	// min, max R1-DO
-	r1mm := h.rCache[t]
-	h.r1Min += r1mm[0]
-	h.r1Max += r1mm[1]
+	h.r1Min += c.r[0]
+	h.r1Max += c.r[1]
 
 	// Cislovacky min, max
-	cMinMax := h.cislovackyCache[t]
-	h.cislovackyMin.Plus(cMinMax[0])
-	h.cislovackyMax.Plus(cMinMax[1])
+	// cMinMax := h.cislovackyCache[t]
+	h.cislovackyMin.Plus(c.cislovacky[0])
+	h.cislovackyMax.Plus(c.cislovacky[1])
 
 	// Zhoda min, max
-	zhMinMax := h.zhodaCache[t]
-	h.zhMin += zhMinMax[0]
-	h.zhMax += zhMinMax[1]
+	// zhMinMax := h.zhodaCache[t]
+	h.zhMin += c.zhoda[0]
+	h.zhMax += c.zhoda[1]
 
 }
 
@@ -304,31 +315,30 @@ func (h *hrxHHrxTab) delete() {
 		h.hhrxMax.move(1, N2[N2LastIndex-i].PocetR()+1, N2[N2LastIndex-i].PocetR())
 	}
 
+	// vyber cache
+	c := h.cache.get(t)
+
 	// pocet suctov
-	h.pocetSucet.Div(&h.pocetSucet, h.psCache[t])
+	h.pocetSucet.Div(&h.pocetSucet, c.ps)
 
 	// min, max sucet
-	mm := h.mmCache[t]
-	h.min -= mm[0]
-	h.max -= mm[1]
+	h.min -= c.mm[0]
+	h.max -= c.mm[1]
 
 	// max ROD-DO
-	h.rod -= h.rodCache[t]
+	h.rod -= c.rod
 
 	// min, max R1-DO
-	r1mm := h.rCache[t]
-	h.r1Min -= r1mm[0]
-	h.r1Max -= r1mm[1]
+	h.r1Min -= c.r[0]
+	h.r1Max -= c.r[1]
 
 	// Cislovacky min, max
-	cMinMax := h.cislovackyCache[t]
-	h.cislovackyMin.Minus(cMinMax[0])
-	h.cislovackyMax.Minus(cMinMax[1])
+	h.cislovackyMin.Minus(c.cislovacky[0])
+	h.cislovackyMax.Minus(c.cislovacky[1])
 
 	// Zhoda min, max
-	zhMinMax := h.zhodaCache[t]
-	h.zhMin -= zhMinMax[0]
-	h.zhMax -= zhMinMax[1]
+	h.zhMin -= c.zhoda[0]
+	h.zhMax -= c.zhoda[1]
 }
 
 func (h *hrxHHrxTab) make(HrxXcisla Xcisla, n int) error {
@@ -427,35 +437,39 @@ func (h *hrxHHrxTab) precompute() {
 
 		for ; max > 0; max-- {
 
+			cache0 := h.cache.get(newTab(t.Sk, max))
+			cache1 := h.cache.get(newTab(t.Sk, i+1))
+
 			// min, max zhoda v skupine
-			h.zhodaCache[newTab(t.Sk, max)] = [2]int{
+			// h.zhodaCache[newTab(t.Sk, max)] = [2]int{
+			cache0.zhoda = [2]int{
 				h.minimum(zhodaMax, max, len(skN)),
 				h.maximum(zhodaMax, max),
 			}
 
 			// min, max cislovacky v skupine
-			h.cislovackyCache[newTab(t.Sk, max)] = [2]Cislovacky{
+			// h.cislovackyCache[newTab(t.Sk, max)] = [2]Cislovacky{
+			cache0.cislovacky = [2]Cislovacky{
 				h.minCislovacky(max, len(skN), cislovacky),
 				h.maxCislovacky(max, cislovacky),
 			}
 
 			// pocet suctov v skupine
 			b := new(big.Int)
-			b.Binomial(int64(t.Max), int64(max))
-			h.psCache[newTab(t.Sk, max)] = b
+			cache0.ps = b.Binomial(int64(t.Max), int64(max))
 
 			// max, min sucet v skupine
 			smin += skN[i].Cislo()
 			smax += skN[len(skN)-1-i].Cislo()
-			h.mmCache[newTab(t.Sk, i+1)] = [2]int{smin, smax}
+			cache1.mm = [2]int{smin, smax}
 
 			// max ROD-DO hodnota v skupine
-			h.rodCache[newTab(t.Sk, max)] = h.HrxNums[t.Sk][0].RNext() * float64(max)
+			cache0.rod = h.HrxNums[t.Sk][0].RNext() * float64(max)
 
 			// min,max R1-DO hodnota v skupine
 			rmin += h.HHrx.GetNum(skN2[i].Cislo()).RNext()
 			rmax += h.HHrx.GetNum(skN2[len(skN2)-1-i].Cislo()).RNext()
-			h.rCache[newTab(t.Sk, i+1)] = [2]float64{rmin, rmax}
+			cache1.r = [2]float64{rmin, rmax}
 
 			i++
 		}

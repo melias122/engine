@@ -46,11 +46,15 @@ func TestZhoda(t *testing.T) {
 	}
 }
 
+// BenchmarkZhoda-4	20000000 59.6 ns/op
 func BenchmarkZhoda(b *testing.B) {
-	k0 := Kombinacia{1, 3, 4, 5, 6}
-	k1 := Kombinacia{1, 2, 3, 4, 5}
+	k := make(Kombinacia, 30)
+	for i := range k {
+		k[i] = byte(i + 1)
+	}
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		Zhoda(k0, k1)
+		Zhoda(k, k)
 	}
 }
 

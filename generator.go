@@ -14,6 +14,11 @@ type Generator interface {
 	Start()
 	Stop()
 	Wait()
+
+	// Progress sleduje stav generatora/filtra vracia stav
+	// aktualne prehladavanych skupin v intervale 0.5 sekund.
+	// Po skonceni generatora hlasi pocet zapisanych riadkov
+	// Viacnasobne volanie tejto funkcie sposobi panic !
 	Progress() chan string
 	Error() error
 	RowsWritten() int
@@ -162,10 +167,6 @@ func (g *generator2) Wait() {
 	close(g.done)
 }
 
-// Progress sleduje stav generatora/filtra vracia stav
-// aktualne prehladavanych skupin v intervale 0.5 sekund.
-// Po skonceni generatora hlasi pocet zapisanych riadkov
-// Viacnasobne volanie tejto funkcie sposobi panic !
 func (g *generator2) Progress() chan string {
 	ch := make(chan string)
 	go func() {
