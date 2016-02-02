@@ -1,9 +1,7 @@
 package psl
 
-import "fmt"
-
 type Filter interface {
-	fmt.Stringer
+	String() string
 	Check(Kombinacia) bool
 	CheckSkupina(Skupina) bool
 }
