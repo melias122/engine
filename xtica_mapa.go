@@ -281,7 +281,10 @@ func (a *Archiv) mapaXtice2() error {
 func (a *Archiv) mapaXtice() error {
 
 	xlsxFile := xlsx.NewFile()
-	sheet := xlsxFile.AddSheet("Mapa Xtice (farebna)")
+	sheet, err := xlsxFile.AddSheet("Mapa Xtice (farebna)")
+	if err != nil {
+		return err
+	}
 
 	for _, riadok := range a.riadky {
 		row := sheet.AddRow()
