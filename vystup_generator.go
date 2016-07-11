@@ -48,8 +48,8 @@ var HeaderV2 = []string{
 type V2 struct {
 	n, m      int
 	Hrx, HHrx *H
-	r         Riadok
-	p         Xcisla
+	// r         Riadok
+	p Xcisla
 
 	hrx              float64
 	sucet            [2]int
@@ -58,6 +58,10 @@ type V2 struct {
 	ntice, xtice     map[string]int
 	cislovacky       []Cislovacky
 	zhoda            [2]int
+
+	K0   Kombinacia
+	HRX0 float64
+	R2   float64
 }
 
 func NewV2(a *Archiv, sk Skupina) V2 {
@@ -66,8 +70,8 @@ func NewV2(a *Archiv, sk Skupina) V2 {
 		m:    a.m,
 		Hrx:  a.Hrx,
 		HHrx: a.HHrx,
-		r:    a.Riadok,
-		p:    sk.Xcisla,
+		// r:    a.Riadok,
+		p: sk.Xcisla,
 
 		hrx:   sk.Hrx,
 		sucet: [2]int{math.MaxInt32, 0},
@@ -78,6 +82,9 @@ func NewV2(a *Archiv, sk Skupina) V2 {
 		ntice: make(map[string]int),
 		xtice: make(map[string]int),
 		zhoda: [2]int{math.MaxInt32, 0},
+
+		K0:   a.Riadok.K,
+		HRX0: a.Riadok.Hrx,
 	}
 }
 
@@ -85,7 +92,7 @@ func (v *V2) Add(k Kombinacia) {
 	v.nKombi++
 
 	// zhoda min, max
-	zhoda := Zhoda(v.r.K, k)
+	zhoda := Zhoda(v.K0, k)
 	v.zhoda[0] = min(v.zhoda[0], zhoda)
 	v.zhoda[1] = max(v.zhoda[1], zhoda)
 
@@ -95,12 +102,13 @@ func (v *V2) Add(k Kombinacia) {
 	v.sucet[1] = max(v.sucet[1], sucet)
 
 	// STL2 min, max, pocet
-	_, S2 := k.SucetRSNext(v.Hrx.Cisla)
+	R2, S2 := k.SucetRSNext(v.Hrx.Cisla)
 	if _, ok := v.s2[S2]; !ok {
 		v.s2[S2] = 1
 	}
+	v.R2 = R2
 
-	// R1, STL2 min, max, pocet
+	// R1, STL1 min, max, pocet
 	R1, S1 := k.SucetRSNext(v.HHrx.Cisla)
 	if _, ok := v.r1[R1]; !ok {
 		v.r1[R1] = 1
@@ -128,9 +136,9 @@ func (v *V2) Add(k Kombinacia) {
 func (v V2) Riadok() []string {
 	r := make([]string, 0, len(HeaderV2))
 	r = append(r, ftoa(v.hrx))
-	r = append(r, ftoa(v.hrx-v.r.Hrx))
+	r = append(r, ftoa(v.hrx-v.HRX0))
 	r = append(r, v.p.String())
-	r = append(r, ftoa(v.r.R2))
+	r = append(r, ftoa(v.R2))
 	r = append(r, v.formatTica(v.ntice))
 	r = append(r, v.formatTica(v.xtice))
 	r = append(r, v.formatFloatMap(v.s2)...)
