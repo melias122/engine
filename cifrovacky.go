@@ -49,6 +49,8 @@ func (k Kombinacia) Cifrovacky() Cifrovacky {
 type filterCifrovacky struct {
 	n int
 	c Cifrovacky
+
+	filterPriority
 }
 
 func NewFilterCifrovacky(c Cifrovacky, n, m int) (Filter, error) {
@@ -65,7 +67,7 @@ func NewFilterCifrovacky(c Cifrovacky, n, m int) (Filter, error) {
 			return nil, fmt.Errorf("cifra(%d): %d je viac ako maximum %d", (i+1)%10, c[i], tmax[i])
 		}
 	}
-	return filterCifrovacky{n: n, c: c}, nil
+	return filterCifrovacky{n: n, c: c, filterPriority: P1}, nil
 }
 
 func (c filterCifrovacky) Check(k Kombinacia) bool {

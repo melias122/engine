@@ -29,6 +29,7 @@ type filterSTL struct {
 	min, max float64
 	nums     Nums
 	fname    string
+	filterPriority
 }
 
 func newFilterSTL(fname string, min, max float64, nums Nums, n int) filterSTL {
@@ -36,11 +37,12 @@ func newFilterSTL(fname string, min, max float64, nums Nums, n int) filterSTL {
 		min = 0.1
 	}
 	return filterSTL{
-		n:     n,
-		min:   nextLSS(min),
-		max:   nextGRT(max),
-		nums:  nums,
-		fname: fname,
+		n:              n,
+		min:            nextLSS(min),
+		max:            nextGRT(max),
+		nums:           nums,
+		fname:          fname,
+		filterPriority: P3,
 	}
 }
 

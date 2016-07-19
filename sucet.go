@@ -7,6 +7,7 @@ import (
 type filterSucet struct {
 	n        int
 	min, max int
+	filterPriority
 }
 
 func NewFilterSucet(min, max, n int) Filter {
@@ -14,9 +15,10 @@ func NewFilterSucet(min, max, n int) Filter {
 		min = 0
 	}
 	return filterSucet{
-		n:   n,
-		min: min,
-		max: max,
+		n:              n,
+		min:            min,
+		max:            max,
+		filterPriority: P2,
 	}
 }
 

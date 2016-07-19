@@ -15,13 +15,15 @@ func Xtica(m int, k Kombinacia) Tica {
 type filterXtica struct {
 	n, m  int
 	xtica Tica
+	filterPriority
 }
 
 func NewFilterXtica(n, m int, tica Tica) Filter {
 	return filterXtica{
-		n:     n,
-		m:     m,
-		xtica: tica,
+		n:              n,
+		m:              m,
+		xtica:          tica,
+		filterPriority: P1,
 	}
 }
 

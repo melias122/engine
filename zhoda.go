@@ -62,6 +62,7 @@ type filterZhoda struct {
 	n, min, max int
 	kombinacia  Kombinacia
 	exact       []bool
+	filterPriority
 }
 
 func NewFilterZhodaRange(min, max int, k Kombinacia, n int) Filter {
@@ -72,10 +73,11 @@ func NewFilterZhodaRange(min, max int, k Kombinacia, n int) Filter {
 		max = n
 	}
 	return filterZhoda{
-		n:          n,
-		min:        min,
-		max:        max,
-		kombinacia: k,
+		n:              n,
+		min:            min,
+		max:            max,
+		kombinacia:     k,
+		filterPriority: P1,
 	}
 }
 

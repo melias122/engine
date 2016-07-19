@@ -7,6 +7,7 @@ import (
 
 type filterZakazane struct {
 	cisla []bool
+	filterPriority
 }
 
 func NewFilterZakazaneFromString(s string, zhoda []byte, n, m int) (Filter, error) {
@@ -27,7 +28,8 @@ func NewFilterZakazane(ints []int, n, m int) Filter {
 		}
 	}
 	return filterZakazane{
-		cisla: z,
+		cisla:          z,
+		filterPriority: P0,
 	}
 }
 
@@ -56,6 +58,7 @@ func (f filterZakazane) String() string {
 
 type filterZakazaneSTL struct {
 	zakazane [][]bool
+	filterPriority
 }
 
 func NewFilterZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
@@ -70,7 +73,8 @@ func NewFilterZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, e
 
 func NewFilterZakazaneSTL(mapInts MapInts, n, m int) Filter {
 	z := filterZakazaneSTL{
-		zakazane: make([][]bool, n),
+		zakazane:       make([][]bool, n),
+		filterPriority: P0,
 	}
 	for i := range mapInts {
 		if i <= 0 {

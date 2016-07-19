@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"time"
 )
 
@@ -52,6 +53,7 @@ type generator2 struct {
 
 func newGenerator2(archiv *Archiv, filters Filters) *generator2 {
 	nworkers := runtime.NumCPU()
+	sort.Sort(byPriority(filters))
 
 	return &generator2{
 		archiv:  archiv,

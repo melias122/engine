@@ -131,11 +131,15 @@ func (h *H) Xcisla() Xcisla {
 }
 
 func NewFilterHrx(min, max float64, Hrx *H, n int) Filter {
-	return filterHrx{newFilterH("Hrx", min, max, Hrx, n)}
+	f := filterHrx{newFilterH("Hrx", min, max, Hrx, n)}
+	f.filterPriority = P2
+	return f
 }
 
 func NewFilterHHrx(min, max float64, HHrx *H, n int) Filter {
-	return filterHHrx{newFilterH("HHrx", min, max, HHrx, n)}
+	f := filterHHrx{newFilterH("HHrx", min, max, HHrx, n)}
+	f.filterPriority = P4
+	return f
 }
 
 type filterHrx struct{ filterH }
@@ -157,6 +161,7 @@ type filterH struct {
 	min, max float64
 	h        *H
 	fname    string
+	filterPriority
 }
 
 func newFilterH(fname string, min, max float64, h *H, n int) filterH {

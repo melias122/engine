@@ -12,14 +12,17 @@ type filterRMinusSTL struct {
 	nums  Nums
 	delta Delta
 	fname string
+
+	filterPriority
 }
 
 func NewFilterR1MinusSTL1(d Delta, nums Nums, n int) Filter {
 	return filterRMinusSTL{
-		n:     n,
-		nums:  nums,
-		delta: d,
-		fname: "Δ(ƩR1-DO-ƩSTL1-DO)",
+		n:              n,
+		nums:           nums,
+		delta:          d,
+		fname:          "Δ(ƩR1-DO-ƩSTL1-DO)",
+		filterPriority: P3,
 	}
 }
 
