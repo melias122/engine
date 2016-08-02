@@ -216,7 +216,7 @@ func (a *Archiv) statistikaCifrovacky() error {
 	for i := 1; i <= 10; i++ {
 		header = append(header, "Cifra ("+strconv.Itoa(i%10)+")")
 	}
-	w := NewCsvMaxWriter("KrokCifrovacky", a.WorkingDir, setHeader(header))
+	w := NewCsvMaxWriter("KrokCifrovacky", a.WorkingDir, SetHeader(header))
 	defer w.Close()
 
 	// dokumentacia

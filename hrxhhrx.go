@@ -100,8 +100,8 @@ func makeSkupiny(archiv *Archiv) (Skupiny, error) {
 	h.precompute()
 
 	h.w = NewCsvMaxWriter("HrxHHrx", archiv.WorkingDir,
-		setHeaders(h.header()),
-		setSuffixFunc(IntSuffix()),
+		SetHeaders(h.header()),
+		SetSuffixFunc(IntSuffix()),
 	)
 	defer h.w.Close()
 

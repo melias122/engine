@@ -82,25 +82,25 @@ type CsvMaxWriter struct {
 	initialized bool
 }
 
-func setSuffixFunc(sf SuffixFunc) func(w *CsvMaxWriter) {
+func SetSuffixFunc(sf SuffixFunc) func(w *CsvMaxWriter) {
 	return func(w *CsvMaxWriter) {
 		w.Suffix = sf
 	}
 }
 
-func setSubdir(subdir string) func(w *CsvMaxWriter) {
+func SetSubdir(subdir string) func(w *CsvMaxWriter) {
 	return func(w *CsvMaxWriter) {
 		w.subdir = subdir
 	}
 }
 
-func setHeader(header []string) func(w *CsvMaxWriter) {
+func SetHeader(header []string) func(w *CsvMaxWriter) {
 	return func(w *CsvMaxWriter) {
 		w.header = [][]string{header}
 	}
 }
 
-func setHeaders(headers [][]string) func(w *CsvMaxWriter) {
+func SetHeaders(headers [][]string) func(w *CsvMaxWriter) {
 	return func(w *CsvMaxWriter) {
 		w.header = headers
 	}

@@ -114,14 +114,12 @@ func ss(k Kombinacia, o operacia) nticaSS {
 type filterNtica struct {
 	n     int
 	ntica Tica
-	filterPriority
 }
 
 func NewFilterNtica(n int, tica Tica) Filter {
 	return filterNtica{
-		n:              n,
-		ntica:          tica,
-		filterPriority: P2,
+		n:     n,
+		ntica: tica,
 	}
 }
 
@@ -145,15 +143,13 @@ type filterSTLNtica struct {
 	n       int
 	pozicie []byte
 	ntica   Filter
-	filterPriority
 }
 
 func NewFilterSTLNtica(n int, tica Tica, pozicie []byte) Filter {
 	return filterSTLNtica{
-		n:              n,
-		ntica:          NewFilterNtica(n, tica),
-		pozicie:        pozicie,
-		filterPriority: P2,
+		n:       n,
+		ntica:   NewFilterNtica(n, tica),
+		pozicie: pozicie,
 	}
 }
 

@@ -28,7 +28,6 @@ type filterKorelacia struct {
 	n, m     int
 	min, max float64
 	k0       Kombinacia
-	filterPriority
 }
 
 func NewFilterKorelacia(min, max float64, k0 Kombinacia, n, m int) Filter {
@@ -39,12 +38,11 @@ func NewFilterKorelacia(min, max float64, k0 Kombinacia, n, m int) Filter {
 		max = 1.9
 	}
 	return filterKorelacia{
-		n:              n,
-		m:              m,
-		min:            nextLSS(min),
-		max:            nextGRT(max),
-		k0:             k0,
-		filterPriority: P3,
+		n:   n,
+		m:   m,
+		min: nextLSS(min),
+		max: nextGRT(max),
+		k0:  k0,
 	}
 }
 

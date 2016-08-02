@@ -31,7 +31,6 @@ type filterR struct {
 	min, max float64
 	cisla    Nums
 	fname    string
-	filterPriority
 }
 
 func newFilterR(fname string, min, max float64, cisla Nums, n int) filterR {
@@ -40,12 +39,11 @@ func newFilterR(fname string, min, max float64, cisla Nums, n int) filterR {
 	}
 	//TODO: max... asi 1
 	return filterR{
-		n:              n,
-		min:            nextLSS(min),
-		max:            nextGRT(max),
-		cisla:          cisla,
-		fname:          fname,
-		filterPriority: P3,
+		n:     n,
+		min:   nextLSS(min),
+		max:   nextGRT(max),
+		cisla: cisla,
+		fname: fname,
 	}
 }
 

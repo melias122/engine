@@ -230,8 +230,6 @@ type filterCislovacky struct {
 	n        int
 	min, max int
 	c        Cislovacka
-
-	filterPriority
 }
 
 func NewFilterCislovackyRange(min, max int, c Cislovacka, n int) Filter {
@@ -246,11 +244,10 @@ func newFilterCislovackyRange(min, max int, c Cislovacka, n int) filterCislovack
 		max = n
 	}
 	return filterCislovacky{
-		n:              n,
-		min:            min,
-		max:            max,
-		c:              c,
-		filterPriority: P1,
+		n:   n,
+		min: min,
+		max: max,
+		c:   c,
 	}
 }
 

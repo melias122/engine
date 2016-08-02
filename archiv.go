@@ -9,9 +9,14 @@ import (
 	"strings"
 )
 
+type Dimension struct {
+	N, M int
+}
+
 // Archiv
 type Archiv struct {
 	Riadok
+	Dimension
 
 	Hrx  *H
 	HHrx *H
@@ -77,8 +82,9 @@ func NewArchiv(csvPath, currentWorkingDir string, n, m int) (*Archiv, error) {
 			n: n,
 			m: m,
 		},
-		Hrx:  NewHrx(n, m),
-		HHrx: NewHHrx(n, m),
+		Dimension: Dimension{N: n, M: m},
+		Hrx:       NewHrx(n, m),
+		HHrx:      NewHHrx(n, m),
 
 		CsvPath:    CsvPath,
 		WorkingDir: WorkingDir,
@@ -126,7 +132,7 @@ func (a *Archiv) skupiny() (err error) {
 
 func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 
-	writter := NewCsvMaxWriter("Archiv", a.WorkingDir, setHeader(archivRiadokHeader))
+	writter := NewCsvMaxWriter("Archiv", a.WorkingDir, SetHeader(archivRiadokHeader))
 	defer func() {
 		e = writter.Close()
 	}()
@@ -219,7 +225,7 @@ func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 }
 
 func (a *Archiv) rPlus1() error {
-	writter := NewCsvMaxWriter("ArchivR+1", a.WorkingDir, setHeader(archivRiadokHeader))
+	writter := NewCsvMaxWriter("ArchivR+1", a.WorkingDir, SetHeader(archivRiadokHeader))
 	defer func() {
 		writter.Close()
 	}()

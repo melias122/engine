@@ -26,7 +26,6 @@ func Smernica(k Kombinacia, n, m int) float64 {
 type filterSmernica struct {
 	n, m     int
 	min, max float64
-	filterPriority
 }
 
 func NewFilterSmernica(min, max float64, n, m int) Filter {
@@ -37,11 +36,10 @@ func NewFilterSmernica(min, max float64, n, m int) Filter {
 		max = 2
 	}
 	return filterSmernica{
-		n:              n,
-		m:              m,
-		min:            nextLSS(min),
-		max:            nextGRT(max),
-		filterPriority: P4,
+		n:   n,
+		m:   m,
+		min: nextLSS(min),
+		max: nextGRT(max),
 	}
 }
 

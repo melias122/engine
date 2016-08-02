@@ -104,7 +104,6 @@ func (p Xcisla) Contains(t Tab) bool {
 // pr: 	{1:[1, 2, ...], 2:[0, 2], 3:[], 6:[], ...}
 type filterXcisla struct {
 	x [][]Tab
-	filterPriority
 }
 
 // XcislaFromString implementuju filter nad Xcislami.
@@ -128,9 +127,7 @@ func NewFilterXcislaFromString(s string, n, m int) (Filter, error) {
 // Xcisla impletuju filter pre hrx.Presun (xcisla). Vstup je vektor tabuliek
 func NewFilterXcisla(xcisla Xcisla) Filter {
 	var (
-		x = filterXcisla{
-			filterPriority: P2,
-		}
+		x           = filterXcisla{}
 		skupinaLast = -1
 	)
 	sort.Sort(xcisla)

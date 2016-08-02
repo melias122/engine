@@ -8,7 +8,6 @@ import (
 type filterPovinne struct {
 	povinne  []bool
 	n, count int
-	filterPriority
 }
 
 func NewFilterPovinneFromString(s string, k0 Kombinacia, n, m int) (Filter, error) {
@@ -23,9 +22,8 @@ func NewFilterPovinneFromString(s string, k0 Kombinacia, n, m int) (Filter, erro
 
 func NewFilterPovinne(ints []int, n, m int) Filter {
 	p := filterPovinne{
-		povinne:        make([]bool, m),
-		n:              n,
-		filterPriority: P1,
+		povinne: make([]bool, m),
+		n:       n,
 	}
 	for _, i := range ints {
 		if i > 0 && i <= m && !p.povinne[i-1] {
@@ -74,7 +72,6 @@ func (p filterPovinne) String() string {
 type filterPovinneSTL struct {
 	povinne [][]bool
 	count   int
-	filterPriority
 }
 
 func NewFilterPovinneSTLFromString(s string, k0 Kombinacia, n, m int) (Filter, error) {
@@ -89,8 +86,7 @@ func NewFilterPovinneSTLFromString(s string, k0 Kombinacia, n, m int) (Filter, e
 
 func NewFilterPovinneSTL(mapInts MapInts, n, m int) Filter {
 	p := filterPovinneSTL{
-		povinne:        make([][]bool, n),
-		filterPriority: P1,
+		povinne: make([][]bool, n),
 	}
 
 	for i, ints := range mapInts {
