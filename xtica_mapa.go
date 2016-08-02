@@ -1,4 +1,4 @@
-package psl
+package engine
 
 import (
 	"fmt"
@@ -43,7 +43,7 @@ func (s *statistikaXticeXn) inc(i int) {
 
 func (sx *statistikaXticeXn) strings(udalost string) [][]string {
 	s := [][]string{
-		[]string{},
+		{},
 	}
 
 	addRow := func() {
@@ -196,7 +196,7 @@ func newMapaXtice2(r []Riadok, n, m int) mapaXtice2 {
 
 func (m *mapaXtice2) strings() [][]string {
 	s := [][]string{
-		[]string{
+		{
 			"Kombinacie",
 		},
 	}

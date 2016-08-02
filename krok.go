@@ -1,4 +1,4 @@
-package psl
+package engine
 
 import (
 	"fmt"
@@ -186,11 +186,11 @@ func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky, tmax f
 			s[i+10] = append(s[i+10], itoa(gp+last))
 		}
 	}
-	s = append([][]string{[]string{}}, s...)
-	s = append([][]string{[]string{}}, s...)
+	s = append([][]string{{}}, s...)
+	s = append([][]string{{}}, s...)
 
-	s = append([][]string{[]string{"Teoreticky možné"}}, s...)
-	s = append([][]string{[]string{"Počet celkom"}}, s...)
+	s = append([][]string{{"Teoreticky možné"}}, s...)
+	s = append([][]string{{"Počet celkom"}}, s...)
 	if doPad {
 		for len(s[0]) < lenOrigHeader {
 			s[0] = append(s[0], "")
@@ -205,8 +205,8 @@ func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky, tmax f
 		s[0] = append(s[0], itoa(sum))
 		s[1] = append(s[1], itoa(int(tMax[i])))
 	}
-	s = append([][]string{[]string{}}, s...)
-	s = append([][]string{[]string{}}, s...)
+	s = append([][]string{{}}, s...)
+	s = append([][]string{{}}, s...)
 
 	return s
 }

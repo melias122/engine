@@ -1,4 +1,4 @@
-package psl
+package engine
 
 import (
 	"testing"
@@ -49,9 +49,9 @@ func TestPlus(t *testing.T) {
 		exepted Cislovacky
 	}
 	test.in = []Cislovacky{
-		Cislovacky{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-		Cislovacky{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		Cislovacky{0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+		{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
+		{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
 	}
 	test.exepted = Cislovacky{1, 3, 5, 7, 9, 11, 13, 15, 17, 20}
 

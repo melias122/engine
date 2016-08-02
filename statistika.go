@@ -1,4 +1,4 @@
-package psl
+package engine
 
 import "math/big"
 
@@ -181,8 +181,8 @@ func (s *statistikaNtica) add(k Kombinacia, riadok int) {
 func (sn *statistikaNtica) strings() [][]string {
 
 	s := [][]string{
-		[]string{},
-		[]string{
+		{},
+		{
 			"", "Ntica", "Súčin pozície a stĺpca", "Počet výskytov", "%",
 		},
 	}
@@ -280,7 +280,7 @@ func (s *statistikaNtice) add(r Riadok) {
 
 func (sn *statistikaNtice) strings() [][]string {
 	s := [][]string{
-		[]string{
+		{
 			"", "Ntica", "Teoretické maximum", "Teoretické %", "Počet výskytov", "%",
 		},
 	}

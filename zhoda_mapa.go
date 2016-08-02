@@ -1,4 +1,4 @@
-package psl
+package engine
 
 func (a *Archiv) mapaZhoda2() error {
 	mz := newMapaZhoda(a.riadky, a.n)
