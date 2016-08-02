@@ -13,7 +13,7 @@ import (
 )
 
 type Line interface {
-	Filter() (psl.Filter, error)
+	Filter() (engine.Filter, error)
 	IsSet() bool
 	Clear()
 	Set(string, int)
@@ -22,10 +22,10 @@ type Line interface {
 type CifrovackyPanel struct {
 	name   string
 	le     [10]*walk.LineEdit
-	filter func() (psl.Filter, error)
+	filter func() (engine.Filter, error)
 }
 
-func (c CifrovackyPanel) Filter() (psl.Filter, error) {
+func (c CifrovackyPanel) Filter() (engine.Filter, error) {
 	if c.filter == nil {
 		return nil, fmt.Errorf("%s: nil filter", c.name)
 	}
@@ -80,7 +80,7 @@ func (c CifrovackyPanel) Set(s string, i int) {
 type StlNtica struct {
 	name   string
 	cb     [30]*walk.CheckBox
-	filter func() (psl.Filter, error)
+	filter func() (engine.Filter, error)
 }
 
 func (s StlNtica) Pozicie() []byte {
@@ -99,7 +99,7 @@ func (s StlNtica) Pozicie() []byte {
 	return pozicie
 }
 
-func (s StlNtica) Filter() (psl.Filter, error) {
+func (s StlNtica) Filter() (engine.Filter, error) {
 	if s.filter == nil {
 		return nil, fmt.Errorf("%s: nil filter", s.name)
 	}
@@ -138,7 +138,7 @@ type UiLine struct {
 	name     string
 	rb1, rb2 *walk.RadioButton
 	lines    []*walk.LineEdit
-	filter   func() (psl.Filter, error)
+	filter   func() (engine.Filter, error)
 
 	// cislovacky exact mode
 	exactMode *walk.CheckBox
@@ -258,7 +258,7 @@ func (u *UiLine) MinMax() (float64, float64, error) {
 	for i, line := range lines {
 		s := strings.TrimSpace(line.Text())
 		if len(s) > 0 {
-			minMax[i], err = psl.ParseFloat(s)
+			minMax[i], err = engine.ParseFloat(s)
 			if err != nil {
 				return 0, 0, err
 			}
@@ -272,7 +272,7 @@ func (u *UiLine) MinMax() (float64, float64, error) {
 	return minMax[0], minMax[1], nil
 }
 
-func (u *UiLine) Filter() (psl.Filter, error) {
+func (u *UiLine) Filter() (engine.Filter, error) {
 	if u.filter == nil {
 		return nil, fmt.Errorf("%s: nil filter", u.name)
 	}
@@ -451,15 +451,15 @@ func UiLineToWidgetDelta(uiLine *UiLine) Widget {
 			},
 			RadioButtonGroup{
 				Buttons: []RadioButton{
-					RadioButton{
+					{
 						AssignTo: &uiLine.rbDelta0,
 						Text:     "Vyp",
 					},
-					RadioButton{
+					{
 						AssignTo: &uiLine.rbDelta1,
 						Text:     "+",
 					},
-					RadioButton{
+					{
 						AssignTo: &uiLine.rbDelta2,
 						Text:     "-",
 					},
@@ -473,7 +473,7 @@ func (u1 *UiLine) syncLines(u2 *UiLine) {
 	if u1.exactMode.Checked() && u2.exactMode.Checked() {
 		s := u2.lines[1].Text()
 		r := strings.NewReader(s)
-		p := psl.NewParser(r, n(), m())
+		p := engine.NewParser(r, n(), m())
 		ints, err := p.ParseInts()
 		if err != nil {
 			log.Println(err)

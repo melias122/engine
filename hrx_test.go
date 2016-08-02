@@ -1,4 +1,4 @@
-package psl
+package engine
 
 import (
 	"math"
@@ -111,10 +111,10 @@ func TestHrxValueKombinacia(t *testing.T) {
 	hrx := NewHHrx(n, m)
 
 	for _, a := range [][]int{
-		[]int{2, 7, 13, 32, 35},
-		[]int{1, 14, 15, 17, 19},
-		[]int{4, 9, 10, 25, 27},
-		[]int{1, 2, 13, 21, 31},
+		{2, 7, 13, 32, 35},
+		{1, 14, 15, 17, 19},
+		{4, 9, 10, 25, 27},
+		{1, 2, 13, 21, 31},
 	} {
 		for y, x := range a {
 			hrx.Add(x, y)
