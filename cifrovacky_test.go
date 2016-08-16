@@ -5,16 +5,6 @@ import (
 	"testing"
 )
 
-// var (
-// 	CifrovackyFilter30, _ = NewFilterCifrovacky(Cifrovacky{3, 3, 3, 3, 3, 3, 3, 3, 3, 3}, 30, 90)
-// )
-
-// func BenchmarkCifrovacky(b *testing.B) {
-// for i := 0; i < b.N; i++ {
-// CifrovackyFilter30.Check(K30)
-// }
-// }
-
 func TestCifrovackyTeorMax(t *testing.T) {
 	tests := []struct {
 		n, m int

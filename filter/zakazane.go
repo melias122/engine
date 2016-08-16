@@ -1,8 +1,10 @@
-package engine
+package filter
 
 import (
 	"strconv"
 	"strings"
+
+	"github.com/melias122/engine"
 )
 
 type filterZakazane struct {
@@ -26,12 +28,12 @@ func NewFilterZakazane(ints []int, n, m int) Filter {
 			z[i-1] = true
 		}
 	}
-	return filterZakazane{
+	return &filterZakazane{
 		cisla: z,
 	}
 }
 
-func (f filterZakazane) Check(k Kombinacia) bool {
+func (f *filterZakazane) Check(k engine.Kombinacia) bool {
 	for _, c := range k {
 		if f.cisla[c-1] {
 			return false
@@ -40,11 +42,11 @@ func (f filterZakazane) Check(k Kombinacia) bool {
 	return true
 }
 
-func (f filterZakazane) CheckSkupina(skupina Skupina) bool {
+func (f *filterZakazane) CheckSkupina(skupina engine.Skupina) bool {
 	return true
 }
 
-func (f filterZakazane) String() string {
+func (f *filterZakazane) String() string {
 	var s []string
 	for c, ok := range f.cisla {
 		if ok {
@@ -69,7 +71,7 @@ func NewFilterZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, e
 }
 
 func NewFilterZakazaneSTL(mapInts MapInts, n, m int) Filter {
-	z := filterZakazaneSTL{
+	z := &filterZakazaneSTL{
 		zakazane: make([][]bool, n),
 	}
 	for i := range mapInts {
@@ -88,7 +90,7 @@ func NewFilterZakazaneSTL(mapInts MapInts, n, m int) Filter {
 	return z
 }
 
-func (z filterZakazaneSTL) Check(k Kombinacia) bool {
+func (z *filterZakazaneSTL) Check(k engine.Kombinacia) bool {
 	for i, j := range k {
 		if z.zakazane[i] == nil {
 			continue
@@ -100,11 +102,11 @@ func (z filterZakazaneSTL) Check(k Kombinacia) bool {
 	return true
 }
 
-func (z filterZakazaneSTL) CheckSkupina(skupina Skupina) bool {
+func (z *filterZakazaneSTL) CheckSkupina(skupina engine.Skupina) bool {
 	return true
 }
 
-func (z filterZakazaneSTL) String() string {
+func (z *filterZakazaneSTL) String() string {
 	var s []string
 	for i := range z.zakazane {
 		if z.zakazane[i] == nil {

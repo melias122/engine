@@ -1,11 +1,8 @@
 package engine
 
 import (
-	"errors"
 	"fmt"
-	"sort"
 	"strconv"
-	"strings"
 )
 
 type Cislovacka byte
@@ -92,7 +89,7 @@ func (c *Cislovacky) Minus(c2 Cislovacky) {
 
 // String implementuje interface Stringer
 func (c *Cislovacky) String() string {
-	return bytesToString(c[:])
+	return bytesToString(c[0:len(c)])
 }
 
 // Strings je pomocna funkcia pre vypis jednotlivych cislovacie
@@ -171,116 +168,4 @@ func IsCc(n int) bool {
 // CC cisla su: 11, 22, 33, 44 ...
 func IsCC(n int) bool {
 	return n/10 == n%10
-}
-
-type filterCislovackyExact struct {
-	filterCislovacky
-	exact []bool
-}
-
-func NewFilterCislovackyExactFromString(s string, c Cislovacka, n, m int) (Filter, error) {
-	r := strings.NewReader(s)
-	p := NewParser(r, n, m)
-	ints, err := p.ParseInts()
-	if err != nil {
-		return nil, err
-	}
-	return NewFilterCislovackyExact(ints, c, n)
-}
-
-func NewFilterCislovackyExact(ints []int, c Cislovacka, n int) (Filter, error) {
-	if ints == nil || len(ints) == 0 {
-		return nil, errors.New("NewFilterCislovackyExact: aspon 1 cislo musi byt zadane")
-	}
-	sort.Ints(ints)
-	min := ints[0]
-	max := ints[len(ints)-1]
-	exact := make([]bool, n+1)
-	for _, i := range ints {
-		if i >= 0 && i <= n {
-			exact[i] = true
-		}
-	}
-	return filterCislovackyExact{
-		filterCislovacky: newFilterCislovackyRange(min, max, c, n),
-		exact:            exact,
-	}, nil
-}
-
-func (f filterCislovackyExact) Check(k Kombinacia) bool {
-	count, ok := f.filterCislovacky.check(k)
-	if k.Len() < f.n {
-		return ok
-	}
-	return ok && f.exact[count]
-}
-
-func (f filterCislovackyExact) String() string {
-	var s []string
-	for i, ok := range f.exact {
-		if ok {
-			s = append(s, itoa(i))
-		}
-	}
-	return fmt.Sprintf("%s: %s", f.c, strings.Join(s, ", "))
-}
-
-// Cislovacky implementuju Filter pre P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
-type filterCislovacky struct {
-	n        int
-	min, max int
-	c        Cislovacka
-}
-
-func NewFilterCislovackyRange(min, max int, c Cislovacka, n int) Filter {
-	return newFilterCislovackyRange(min, max, c, n)
-}
-
-func newFilterCislovackyRange(min, max int, c Cislovacka, n int) filterCislovacky {
-	if min < 0 {
-		min = 0
-	}
-	if max > n {
-		max = n
-	}
-	return filterCislovacky{
-		n:   n,
-		min: min,
-		max: max,
-		c:   c,
-	}
-}
-
-func (f filterCislovacky) Check(k Kombinacia) bool {
-	_, ok := f.check(k)
-	return ok
-}
-
-func (c filterCislovacky) check(k Kombinacia) (int, bool) {
-	var (
-		fun   = c.c.Func()
-		count int
-	)
-	for _, n := range k {
-		if fun(int(n)) {
-			count++
-		}
-	}
-	if count > c.max || (len(k) == c.n && count < c.min) {
-		return count, false
-	}
-	return count, true
-}
-
-func (f filterCislovacky) CheckSkupina(s Skupina) bool {
-	min := int(s.Cislovacky[0][f.c])
-	max := int(s.Cislovacky[1][f.c])
-	if min > f.max || max < f.min {
-		return false
-	}
-	return true
-}
-
-func (c filterCislovacky) String() string {
-	return fmt.Sprintf("%s: %d-%d", c.c.String(), c.min, c.max)
 }

@@ -1,13 +1,13 @@
-package engine
+package filter
 
 import (
-	"encoding/csv"
 	"errors"
 	"fmt"
 	"io"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/melias122/engine"
 )
 
 type Ints []int
@@ -89,7 +89,7 @@ func (pa *Parser) ParseInts() (Ints, error) {
 
 		case p, n, pr, mc, vc, c19, c0, ca, cb, cc:
 			// s = append(s, cislovacky[tok]...)
-			for _, num := range cislovacky[tok] {
+			for _, num := range _cislovacky[tok] {
 				if num > pa.m {
 					break
 				}
@@ -175,7 +175,7 @@ func (p *Parser) scanIgnoreWhitespace() (tok Token, lit string) {
 }
 
 // lookup table for cislovacky
-var cislovacky = [...][]int{
+var _cislovacky = [...][]int{
 	p:   {2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98},
 	n:   {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 73, 75, 77, 79, 81, 83, 85, 87, 89, 91, 93, 95, 97, 99},
 	pr:  {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97},
@@ -195,7 +195,7 @@ func ParseFloat(s string) (f float64, e error) {
 	return
 }
 
-func parseTica(s string) (t Tica, e error) {
+func parseTica(s string) (t engine.Tica, e error) {
 	s = strings.TrimSpace(s)
 	for _, str := range strings.Split(s, " ") {
 		var i int
@@ -208,7 +208,7 @@ func parseTica(s string) (t Tica, e error) {
 	return
 }
 
-func ParseNtica(n int, s string) (Tica, error) {
+func ParseNtica(n int, s string) (engine.Tica, error) {
 	ntica, err := parseTica(s)
 	if err != nil {
 		return nil, err
@@ -229,7 +229,7 @@ func ParseNtica(n int, s string) (Tica, error) {
 	return ntica, nil
 }
 
-func ParseXtica(n, m int, s string) (Tica, error) {
+func ParseXtica(n, m int, s string) (engine.Tica, error) {
 	xtica, err := parseTica(s)
 	if err != nil {
 		return nil, err
@@ -251,8 +251,8 @@ func ParseXtica(n, m int, s string) (Tica, error) {
 	return xtica, nil
 }
 
-func ParseCifrovacky(s string, n, m int) (Cifrovacky, error) {
-	var c Cifrovacky
+func ParseCifrovacky(s string, n, m int) (engine.Cifrovacky, error) {
+	var c engine.Cifrovacky
 	split := strings.Split(s, " ")
 	if len(split) > len(c) {
 		return c, errors.New("Nespravne zadane Cifrovacky")
@@ -266,83 +266,4 @@ func ParseCifrovacky(s string, n, m int) (Cifrovacky, error) {
 		c[i] = byte(j)
 	}
 	return c, nil
-}
-
-type ErrKomb struct {
-	Header []string
-	Komb   Kombinacia
-	Orig   []string
-	Err    error
-}
-
-func parse(record []string, n int) (Kombinacia, error) {
-	var (
-		komb  = make([]byte, n)
-		err   error
-		cislo int
-	)
-	for i, field := range record[3 : n+3] {
-		if strings.ContainsAny(field, ".,") {
-			field = strings.Replace(field, ",", ".", -1)
-			f, err := strconv.ParseFloat(field, 64)
-			if err != nil {
-				return nil, err
-			}
-			cislo = int(f)
-		} else {
-			cislo, err = strconv.Atoi(field)
-			if err != nil {
-				return nil, err
-			}
-		}
-		komb[i] = byte(cislo)
-	}
-	return komb, nil
-}
-
-func Parse(path string, n, m int) chan ErrKomb {
-
-	ch := make(chan ErrKomb, 1)
-	go func() {
-		defer close(ch)
-
-		file, err := os.Open(path)
-		if err != nil {
-			ch <- ErrKomb{Err: err}
-			return
-		}
-		defer file.Close()
-
-		r := csv.NewReader(file)
-		r.Comma = rune(';')
-
-		// Skip Header
-		header, _ := r.Read()
-
-		var nline int
-		for {
-			nline++
-			record, err := r.Read()
-			if err == io.EOF {
-				return
-			}
-			if err != nil {
-				ch <- ErrKomb{Err: err}
-				return
-			}
-			if len(record) < n+3 {
-				ch <- ErrKomb{Err: fmt.Errorf("%s: riadku %d musi byt dlhsi ako %d", file.Name(), nline, n+3)}
-				return
-			}
-			komb, err := parse(record, n)
-			if err != nil {
-				ch <- ErrKomb{Err: err}
-			} else {
-				recordCopy := make([]string, len(record))
-				copy(recordCopy, record)
-				ch <- ErrKomb{Komb: komb, Orig: recordCopy, Header: header}
-			}
-		}
-	}()
-	return ch
 }

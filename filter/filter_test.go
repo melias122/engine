@@ -1,15 +1,9 @@
-package engine
+package filter
 
 import (
 	"strconv"
 	"testing"
 )
-
-// func BenchmarkFilter(b *testing.B) {
-// 	for i := 0; i < b.N; i++ {
-// 		Filters30.Check(K30)
-// 	}
-// }
 
 func TestGRTLSS(t *testing.T) {
 	tests := []struct {

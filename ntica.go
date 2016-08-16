@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"bytes"
 	"strconv"
 	"strings"
 )
@@ -109,70 +108,4 @@ func ss(k Kombinacia, o operacia) nticaSS {
 		n = append(n, spolu)
 	}
 	return n
-}
-
-type filterNtica struct {
-	n     int
-	ntica Tica
-}
-
-func NewFilterNtica(n int, tica Tica) Filter {
-	return filterNtica{
-		n:     n,
-		ntica: tica,
-	}
-}
-
-func (n filterNtica) Check(k Kombinacia) bool {
-	nticaK := Ntica(k)
-	if len(k) == n.n {
-		return bytes.Equal(nticaK, n.ntica)
-	}
-	return true
-}
-
-func (n filterNtica) CheckSkupina(skupina Skupina) bool {
-	return true
-}
-
-func (n filterNtica) String() string {
-	return "Ntica: " + n.ntica.String()
-}
-
-type filterSTLNtica struct {
-	n       int
-	pozicie []byte
-	ntica   Filter
-}
-
-func NewFilterSTLNtica(n int, tica Tica, pozicie []byte) Filter {
-	return filterSTLNtica{
-		n:       n,
-		ntica:   NewFilterNtica(n, tica),
-		pozicie: pozicie,
-	}
-}
-
-func (s filterSTLNtica) Check(k Kombinacia) bool {
-	if !s.ntica.Check(k) {
-		return false
-	}
-	if s.n == len(k) {
-		return bytes.Equal(NticaPozicie(k), s.pozicie)
-	}
-	return true
-}
-
-func (s filterSTLNtica) CheckSkupina(h Skupina) bool {
-	return true
-}
-
-func (s filterSTLNtica) String() string {
-	var pozicie []string
-	for i, p := range s.pozicie {
-		if p == 1 {
-			pozicie = append(pozicie, strconv.Itoa(i+1))
-		}
-	}
-	return s.ntica.String() + "\n" + "STL Ntica: " + strings.Join(pozicie, ", ")
 }

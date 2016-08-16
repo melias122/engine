@@ -11,10 +11,6 @@ var (
 	HHrx = NewHHrx(30, 90)
 )
 
-func init() {
-
-}
-
 func BenchmarkHrxValue(b *testing.B) {
 	n, m := 30, 90
 	hrx := NewHHrx(n, m)

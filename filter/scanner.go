@@ -1,4 +1,4 @@
-package engine
+package filter
 
 import (
 	"bufio"

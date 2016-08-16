@@ -5,8 +5,9 @@ import "testing"
 func BenchmarkFtoa(b *testing.B) {
 	f := 0.123123123123123123123123123123
 	for i := 0; i < b.N; i++ {
-		ftoa(f)
+		_ = ftoa(f)
 	}
+	b.ReportAllocs()
 }
 
 func TestFtoa(t *testing.T) {

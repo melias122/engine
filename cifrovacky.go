@@ -1,8 +1,6 @@
 package engine
 
 import (
-	"bytes"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -49,43 +47,4 @@ func (c Cifrovacky) String() string {
 
 func (k Kombinacia) Cifrovacky() Cifrovacky {
 	return MakeCifrovacky(k)
-}
-
-type filterCifrovacky struct {
-	n int
-	c Cifrovacky
-}
-
-func NewFilterCifrovacky(c Cifrovacky, n, m int) (Filter, error) {
-	var sum int
-	for i := range c {
-		sum += int(c[i])
-	}
-	if sum != n {
-		return nil, fmt.Errorf("súčet cifrovaciek != %d", n)
-	}
-	tmax := CifrovackyTeorMax(n, m)
-	for i := range c {
-		if c[i] > tmax[i] {
-			return nil, fmt.Errorf("cifra(%d): %d je viac ako maximum %d", (i+1)%10, c[i], tmax[i])
-		}
-	}
-	return filterCifrovacky{n: n, c: c}, nil
-}
-
-func (c filterCifrovacky) Check(k Kombinacia) bool {
-	cifrovacky := k.Cifrovacky()
-	cmp := bytes.Compare(cifrovacky[:], c.c[:])
-	if cmp > 0 || (len(k) == c.n && cmp != 0) {
-		return false
-	}
-	return true
-}
-
-func (c filterCifrovacky) CheckSkupina(s Skupina) bool {
-	return true
-}
-
-func (c filterCifrovacky) String() string {
-	return fmt.Sprintf("Cifrovacky: %s", c.c[:])
 }

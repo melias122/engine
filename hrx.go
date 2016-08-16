@@ -1,9 +1,6 @@
 package engine
 
-import (
-	"fmt"
-	"math"
-)
+import "math"
 
 type H struct {
 	n, m   int
@@ -79,20 +76,7 @@ func (h *H) Value() float64 {
 	return h.valuePresun(h.xcisla)
 }
 
-// var xcislaPool = sync.Pool{
-// 	New: func() interface{} {
-// 		return make(Xcisla, 0, 30)
-// 	},
-// }
-
 func (h *H) ValueKombinacia(k Kombinacia) float64 {
-	// Get xcisla from pool
-	// xcisla := xcislaPool.Get().(Xcisla)
-	// make copy
-	// xcisla = xcisla[:0]
-	// for _, x := range h.xcisla {
-	// xcisla = append(xcisla, x)
-	// }
 	xcisla := h.xcisla.copy()
 	// move
 	for _, cislo := range k {
@@ -100,10 +84,7 @@ func (h *H) ValueKombinacia(k Kombinacia) float64 {
 		xcisla.move(1, sk, sk+1)
 	}
 	// compute
-	valuePresun := h.valuePresun(xcisla)
-	// put xcisla back for later use
-	// xcislaPool.Put(xcisla)
-	return valuePresun
+	return h.valuePresun(xcisla)
 }
 
 //Vypocita hodnotu Presun p
@@ -128,69 +109,4 @@ func (h *H) valuePresun(p Xcisla) float64 {
 
 func (h *H) Xcisla() Xcisla {
 	return h.xcisla.copy()
-}
-
-func NewFilterHrx(min, max float64, Hrx *H, n int) Filter {
-	f := filterHrx{newFilterH("Hrx", min, max, Hrx, n)}
-	return f
-}
-
-func NewFilterHHrx(min, max float64, HHrx *H, n int) Filter {
-	f := filterHHrx{newFilterH("HHrx", min, max, HHrx, n)}
-	return f
-}
-
-type filterHrx struct{ filterH }
-
-func (f filterHrx) Check(Kombinacia) bool { return true }
-
-func (f filterHrx) CheckSkupina(s Skupina) bool {
-	return f.checkSkupina(s.Hrx, s.Hrx)
-}
-
-type filterHHrx struct{ filterH }
-
-func (f filterHHrx) CheckSkupina(s Skupina) bool {
-	return f.checkSkupina(s.HHrx[0], s.HHrx[1])
-}
-
-type filterH struct {
-	n        int
-	min, max float64
-	h        *H
-	fname    string
-}
-
-func newFilterH(fname string, min, max float64, h *H, n int) filterH {
-	if min <= 0 {
-		min = 0.1
-	}
-	if max > 100 {
-		max = 99.99999999999
-	}
-	return filterH{
-		n:     n,
-		min:   nextLSS(min),
-		max:   nextGRT(max),
-		h:     h,
-		fname: fname,
-	}
-}
-
-func (h filterH) Check(k Kombinacia) bool {
-	value := h.h.ValueKombinacia(k)
-	if len(k) == h.n {
-		if value < h.min || value > h.max {
-			return false
-		}
-	}
-	return true
-}
-
-func (h filterH) checkSkupina(min, max float64) bool {
-	return !outOfRangeFloats64(h.min, h.max, min, max)
-}
-
-func (h filterH) String() string {
-	return fmt.Sprintf("%s: %s-%s", h.fname, ftoa(h.min), ftoa(h.max))
 }

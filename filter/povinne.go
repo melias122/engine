@@ -1,8 +1,10 @@
-package engine
+package filter
 
 import (
 	"strconv"
 	"strings"
+
+	"github.com/melias122/engine"
 )
 
 type filterPovinne struct {
@@ -10,7 +12,7 @@ type filterPovinne struct {
 	n, count int
 }
 
-func NewFilterPovinneFromString(s string, k0 Kombinacia, n, m int) (Filter, error) {
+func NewFilterPovinneFromString(s string, k0 engine.Kombinacia, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
 	p.Zhoda = k0
 	ints, err := p.ParseInts()
@@ -21,7 +23,7 @@ func NewFilterPovinneFromString(s string, k0 Kombinacia, n, m int) (Filter, erro
 }
 
 func NewFilterPovinne(ints []int, n, m int) Filter {
-	p := filterPovinne{
+	p := &filterPovinne{
 		povinne: make([]bool, m),
 		n:       n,
 	}
@@ -37,7 +39,7 @@ func NewFilterPovinne(ints []int, n, m int) Filter {
 	return p
 }
 
-func (p filterPovinne) Check(k Kombinacia) bool {
+func (p *filterPovinne) Check(k engine.Kombinacia) bool {
 	// if p.n-len(k) > p.count {
 	// if len(k) < p.count {
 	// 	return true
@@ -55,11 +57,11 @@ func (p filterPovinne) Check(k Kombinacia) bool {
 	return true
 }
 
-func (p filterPovinne) CheckSkupina(s Skupina) bool {
+func (p *filterPovinne) CheckSkupina(s engine.Skupina) bool {
 	return true
 }
 
-func (p filterPovinne) String() string {
+func (p *filterPovinne) String() string {
 	var s []string
 	for i, ok := range p.povinne {
 		if ok {
@@ -74,7 +76,7 @@ type filterPovinneSTL struct {
 	count   int
 }
 
-func NewFilterPovinneSTLFromString(s string, k0 Kombinacia, n, m int) (Filter, error) {
+func NewFilterPovinneSTLFromString(s string, k0 engine.Kombinacia, n, m int) (Filter, error) {
 	parser := NewParser(strings.NewReader(s), n, m)
 	parser.Zhoda = k0
 	mapInts, err := parser.ParseMapInts()
@@ -85,7 +87,7 @@ func NewFilterPovinneSTLFromString(s string, k0 Kombinacia, n, m int) (Filter, e
 }
 
 func NewFilterPovinneSTL(mapInts MapInts, n, m int) Filter {
-	p := filterPovinneSTL{
+	p := &filterPovinneSTL{
 		povinne: make([][]bool, n),
 	}
 
@@ -108,7 +110,7 @@ func NewFilterPovinneSTL(mapInts MapInts, n, m int) Filter {
 	return p
 }
 
-func (p filterPovinneSTL) Check(k Kombinacia) bool {
+func (p *filterPovinneSTL) Check(k engine.Kombinacia) bool {
 	for i, j := range k {
 		if p.povinne[i] == nil {
 			continue
@@ -120,11 +122,11 @@ func (p filterPovinneSTL) Check(k Kombinacia) bool {
 	return true
 }
 
-func (p filterPovinneSTL) CheckSkupina(s Skupina) bool {
+func (p *filterPovinneSTL) CheckSkupina(s engine.Skupina) bool {
 	return true
 }
 
-func (p filterPovinneSTL) String() string {
+func (p *filterPovinneSTL) String() string {
 	var s []string
 	for i := range p.povinne {
 		if p.povinne[i] == nil {

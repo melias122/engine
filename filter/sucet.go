@@ -1,7 +1,9 @@
-package engine
+package filter
 
 import (
 	"fmt"
+
+	"github.com/melias122/engine"
 )
 
 type filterSucet struct {
@@ -13,14 +15,14 @@ func NewFilterSucet(min, max, n int) Filter {
 	if min < 0 {
 		min = 0
 	}
-	return filterSucet{
+	return &filterSucet{
 		n:   n,
 		min: min,
 		max: max,
 	}
 }
 
-func (s filterSucet) Check(k Kombinacia) bool {
+func (s *filterSucet) Check(k engine.Kombinacia) bool {
 	var sum int
 	for _, cislo := range k {
 		sum += int(cislo)
@@ -31,7 +33,7 @@ func (s filterSucet) Check(k Kombinacia) bool {
 	return true
 }
 
-func (s filterSucet) CheckSkupina(skupina Skupina) bool {
+func (s *filterSucet) CheckSkupina(skupina engine.Skupina) bool {
 	if int(skupina.Sucet[0]) > s.max || int(skupina.Sucet[1]) < s.min {
 		return false
 	} else {
@@ -39,6 +41,6 @@ func (s filterSucet) CheckSkupina(skupina Skupina) bool {
 	}
 }
 
-func (s filterSucet) String() string {
+func (s *filterSucet) String() string {
 	return fmt.Sprintf("Sucet: %d-%d", s.min, s.max)
 }
