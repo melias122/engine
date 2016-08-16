@@ -5,6 +5,38 @@ import (
 	"sort"
 )
 
+// hlavicka suboru HrxHHrx
+var HeaderHrxHHrx = []string{
+	"Hrx",
+	"ΔHrx",
+	"Xcisla",
+	"ƩR OD-DO",
+	"ƩSTL OD-DO (min)",
+	"ƩSTL OD-DO (max)",
+	"ƩKombinacie (min)",
+	"ƩKombinacie (max)",
+	"Kombinacie (počet)",
+	"HHrx (min)",
+	"HHrx (max)",
+	"ΔHHrx (min)",
+	"ΔHHrx (max)",
+	"ƩR 1-DO (min)",
+	"ƩR 1-DO (max)",
+	"ƩSTL 1-DO (min)",
+	"ƩSTL 1-DO (max)",
+	"P (min)", "P (max)",
+	"N (min)", "N (max)",
+	"Pr (min)", "Pr (max)",
+	"Mc (min)", "Mc (max)",
+	"Vc (min)", "Vc (max)",
+	"C19 (min)", "C19 (max)",
+	"C0 (min)", "C0 (max)",
+	"cC (min)", "cC (max)",
+	"Cc (min)", "Cc (max)",
+	"CC (min)", "CC (max)",
+	"Zh (min)", "Zh (max)",
+}
+
 type hrxHHrxCacheItem struct {
 	ps         *big.Int
 	mm         [2]int
@@ -64,7 +96,7 @@ func makeSkupiny(archiv *Archiv) (Skupiny, error) {
 		n:          archiv.n,
 		m:          archiv.m,
 		HrxXcisla:  archiv.Hrx.Xcisla(),
-		Xcisla:     make(Xcisla, 0, n),
+		Xcisla:     make(Xcisla, 0, archiv.n),
 		Hrx:        archiv.Hrx,
 		HHrx:       archiv.HHrx,
 		riadokHrx:  archiv.Hrx.Value(),
@@ -183,16 +215,6 @@ func (h *hrxHHrxTab) sMinMax() (float64, float64, float64, float64) {
 	return sums[0], sums[1], sums[2], sums[3]
 }
 
-func (h *hrxHHrxTab) formatCislovackyMinMax() []string {
-	s := make([]string, 20)
-	for i := 0; i < 10; i++ {
-		j := i * 2
-		s[j] = itoa(int(h.cislovackyMin[i]))
-		s[j+1] = itoa(int(h.cislovackyMax[i]))
-	}
-	return s
-}
-
 func (h *hrxHHrxTab) record() []string {
 	hrx := h.Hrx.valuePresun(h.HrxXcisla)
 
@@ -202,57 +224,25 @@ func (h *hrxHHrxTab) record() []string {
 	hhrxMin := h.HHrx.valuePresun(h.hhrxMin)
 	hhrxMax := h.HHrx.valuePresun(h.hhrxMax)
 
-	h.skupiny = append(h.skupiny, Skupina{
-		R1:   [2]float64{h.r1Min, h.r1Max},
-		S1:   [2]float64{s1min, s1max},
-		HHrx: [2]float64{hhrxMin, hhrxMax},
-
-		R2:  h.rod,
-		S2:  [2]float64{s2min, s2max},
-		Hrx: hrx,
-
-		Sucet: [2]uint16{uint16(h.min), uint16(h.max)},
-
+	s := Skupina{
+		Hrx:        hrx,
+		HrxDelta:   hrx - h.riadokHrx,
+		Xcisla:     h.Xcisla.copy(),
+		R2:         h.rod,
+		S2:         [2]float64{s2min, s2max},
+		Sucet:      [2]int{h.min, h.max},
+		PocetKomb:  h.pocetSucet.String(),
+		HHrx:       [2]float64{hhrxMin, hhrxMax},
+		HHrxDelta:  [2]float64{h.riadokHHrx - hhrxMin, h.riadokHHrx - hhrxMax},
+		R1:         [2]float64{h.r1Min, h.r1Max},
+		S1:         [2]float64{s1min, s1max},
 		Cislovacky: [2]Cislovacky{h.cislovackyMin, h.cislovackyMax},
-		Zh:         [2]byte{byte(h.zhMin), byte(h.zhMax)},
+		Zh:         [2]int{h.zhMin, h.zhMax},
+	}
 
-		// Cifrovacky:,
+	h.skupiny = append(h.skupiny, s)
 
-		Xcisla: h.Xcisla.copy(),
-	})
-
-	r := make([]string, 0, h.headerLen)
-	r = append(r,
-		ftoa(hrx),
-		ftoa(hrx-h.riadokHrx),
-		h.Xcisla.String(),
-		ftoa(h.rod),
-		// ntice
-		// xtice
-		ftoa(s2min),
-		ftoa(s2max),
-		// pocet s2
-		itoa(h.min),
-		itoa(h.max),
-		h.pocetSucet.String(),
-		// "#Kombinacie"
-		ftoa(hhrxMin),
-		ftoa(hhrxMax),
-		// "HHrx (počet)"
-		ftoa(h.riadokHHrx-hhrxMin),
-		ftoa(h.riadokHHrx-hhrxMax),
-		ftoa(h.r1Min),
-		ftoa(h.r1Max),
-		// "ƩR 1-DO (počet)"
-		// "Teor. max. pocet"
-		ftoa(s1min),
-		ftoa(s1max),
-		// "ƩSTL 1-DO (počet)"
-	)
-	r = append(r, h.formatCislovackyMinMax()...)
-	r = append(r, itoa(h.zhMin), itoa(h.zhMax))
-
-	return r
+	return s.Record()
 }
 
 func (h *hrxHHrxTab) append(t Tab) {
@@ -500,48 +490,8 @@ func (h *hrxHHrxTab) header() [][]string {
 		}
 		header = append(header, r1, r2, r3, []string{""})
 	}
-
-	// hlavicka suboru HrxHHrx
-	realHeader := []string{
-		"Hrx",
-		"ΔHrx",
-		"Xcisla",
-		"ƩR OD-DO",
-		// "Ntice",
-		// "Xtice",
-		"ƩSTL OD-DO (min)",
-		"ƩSTL OD-DO (max)",
-		// "ƩSTL OD-DO (počet)",
-		"ƩKombinacie (min)",
-		"ƩKombinacie (max)",
-		"Kombinacie (počet)",
-		"HHrx (min)",
-		"HHrx (max)",
-		// "HHrx (počet)",
-		"ΔHHrx (min)",
-		"ΔHHrx (max)",
-		"ƩR 1-DO (min)",
-		"ƩR 1-DO (max)",
-		// "ƩR 1-DO (počet)",
-		// "Teor. max. pocet",
-		"ƩSTL 1-DO (min)",
-		"ƩSTL 1-DO (max)",
-		// "ƩSTL 1-DO (počet)",
-		"P (min)", "P (max)",
-		"N (min)", "N (max)",
-		"Pr (min)", "Pr (max)",
-		"Mc (min)", "Mc (max)",
-		"Vc (min)", "Vc (max)",
-		"C19 (min)", "C19 (max)",
-		"C0 (min)", "C0 (max)",
-		"cC (min)", "cC (max)",
-		"Cc (min)", "Cc (max)",
-		"CC (min)", "CC (max)",
-		"Zh (min)", "Zh (max)",
-	}
-	header = append(header, realHeader)
-
-	h.headerLen = len(realHeader)
+	header = append(header, HeaderHrxHHrx)
+	h.headerLen = len(HeaderHrxHHrx)
 
 	return header
 }

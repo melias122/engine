@@ -53,8 +53,3 @@ func maker(xcisla Xcisla, n int) {
 		fmt.Println(x)
 	}
 }
-
-// func TestItt(t *testing.T) {
-// 	x := Xcisla{{1, 1}, {2, 1}, {4, 2}, {5, 1}, {6, 9}, {7, 6}, {8, 8}, {9, 4}, {10, 6}, {11, 3}, {12, 2}, {14, 2}}
-// 	maker(x, 7)
-// }

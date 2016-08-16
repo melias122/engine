@@ -149,6 +149,10 @@ func (w *CsvMaxWriter) Write(record []string) error {
 		}
 	}
 
+	if w.writer == nil {
+		panic("nil writer")
+	}
+
 	// zapis csv
 	if err := w.writer.Write(record); err != nil {
 		return err
