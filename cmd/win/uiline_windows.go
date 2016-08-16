@@ -1,3 +1,4 @@
+// +build windows
 package main
 
 import (
@@ -9,11 +10,11 @@ import (
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
-	"github.com/melias122/psl"
+	"github.com/melias122/engine/filter"
 )
 
 type Line interface {
-	Filter() (engine.Filter, error)
+	Filter() (filter.Filter, error)
 	IsSet() bool
 	Clear()
 	Set(string, int)
@@ -22,10 +23,10 @@ type Line interface {
 type CifrovackyPanel struct {
 	name   string
 	le     [10]*walk.LineEdit
-	filter func() (engine.Filter, error)
+	filter func() (filter.Filter, error)
 }
 
-func (c CifrovackyPanel) Filter() (engine.Filter, error) {
+func (c CifrovackyPanel) Filter() (filter.Filter, error) {
 	if c.filter == nil {
 		return nil, fmt.Errorf("%s: nil filter", c.name)
 	}
@@ -80,7 +81,7 @@ func (c CifrovackyPanel) Set(s string, i int) {
 type StlNtica struct {
 	name   string
 	cb     [30]*walk.CheckBox
-	filter func() (engine.Filter, error)
+	filter func() (filter.Filter, error)
 }
 
 func (s StlNtica) Pozicie() []byte {
@@ -99,7 +100,7 @@ func (s StlNtica) Pozicie() []byte {
 	return pozicie
 }
 
-func (s StlNtica) Filter() (engine.Filter, error) {
+func (s StlNtica) Filter() (filter.Filter, error) {
 	if s.filter == nil {
 		return nil, fmt.Errorf("%s: nil filter", s.name)
 	}
@@ -138,7 +139,7 @@ type UiLine struct {
 	name     string
 	rb1, rb2 *walk.RadioButton
 	lines    []*walk.LineEdit
-	filter   func() (engine.Filter, error)
+	filter   func() (filter.Filter, error)
 
 	// cislovacky exact mode
 	exactMode *walk.CheckBox
@@ -258,7 +259,7 @@ func (u *UiLine) MinMax() (float64, float64, error) {
 	for i, line := range lines {
 		s := strings.TrimSpace(line.Text())
 		if len(s) > 0 {
-			minMax[i], err = engine.ParseFloat(s)
+			minMax[i], err = filter.ParseFloat(s)
 			if err != nil {
 				return 0, 0, err
 			}
@@ -272,7 +273,7 @@ func (u *UiLine) MinMax() (float64, float64, error) {
 	return minMax[0], minMax[1], nil
 }
 
-func (u *UiLine) Filter() (engine.Filter, error) {
+func (u *UiLine) Filter() (filter.Filter, error) {
 	if u.filter == nil {
 		return nil, fmt.Errorf("%s: nil filter", u.name)
 	}
@@ -473,7 +474,7 @@ func (u1 *UiLine) syncLines(u2 *UiLine) {
 	if u1.exactMode.Checked() && u2.exactMode.Checked() {
 		s := u2.lines[1].Text()
 		r := strings.NewReader(s)
-		p := engine.NewParser(r, n(), m())
+		p := filter.NewParser(r, n(), m())
 		ints, err := p.ParseInts()
 		if err != nil {
 			log.Println(err)

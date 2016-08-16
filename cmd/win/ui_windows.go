@@ -1,6 +1,8 @@
+// +build windows
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -10,7 +12,11 @@ import (
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
-	"github.com/melias122/psl"
+	"github.com/melias122/engine"
+	"github.com/melias122/engine/filter"
+	"github.com/melias122/engine/sieve"
+	"github.com/melias122/engine/sieve/fastfilter"
+	"github.com/melias122/engine/sieve/generator"
 )
 
 const (
@@ -64,9 +70,8 @@ var (
 	cifrovacky *CifrovackyPanel
 
 	//Vars
-	Archiv *engine.Archiv
-	// Generator  psl.Generator = nil
-	stop       = make(chan struct{})
+	Archiv     *engine.Archiv
+	stopfun    func()
 	workingDir string
 
 	lines = make(map[string]Line)
@@ -76,84 +81,84 @@ func UpperFilters() Widget {
 	var widgets []Widget
 
 	r1 := NewUiLine(R1, 3)
-	r1.filter = func() (engine.Filter, error) {
+	r1.filter = func() (filter.Filter, error) {
 		min, max, err := r1.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterR1(min, max, Archiv.HHrx.Cisla, n()), nil
+		return filter.NewFilterR1(min, max, Archiv.HHrx.Cisla, n()), nil
 	}
 
 	r2 := NewUiLine(R2, 3)
-	r2.filter = func() (engine.Filter, error) {
+	r2.filter = func() (filter.Filter, error) {
 		min, max, err := r2.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterR2(min, max, Archiv.Hrx.Cisla, n()), nil
+		return filter.NewFilterR2(min, max, Archiv.Hrx.Cisla, n()), nil
 	}
 
 	s1 := NewUiLine(STL1, 3)
-	s1.filter = func() (engine.Filter, error) {
+	s1.filter = func() (filter.Filter, error) {
 		min, max, err := s1.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterSTL1(min, max, Archiv.HHrx.Cisla, n()), nil
+		return filter.NewFilterSTL1(min, max, Archiv.HHrx.Cisla, n()), nil
 	}
 
 	s2 := NewUiLine(STL2, 3)
-	s2.filter = func() (engine.Filter, error) {
+	s2.filter = func() (filter.Filter, error) {
 		min, max, err := s2.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterSTL2(min, max, Archiv.Hrx.Cisla, n()), nil
+		return filter.NewFilterSTL2(min, max, Archiv.Hrx.Cisla, n()), nil
 	}
 
 	hhrx := NewUiLine(HHRX, 3)
-	hhrx.filter = func() (engine.Filter, error) {
+	hhrx.filter = func() (filter.Filter, error) {
 		min, max, err := hhrx.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterHHrx(min, max, Archiv.HHrx, n()), nil
+		return filter.NewFilterHHrx(min, max, Archiv.HHrx, n()), nil
 	}
 
 	hrx := NewUiLine(HRX, 3)
-	hrx.filter = func() (engine.Filter, error) {
+	hrx.filter = func() (filter.Filter, error) {
 		min, max, err := hrx.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterHrx(min, max, Archiv.Hrx, n()), nil
+		return filter.NewFilterHrx(min, max, Archiv.Hrx, n()), nil
 	}
 
 	sucet := NewUiLine(Sucet, 3)
-	sucet.filter = func() (engine.Filter, error) {
+	sucet.filter = func() (filter.Filter, error) {
 		min, max, err := sucet.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterSucet(int(min), int(max), n()), nil
+		return filter.NewFilterSucet(int(min), int(max), n()), nil
 	}
 
 	delta1 := NewUiLine(Delta1, 0)
-	delta1.filter = func() (engine.Filter, error) {
+	delta1.filter = func() (filter.Filter, error) {
 		if delta1.rbDelta1.Checked() {
-			return engine.NewFilterR1MinusSTL1(engine.POSSITIVE, Archiv.HHrx.Cisla, n()), nil
+			return filter.NewFilterR1MinusSTL1(filter.POSSITIVE, Archiv.HHrx.Cisla, n()), nil
 		} else if delta1.rbDelta2.Checked() {
-			return engine.NewFilterR1MinusSTL1(engine.NEGATIVE, Archiv.HHrx.Cisla, n()), nil
+			return filter.NewFilterR1MinusSTL1(filter.NEGATIVE, Archiv.HHrx.Cisla, n()), nil
 		}
 		return nil, errors.New("chyba")
 	}
 
 	delta2 := NewUiLine(Delta2, 0)
-	delta2.filter = func() (engine.Filter, error) {
+	delta2.filter = func() (filter.Filter, error) {
 		if delta2.rbDelta1.Checked() {
-			return engine.NewFilterR2MinusSTL2(engine.POSSITIVE, Archiv.Hrx.Cisla, n()), nil
+			return filter.NewFilterR2MinusSTL2(filter.POSSITIVE, Archiv.Hrx.Cisla, n()), nil
 		} else if delta2.rbDelta2.Checked() {
-			return engine.NewFilterR2MinusSTL2(engine.NEGATIVE, Archiv.Hrx.Cisla, n()), nil
+			return filter.NewFilterR2MinusSTL2(filter.NEGATIVE, Archiv.Hrx.Cisla, n()), nil
 		}
 		return nil, errors.New("chyba")
 	}
@@ -201,175 +206,175 @@ func UpperFilters() Widget {
 func MiddleFilters() Widget {
 	var widgets []Widget
 	p := NewUiLine(P, 3)
-	p.filter = func() (engine.Filter, error) {
+	p.filter = func() (filter.Filter, error) {
 		if p.exactMode.Checked() {
 			s := p.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.P, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.P, n(), m())
 		} else {
 			min, max, err := p.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.P, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.P, n()), nil
 		}
 	}
 
 	mc := NewUiLine(Mc, 3)
-	mc.filter = func() (engine.Filter, error) {
+	mc.filter = func() (filter.Filter, error) {
 		if mc.exactMode.Checked() {
 			s := mc.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.Mc, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.Mc, n(), m())
 		} else {
 			min, max, err := mc.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.Mc, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.Mc, n()), nil
 		}
 	}
 
 	c0 := NewUiLine(C0, 3)
-	c0.filter = func() (engine.Filter, error) {
+	c0.filter = func() (filter.Filter, error) {
 		if c0.exactMode.Checked() {
 			s := c0.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.C0, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.C0, n(), m())
 		} else {
 			min, max, err := c0.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.C0, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.C0, n()), nil
 		}
 	}
 
 	fCC := NewUiLine(CC, 3)
-	fCC.filter = func() (engine.Filter, error) {
+	fCC.filter = func() (filter.Filter, error) {
 		if fCC.exactMode.Checked() {
 			s := fCC.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.CC, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.CC, n(), m())
 		} else {
 			min, max, err := fCC.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.CC, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.CC, n()), nil
 		}
 	}
 
 	nui := NewUiLine(N, 3)
-	nui.filter = func() (engine.Filter, error) {
+	nui.filter = func() (filter.Filter, error) {
 		if nui.exactMode.Checked() {
 			s := nui.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.N, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.N, n(), m())
 		} else {
 			min, max, err := nui.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.N, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.N, n()), nil
 		}
 	}
 
 	vc := NewUiLine(Vc, 3)
-	vc.filter = func() (engine.Filter, error) {
+	vc.filter = func() (filter.Filter, error) {
 		if vc.exactMode.Checked() {
 			s := vc.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.Vc, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.Vc, n(), m())
 		} else {
 			min, max, err := vc.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.Vc, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.Vc, n()), nil
 		}
 	}
 
 	fcC := NewUiLine(cC, 3)
-	fcC.filter = func() (engine.Filter, error) {
+	fcC.filter = func() (filter.Filter, error) {
 		if fcC.exactMode.Checked() {
 			s := fcC.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.XcC, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.XcC, n(), m())
 		} else {
 			min, max, err := fcC.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.XcC, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.XcC, n()), nil
 		}
 	}
 
 	zhoda := NewUiLine(Zhoda, 3)
-	zhoda.filter = func() (engine.Filter, error) {
+	zhoda.filter = func() (filter.Filter, error) {
 		if zhoda.exactMode.Checked() {
 			s := zhoda.lines[1].Text()
-			return engine.NewFilterZhodaExactFromString(s, Archiv.K, n(), m())
+			return filter.NewFilterZhodaExactFromString(s, Archiv.K, n(), m())
 		} else {
 			min, max, err := zhoda.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterZhodaRange(int(min), int(max), Archiv.K, n()), nil
+			return filter.NewFilterZhodaRange(int(min), int(max), Archiv.K, n()), nil
 		}
 	}
 
 	pr := NewUiLine(Pr, 3)
-	pr.filter = func() (engine.Filter, error) {
+	pr.filter = func() (filter.Filter, error) {
 		if pr.exactMode.Checked() {
 			s := pr.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.Pr, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.Pr, n(), m())
 		} else {
 			min, max, err := pr.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.Pr, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.Pr, n()), nil
 		}
 	}
 
 	c19 := NewUiLine(C19, 3)
-	c19.filter = func() (engine.Filter, error) {
+	c19.filter = func() (filter.Filter, error) {
 		if c19.exactMode.Checked() {
 			s := c19.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.C19, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.C19, n(), m())
 		} else {
 			min, max, err := c19.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.C19, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.C19, n()), nil
 		}
 	}
 
 	fCc := NewUiLine(Cc, 3)
-	fCc.filter = func() (engine.Filter, error) {
+	fCc.filter = func() (filter.Filter, error) {
 		if fCc.exactMode.Checked() {
 			s := fCc.lines[1].Text()
-			return engine.NewFilterCislovackyExactFromString(s, engine.Cc, n(), m())
+			return filter.NewFilterCislovackyExactFromString(s, engine.Cc, n(), m())
 		} else {
 			min, max, err := fCc.MinMax()
 			if err != nil {
 				return nil, err
 			}
-			return engine.NewFilterCislovackyRange(int(min), int(max), engine.Cc, n()), nil
+			return filter.NewFilterCislovackyRange(int(min), int(max), engine.Cc, n()), nil
 		}
 	}
 
 	kk := NewUiLine(Kk, 3)
-	kk.filter = func() (engine.Filter, error) {
+	kk.filter = func() (filter.Filter, error) {
 		min, max, err := kk.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterKorelacia(min, max, Archiv.K, n(), m()), nil
+		return filter.NewFilterKorelacia(min, max, Archiv.K, n(), m()), nil
 	}
 
 	sm := NewUiLine(Sm, 3)
-	sm.filter = func() (engine.Filter, error) {
+	sm.filter = func() (filter.Filter, error) {
 		min, max, err := sm.MinMax()
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterSmernica(min, max, n(), m()), nil
+		return filter.NewFilterSmernica(min, max, n(), m()), nil
 	}
 
 	pw, nw := UiLineToWidgetPair(p, nui, 35)
@@ -437,46 +442,46 @@ func MiddleFilters() Widget {
 func DownFilters() Widget {
 	var widgets []Widget
 	povinne := NewUiLine("Povinne", 1)
-	povinne.filter = func() (engine.Filter, error) {
-		return engine.NewFilterPovinneFromString(povinne.lines[0].Text(), Archiv.K, n(), m())
+	povinne.filter = func() (filter.Filter, error) {
+		return filter.NewFilterPovinneFromString(povinne.lines[0].Text(), Archiv.K, n(), m())
 	}
 
 	povinneSTL := NewUiLine("Povinne STL", 1)
-	povinneSTL.filter = func() (engine.Filter, error) {
-		return engine.NewFilterPovinneSTLFromString(povinneSTL.lines[0].Text(), Archiv.K, n(), m())
+	povinneSTL.filter = func() (filter.Filter, error) {
+		return filter.NewFilterPovinneSTLFromString(povinneSTL.lines[0].Text(), Archiv.K, n(), m())
 	}
 
 	zakazane := NewUiLine("Zakazane", 1)
-	zakazane.filter = func() (engine.Filter, error) {
-		return engine.NewFilterZakazaneFromString(zakazane.lines[0].Text(), Archiv.K, n(), m())
+	zakazane.filter = func() (filter.Filter, error) {
+		return filter.NewFilterZakazaneFromString(zakazane.lines[0].Text(), Archiv.K, n(), m())
 	}
 
 	zakazaneSTL := NewUiLine("Zakazane STL", 1)
-	zakazaneSTL.filter = func() (engine.Filter, error) {
-		return engine.NewFilterZakazaneSTLFromString(zakazaneSTL.lines[0].Text(), Archiv.K, n(), m())
+	zakazaneSTL.filter = func() (filter.Filter, error) {
+		return filter.NewFilterZakazaneSTLFromString(zakazaneSTL.lines[0].Text(), Archiv.K, n(), m())
 	}
 
 	ntica := NewUiLine(Ntica, 1)
-	ntica.filter = func() (engine.Filter, error) {
-		tica, err := engine.ParseNtica(n(), ntica.lines[0].Text())
+	ntica.filter = func() (filter.Filter, error) {
+		tica, err := filter.ParseNtica(n(), ntica.lines[0].Text())
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterNtica(n(), tica), nil
+		return filter.NewFilterNtica(n(), tica), nil
 	}
 
 	xtica := NewUiLine(Xtica, 1)
-	xtica.filter = func() (engine.Filter, error) {
-		tica, err := engine.ParseXtica(n(), m(), xtica.lines[0].Text())
+	xtica.filter = func() (filter.Filter, error) {
+		tica, err := filter.ParseXtica(n(), m(), xtica.lines[0].Text())
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterXtica(n(), m(), tica), nil
+		return filter.NewFilterXtica(n(), m(), tica), nil
 	}
 
 	xcisla := NewUiLine(Xcisla, 1)
-	xcisla.filter = func() (engine.Filter, error) {
-		return engine.NewFilterXcislaFromString(xcisla.lines[0].Text(), n(), m())
+	xcisla.filter = func() (filter.Filter, error) {
+		return filter.NewFilterXcislaFromString(xcisla.lines[0].Text(), n(), m())
 	}
 
 	for _, line := range []*UiLine{
@@ -494,12 +499,12 @@ func DownFilters() Widget {
 
 	cifrovacky := new(CifrovackyPanel)
 	cifrovacky.name = Cifrovacky
-	cifrovacky.filter = func() (engine.Filter, error) {
-		c, err := engine.ParseCifrovacky(cifrovacky.String(), n(), m())
+	cifrovacky.filter = func() (filter.Filter, error) {
+		c, err := filter.ParseCifrovacky(cifrovacky.String(), n(), m())
 		if err != nil {
 			return nil, err
 		}
-		return engine.NewFilterCifrovacky(c, n(), m())
+		return filter.NewFilterCifrovacky(c, n(), m())
 	}
 	cifrovackyWidget := []Widget{
 		Label{
@@ -530,12 +535,12 @@ func DownFilters() Widget {
 
 	stlNtica = new(StlNtica)
 	stlNtica.name = STLNtica
-	stlNtica.filter = func() (engine.Filter, error) {
-		tica, err := engine.ParseNtica(n(), ntica.lines[0].Text())
+	stlNtica.filter = func() (filter.Filter, error) {
+		tica, err := filter.ParseNtica(n(), ntica.lines[0].Text())
 		if err != nil {
 			return nil, errors.New("Nebola zadaná Ntica")
 		}
-		return engine.NewFilterSTLNtica(n(), tica, stlNtica.Pozicie()), nil
+		return filter.NewFilterSTLNtica(n(), tica, stlNtica.Pozicie()), nil
 	}
 	stlNticaWidget := []Widget{
 		Label{
@@ -772,9 +777,9 @@ func NacitajSubor() {
 	}
 }
 
-func Filters() (engine.Filters, error) {
+func Filters() (filter.Filters, error) {
 	var (
-		f engine.Filters
+		f filter.Filters
 		e []error
 	)
 	for _, line := range lines {
@@ -812,56 +817,56 @@ func unlockBtns() {
 	stopPB.SetEnabled(false)
 }
 
-func run(g engine.Generator) {
-	g.Start()
+func run(producer sieve.Producer) {
+	// create context
+	ctx := context.Background()
+	ctx, stopfun = context.WithCancel(ctx)
 
-	// buttons
-	go func() {
-		lockBtns()
-		defer unlockBtns()
+	// lock buttons
+	lockBtns()
+	defer unlockBtns()
 
-		msg := g.Progress()
-		for {
-			select {
-			// pripad ze vsetko prebehne ako ma
-			case m, ok := <-msg:
-				if !ok {
-					return
-				}
-				infoL.SetText(m)
-				// pouzivatel stlacil stop
-			case <-stop:
-				g.Stop()
-			}
-		}
-	}()
+	// start sieve
+	s := sieve.New(producer)
+	s.Start(ctx)
+
+	// wait for finished and report progress
+	s.Wait(func(p sieve.Progress) {
+		actual, total := p.Absolute()
+		infoL.SetText(fmt.Sprintf("hotovo %d/%d", actual, total))
+	})
+
+	infoL.SetText(fmt.Sprintf("hotovo."))
+
+	// log err
+	log.Println(s.Error())
 }
 
 func Stop() {
-	go func() {
-		stop <- struct{}{}
-	}()
+	if stopfun != nil {
+		stopfun()
+	}
 	stopPB.SetEnabled(false)
 }
 
 func Generuj() {
+	// get filters
 	filters, err := Filters()
 	if err != nil {
 		walk.MsgBox(mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
 		return
 	}
-	g := engine.NewGenerator2(Archiv, filters)
-	run(g)
+	go run(generator.New(Archiv, filters))
 }
 
 func Filtruj() {
+	// get filters
 	filters, err := Filters()
 	if err != nil {
 		walk.MsgBox(mainWindow, "Chyba", err.Error(), walk.MsgBoxIconWarning)
 		return
 	}
-	f := engine.NewFilter2(Archiv, filters)
-	run(f)
+	go run(fastfilter.New(Archiv, filters))
 }
 
 func Main() (err error) {
@@ -930,10 +935,4 @@ func Main() (err error) {
 	}
 	mainWindow.Run()
 	return err
-}
-
-func main() {
-	if err := Main(); err != nil {
-		log.Fatal(err)
-	}
 }
