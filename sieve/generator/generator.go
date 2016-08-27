@@ -13,8 +13,6 @@ import (
 )
 
 type Generator struct {
-	sieve.Producer
-
 	archiv  *engine.Archiv
 	filters filter.Filters
 	skupiny engine.Skupiny
@@ -56,13 +54,10 @@ func New(archiv *engine.Archiv, filters filter.Filters) *Generator {
 	}
 }
 
-func (g *Generator) Produce(ctx context.Context) <-chan sieve.Task {
+func (g *Generator) Start(ctx context.Context) <-chan sieve.Task {
 	tasks := make(chan sieve.Task)
 	go func() {
-		defer func() {
-			defer close(tasks)
-		}()
-
+		defer close(tasks)
 		for _, s := range g.skupiny {
 			select {
 			case <-ctx.Done():
@@ -79,7 +74,7 @@ func (g *Generator) Produce(ctx context.Context) <-chan sieve.Task {
 	return tasks
 }
 
-func (g *Generator) TasksCount() int {
+func (g *Generator) Count() int {
 	return len(g.skupiny)
 }
 

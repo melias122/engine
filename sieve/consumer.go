@@ -2,62 +2,80 @@ package sieve
 
 import (
 	"context"
-	"log"
+	"errors"
 	"runtime"
 	"sync"
-	"time"
 )
 
-type consumer struct {
-	producer Producer
+type Consumer interface {
+	Start(context.Context)
+	Done() <-chan struct{}
+	Error() error
+}
 
-	mu       sync.Mutex
+type consumer struct {
+	once sync.Once
+
+	producer Producer
+	workers  []*worker
+
 	progress Progress
+	report   chan<- Progress
 
 	done chan struct{}
 	err  error
 }
 
-func New(producer Producer) Interface {
+func New(producer Producer, progress chan<- Progress) (Consumer, error) {
+	return newConsumer(producer, progress)
+}
+
+func newConsumer(producer Producer, report chan<- Progress) (Consumer, error) {
 	if producer == nil {
-		log.Fatal("nil producer")
+		return nil, errors.New("producer can't be nil")
 	}
 	return &consumer{
 		producer: producer,
+		workers:  make([]*worker, runtime.NumCPU()),
+		progress: Progress{total: producer.Count()},
+		report:   report,
 		done:     make(chan struct{}),
-	}
+	}, nil
 }
 
 func (c *consumer) Start(ctx context.Context) {
-	go c.start(ctx)
+	c.once.Do(func() {
+		go c.start(ctx)
+	})
 }
 
 func (c *consumer) start(ctx context.Context) {
-	var (
-		workers = make([]*worker, runtime.NumCPU())
-		errs    []<-chan error
-	)
 
 	// start producer
-	tasks := c.producer.Produce(ctx)
+	tasks := c.producer.Start(ctx)
 
 	// start workers
-	for i := 0; i < len(workers); i++ {
-		workers[i] = &worker{
-			id: i,
-		}
-		err := workers[i].start(tasks)
-		errs = append(errs, err)
+	var errs []<-chan error
+	for i := 0; i < len(c.workers); i++ {
+		c.workers[i] = &worker{id: i}
+		errs = append(errs, c.workers[i].start(tasks))
 	}
-	done := merge(errs...)
+	workers := merge(errs...)
 
 	defer func() {
-		// cleanup producer
-		if err := c.producer.Close(); err != nil && c.err == nil {
-			c.err = err
+		// stop workers
+		for _, w := range c.workers {
+			w.stop()
+		}
+		// drain everything that left
+		for range workers {
 		}
 
-		// wait/progress signal
+		// cleanup producer
+		err := c.producer.Close()
+		c.setError(err)
+
+		// report done
 		close(c.done)
 	}()
 
@@ -67,61 +85,47 @@ func (c *consumer) start(ctx context.Context) {
 		select {
 		// cancel by user or timeout
 		case <-ctx.Done():
-			for _, w := range workers {
-				w.stop()
-			}
+			return
+
 		// continue even if task fails but log taks err
-		case err, ok := <-done:
-			if !ok {
+		case err, ok := <-workers:
+
+			switch {
+			// cancel on err
+			case err != nil:
+				c.setError(err)
+				return
+			// cancel on chan close
+			case !ok:
 				return
 			}
-			if err != nil {
-				// TODO: maybe log to file
-				log.Println("task err: ", err.Error())
+
+			// increase progress
+			c.progress.actual++
+
+			// report actual progress
+			// if receiver is too slow
+			// drop report and continue
+			select {
+			case c.report <- c.progress:
+			default:
 			}
-			// set progress
-			p := c.getProgress()
-			c.setProgress(Progress{actual: p.actual + 1, total: c.producer.TasksCount()})
 		}
 	}
 }
 
-func (c *consumer) Wait(report func(Progress)) {
-	if report == nil {
-		report = func(Progress) {}
-	}
-
-	// start with 50 milisecond after first progress report
-	// continue with 500 milisends
-	duration := time.Duration(50 * time.Millisecond)
-	for {
-		select {
-		case _, ok := <-c.done:
-			if !ok {
-				report(c.getProgress())
-			}
-			return
-		case <-time.After(duration):
-			report(c.getProgress())
-		}
-		duration = 1000 * time.Millisecond
-	}
+func (c *consumer) Done() <-chan struct{} {
+	return c.done
 }
 
 func (c *consumer) Error() error {
 	return c.err
 }
 
-func (c *consumer) setProgress(p Progress) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.progress = p
-}
-
-func (m *consumer) getProgress() Progress {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	return m.progress
+func (c *consumer) setError(err error) {
+	if c.err == nil && err != nil {
+		c.err = err
+	}
 }
 
 type Progress struct {

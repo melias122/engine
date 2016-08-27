@@ -11,7 +11,7 @@ import (
 
 func Test745(t *testing.T) {
 	n, m := 7, 45
-	a, err := engine.NewArchiv("../../profile/745_r.csv", engine.DiscardCSV, n, m)
+	a, err := engine.NewArchiv("../../test/745.csv", engine.DiscardCSV, n, m)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,10 +51,17 @@ func Test745(t *testing.T) {
 	}
 
 	ff := New(a, filters)
-	s := sieve.New(ff)
+	s, err := sieve.New(ff, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	s.Start(context.Background())
-	s.Wait(func(p sieve.Progress) { t.Log(p.Absolute()) })
+	<-s.Done()
+	if s.Error() != nil {
+		t.Log(s.Error())
+	}
+
 	if ff.Found() != "1" {
 		t.Fail()
 	}

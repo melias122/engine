@@ -18,7 +18,6 @@ type FastFilter struct {
 
 	filters filter.Filters
 	skupiny engine.Skupiny
-	// closer  io.Closer
 
 	r *result
 }
@@ -55,14 +54,10 @@ func New(archiv *engine.Archiv, filters filter.Filters) *FastFilter {
 	}
 }
 
-func (f *FastFilter) Produce(ctx context.Context) <-chan sieve.Task {
+func (f *FastFilter) Start(ctx context.Context) <-chan sieve.Task {
 	tasks := make(chan sieve.Task)
 	go func() {
-		defer func() {
-			defer close(tasks)
-			log.Println("FastFilter: done")
-		}()
-
+		defer close(tasks)
 		for _, s := range f.skupiny {
 			select {
 			case <-ctx.Done():
@@ -71,13 +66,14 @@ func (f *FastFilter) Produce(ctx context.Context) <-chan sieve.Task {
 				filters: f.filters,
 				skupina: s,
 			}:
+				log.Println("sending task")
 			}
 		}
 	}()
 	return tasks
 }
 
-func (f *FastFilter) TasksCount() int {
+func (f *FastFilter) Count() int {
 	return len(f.skupiny)
 }
 

@@ -1,11 +1,15 @@
 package sieve
 
-import "sync"
+import (
+	"sync"
+	"sync/atomic"
+)
 
 type worker struct {
-	id int
-	mu sync.Mutex
-	t  Task
+	id   int
+	mu   sync.Mutex
+	t    Task
+	done uint32
 }
 
 func (w *worker) stop() {
@@ -14,6 +18,7 @@ func (w *worker) stop() {
 	if w.t != nil {
 		w.t.Cancel()
 	}
+	atomic.StoreUint32(&w.done, 1)
 }
 
 func (w *worker) set(t Task) Task {
@@ -28,6 +33,9 @@ func (w *worker) start(tasks <-chan Task) <-chan error {
 	go func() {
 		defer close(ch)
 		for t := range tasks {
+			if atomic.LoadUint32(&w.done) == 1 {
+				return
+			}
 			ch <- w.set(t).Run()
 		}
 	}()
