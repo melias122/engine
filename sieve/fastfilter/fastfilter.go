@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"gitlab.com/melias122/engine"
+	"gitlab.com/melias122/engine/csv"
 	"gitlab.com/melias122/engine/filter"
 	"gitlab.com/melias122/engine/sieve"
 )
@@ -26,10 +27,10 @@ func New(archiv *engine.Archiv, filters filter.Filters) *FastFilter {
 	startTime := time.Now().Format("2006-1-2-15-4-5")
 	subdir := startTime + "_FastFilter"
 
-	csvw := engine.NewCsvMaxWriter(startTime, archiv.WorkingDir,
-		engine.SetSubdir(subdir),
-		engine.SetSuffixFunc(engine.IntSuffix()),
-		engine.SetHeader(engine.HeaderHrxHHrx),
+	csvw := csv.NewCsvMaxWriter(startTime, archiv.WorkingDir,
+		csv.SetSubdir(subdir),
+		csv.SetSuffixFunc(csv.IntSuffix()),
+		csv.SetHeader(engine.HeaderHrxHHrx),
 	)
 
 	os.Mkdir(filepath.Join(archiv.WorkingDir, subdir), 0755)

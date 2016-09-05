@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"gitlab.com/melias122/engine/csv"
+
 	"github.com/tealeg/xlsx"
 )
 
@@ -265,7 +267,7 @@ func (m *mapaXtice2) strings() [][]string {
 
 func (a *Archiv) mapaXtice2() error {
 
-	w := NewCsvMaxWriter("MapaXtice2", a.WorkingDir)
+	w := csv.NewCsvMaxWriter("MapaXtice2", a.WorkingDir)
 	defer w.Close()
 
 	mx := newMapaXtice2(a.riadky, a.n, a.m)

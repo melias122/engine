@@ -1,9 +1,11 @@
 package engine
 
+import "gitlab.com/melias122/engine/csv"
+
 func (a *Archiv) mapaZhoda2() error {
 	mz := newMapaZhoda(a.riadky, a.n)
 
-	w := NewCsvMaxWriter("MapaZhoda2", a.WorkingDir, SetHeader(mz.header()))
+	w := csv.NewCsvMaxWriter("MapaZhoda2", a.WorkingDir, csv.SetHeader(mz.header()))
 	defer w.Close()
 
 	for _, s := range mz.strings() {

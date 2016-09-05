@@ -8,15 +8,16 @@ import (
 	"unicode/utf8"
 
 	"gitlab.com/melias122/engine"
+	"gitlab.com/melias122/engine/csv"
 	"gitlab.com/melias122/engine/filter"
 )
 
 type syncWriter struct {
 	sync.Mutex
-	w *engine.CsvMaxWriter
+	w *csv.CsvMaxWriter
 }
 
-func newSyncWriter(w *engine.CsvMaxWriter) *syncWriter {
+func newSyncWriter(w *csv.CsvMaxWriter) *syncWriter {
 	return &syncWriter{
 		w: w,
 	}
@@ -46,7 +47,7 @@ type result struct {
 	w         *syncWriter
 }
 
-func newResultFilter(w *engine.CsvMaxWriter, a *engine.Archiv) *result {
+func newResultFilter(w *csv.CsvMaxWriter, a *engine.Archiv) *result {
 	var header []string
 	for i := 1; i <= a.Dimension.N; i++ {
 		header = append(header, strconv.Itoa(i))

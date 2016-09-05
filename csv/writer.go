@@ -1,10 +1,11 @@
-package engine
+package csv
 
 import (
 	"encoding/csv"
 	"errors"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 const (
@@ -13,9 +14,6 @@ const (
 
 	// Maximum Excel rows..
 	MaxWrite = 500000
-
-	// Ked nechceme zapisat nic
-	DiscardCSV = "-"
 )
 
 type SuffixFunc func() string
@@ -24,7 +22,7 @@ func IntSuffix() SuffixFunc {
 	var i int
 	return func() string {
 		i++
-		return "_" + itoa(i)
+		return "_" + strconv.Itoa(i)
 	}
 }
 
@@ -80,6 +78,8 @@ type CsvMaxWriter struct {
 
 	// prvy zapis
 	initialized bool
+
+	error error
 }
 
 func SetSuffixFunc(sf SuffixFunc) func(w *CsvMaxWriter) {
@@ -115,8 +115,8 @@ func NewCsvMaxWriter(fileName, workingDir string, options ...func(*CsvMaxWriter)
 	for _, option := range options {
 		option(w)
 	}
-	if workingDir != DiscardCSV {
-		os.Mkdir(filepath.Join(w.workingDir, w.subdir), 0755)
+	if err := os.MkdirAll(filepath.Join(w.workingDir, w.subdir), 0755); err != nil {
+		w.error = err
 	}
 	return w
 }
@@ -248,12 +248,6 @@ func (w *CsvMaxWriter) add() (err error) {
 }
 
 func (w *CsvMaxWriter) nextFilename() string {
-
-	// specialny pripad ked nezapisujeme nic
-	if w.workingDir == DiscardCSV {
-		return os.DevNull
-	}
-
 	// vrati nazov suboru v tvare workingDir/subDir/fileName_suffix.csv
 	// ak je subDir "" tak workingDir/fileName_suffix.csv
 	return filepath.Join(w.workingDir, w.subdir, w.fileName+w.Suffix()+".csv")

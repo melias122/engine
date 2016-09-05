@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"math/big"
+
+	"gitlab.com/melias122/engine/csv"
 )
 
 func (a *Archiv) PocetnostR() (err error) {
@@ -13,7 +15,7 @@ func (a *Archiv) PocetnostR() (err error) {
 		"Pocet R 1-DO", "R 1-DO", "Pocet R 1-DO (r+1)", "R 1-DO (r+1)",
 		"Pocet R OD-DO", "R OD-DO", "Pocet R OD-DO (r+1)", "R OD-DO (r+1)",
 	}
-	w := NewCsvMaxWriter("PocetnostR", a.WorkingDir, SetHeader(header))
+	w := csv.NewCsvMaxWriter("PocetnostR", a.WorkingDir, csv.SetHeader(header))
 	defer func() {
 		err = w.Close()
 	}()
@@ -66,7 +68,7 @@ func (a *Archiv) PocetnostS() (err error) {
 		"Pocet STL OD-DO", "STL OD-DO", "Pocet STL OD-DO (r+1)", "STL OD-DO (r+1)",
 	}
 
-	w := NewCsvMaxWriter("PocetnostSTL", a.WorkingDir, SetHeader(header))
+	w := csv.NewCsvMaxWriter("PocetnostSTL", a.WorkingDir, csv.SetHeader(header))
 	defer func() {
 		err = w.Close()
 	}()

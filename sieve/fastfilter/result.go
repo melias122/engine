@@ -5,14 +5,15 @@ import (
 	"sync"
 
 	"gitlab.com/melias122/engine"
+	"gitlab.com/melias122/engine/csv"
 )
 
 type syncWriter struct {
 	sync.Mutex
-	w *engine.CsvMaxWriter
+	w *csv.CsvMaxWriter
 }
 
-func newSyncWriter(w *engine.CsvMaxWriter) *syncWriter {
+func newSyncWriter(w *csv.CsvMaxWriter) *syncWriter {
 	return &syncWriter{
 		w: w,
 	}
@@ -35,7 +36,7 @@ type result struct {
 	err error
 }
 
-func newResultFilter(w *engine.CsvMaxWriter, a *engine.Archiv) *result {
+func newResultFilter(w *csv.CsvMaxWriter, a *engine.Archiv) *result {
 	return &result{
 		w: newSyncWriter(w),
 	}

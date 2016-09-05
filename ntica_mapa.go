@@ -1,6 +1,10 @@
 package engine
 
-import "bytes"
+import (
+	"bytes"
+
+	"gitlab.com/melias122/engine/csv"
+)
 
 func nticaPozicie(k Kombinacia) []string {
 	var s []string
@@ -58,7 +62,7 @@ func (a *Archiv) mapaNtice() error {
 	header = append(header, "Sucet N-tic", "Sucin pozicie a stlpca")
 	header = append(header, nticeVsetky...)
 
-	w := NewCsvMaxWriter("MapaNtice", a.WorkingDir, SetHeader(header))
+	w := csv.NewCsvMaxWriter("MapaNtice", a.WorkingDir, csv.SetHeader(header))
 	defer w.Close()
 
 	for i, r := range a.riadky {

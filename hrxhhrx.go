@@ -3,6 +3,8 @@ package engine
 import (
 	"math/big"
 	"sort"
+
+	"gitlab.com/melias122/engine/csv"
 )
 
 // hlavicka suboru HrxHHrx
@@ -83,7 +85,7 @@ type hrxHHrxTab struct {
 	cislovackyMax Cislovacky
 	zhMin, zhMax  int
 
-	w *CsvMaxWriter
+	w *csv.CsvMaxWriter
 
 	cache hrxHHrxCache
 
@@ -131,9 +133,9 @@ func makeSkupiny(archiv *Archiv) (Skupiny, error) {
 
 	h.precompute()
 
-	h.w = NewCsvMaxWriter("HrxHHrx", archiv.WorkingDir,
-		SetHeaders(h.header()),
-		SetSuffixFunc(IntSuffix()),
+	h.w = csv.NewCsvMaxWriter("HrxHHrx", archiv.WorkingDir,
+		csv.SetHeaders(h.header()),
+		csv.SetSuffixFunc(csv.IntSuffix()),
 	)
 	defer h.w.Close()
 

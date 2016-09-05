@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"encoding/csv"
 	"fmt"
 	"io"
 	"log"
@@ -9,6 +8,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"gitlab.com/melias122/engine/csv"
 )
 
 type Dimension struct {
@@ -134,7 +135,7 @@ func (a *Archiv) skupiny() (err error) {
 
 func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 
-	writter := NewCsvMaxWriter("Archiv", a.WorkingDir, SetHeader(archivRiadokHeader))
+	writter := csv.NewCsvMaxWriter("Archiv", a.WorkingDir, csv.SetHeader(archivRiadokHeader))
 	defer func() {
 		e = writter.Close()
 	}()
@@ -227,7 +228,7 @@ func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 }
 
 func (a *Archiv) rPlus1() error {
-	writter := NewCsvMaxWriter("ArchivR+1", a.WorkingDir, SetHeader(archivRiadokHeader))
+	writter := csv.NewCsvMaxWriter("ArchivR+1", a.WorkingDir, csv.SetHeader(archivRiadokHeader))
 	defer func() {
 		writter.Close()
 	}()
@@ -385,7 +386,6 @@ func Parse(path string, n, m int) chan ErrKomb {
 		defer file.Close()
 
 		r := csv.NewReader(file)
-		r.Comma = rune(';')
 
 		// Skip Header
 		header, _ := r.Read()

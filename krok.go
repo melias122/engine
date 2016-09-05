@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+
+	"gitlab.com/melias122/engine/csv"
 )
 
 func aritmetickyPriemer(s []float64) float64 {
@@ -216,7 +218,7 @@ func (a *Archiv) statistikaCifrovacky() error {
 	for i := 1; i <= 10; i++ {
 		header = append(header, "Cifra ("+strconv.Itoa(i%10)+")")
 	}
-	w := NewCsvMaxWriter("KrokCifrovacky", a.WorkingDir, SetHeader(header))
+	w := csv.NewCsvMaxWriter("KrokCifrovacky", a.WorkingDir, csv.SetHeader(header))
 	defer w.Close()
 
 	// dokumentacia

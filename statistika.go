@@ -1,6 +1,10 @@
 package engine
 
-import "math/big"
+import (
+	"math/big"
+
+	"gitlab.com/melias122/engine/csv"
+)
 
 func (a *Archiv) statistikaZhoda() error {
 
@@ -27,7 +31,7 @@ func (a *Archiv) statistikaZhoda() error {
 	header := []string{"Zhoda", "Pocetnost teor.", "Teoreticka moznost v %",
 		"Pocetnost", "Realne dosiahnute %"}
 
-	w := NewCsvMaxWriter("StatistikaZhoda", a.WorkingDir, SetHeader(header))
+	w := csv.NewCsvMaxWriter("StatistikaZhoda", a.WorkingDir, csv.SetHeader(header))
 	defer w.Close()
 
 	dbLen := float64(len(a.riadky))
@@ -80,7 +84,7 @@ func (a *Archiv) statistikaZhoda() error {
 func (a *Archiv) statistikaNtice2() error {
 	stat := newStatistikaNtice(a.riadky, a.n, a.m)
 
-	w := NewCsvMaxWriter("StatistikaNtice2", a.WorkingDir)
+	w := csv.NewCsvMaxWriter("StatistikaNtice2", a.WorkingDir)
 	defer w.Close()
 
 	for _, s := range stat.strings() {
@@ -314,7 +318,7 @@ func (a *Archiv) statistikaCislovacky() error {
 	header := []string{
 		"", "P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC", "ZH",
 	}
-	w := NewCsvMaxWriter("StatistikaCislovacky", a.WorkingDir, SetHeader(header))
+	w := csv.NewCsvMaxWriter("StatistikaCislovacky", a.WorkingDir, csv.SetHeader(header))
 	defer w.Close()
 
 	tmax := func() []byte {

@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 
+	"gitlab.com/melias122/engine/csv"
+
 	"github.com/montanaflynn/stats"
 )
 
@@ -340,7 +342,7 @@ func normalizePrediction(p *Prediction, s Skupiny) {
 }
 
 func savePredictions(workingDir string, p1DO, pODDO Prediction) error {
-	w := NewCsvMaxWriter("Predikcia", workingDir)
+	w := csv.NewCsvMaxWriter("Predikcia", workingDir)
 	defer w.Close()
 
 	s1 := p1DO.Record("Predikcia 1-DO")
