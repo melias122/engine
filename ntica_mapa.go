@@ -62,7 +62,7 @@ func (a *Archiv) mapaNtice() error {
 	header = append(header, "Sucet N-tic", "Sucin pozicie a stlpca")
 	header = append(header, nticeVsetky...)
 
-	w := csv.NewCsvMaxWriter("MapaNtice", a.WorkingDir, csv.SetHeader(header))
+	w := csv.NewCsvMaxWriter("MapaNtice", a.Workdir, csv.SetHeader(header))
 	defer w.Close()
 
 	for i, r := range a.riadky {

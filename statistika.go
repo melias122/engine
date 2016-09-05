@@ -31,7 +31,7 @@ func (a *Archiv) statistikaZhoda() error {
 	header := []string{"Zhoda", "Pocetnost teor.", "Teoreticka moznost v %",
 		"Pocetnost", "Realne dosiahnute %"}
 
-	w := csv.NewCsvMaxWriter("StatistikaZhoda", a.WorkingDir, csv.SetHeader(header))
+	w := csv.NewCsvMaxWriter("StatistikaZhoda", a.Workdir, csv.SetHeader(header))
 	defer w.Close()
 
 	dbLen := float64(len(a.riadky))
@@ -84,7 +84,7 @@ func (a *Archiv) statistikaZhoda() error {
 func (a *Archiv) statistikaNtice2() error {
 	stat := newStatistikaNtice(a.riadky, a.n, a.m)
 
-	w := csv.NewCsvMaxWriter("StatistikaNtice2", a.WorkingDir)
+	w := csv.NewCsvMaxWriter("StatistikaNtice2", a.Workdir)
 	defer w.Close()
 
 	for _, s := range stat.strings() {
@@ -318,7 +318,7 @@ func (a *Archiv) statistikaCislovacky() error {
 	header := []string{
 		"", "P", "N", "PR", "Mc", "Vc", "c1-c9", "C0", "cC", "Cc", "CC", "ZH",
 	}
-	w := csv.NewCsvMaxWriter("StatistikaCislovacky", a.WorkingDir, csv.SetHeader(header))
+	w := csv.NewCsvMaxWriter("StatistikaCislovacky", a.Workdir, csv.SetHeader(header))
 	defer w.Close()
 
 	tmax := func() []byte {

@@ -267,7 +267,7 @@ func (m *mapaXtice2) strings() [][]string {
 
 func (a *Archiv) mapaXtice2() error {
 
-	w := csv.NewCsvMaxWriter("MapaXtice2", a.WorkingDir)
+	w := csv.NewCsvMaxWriter("MapaXtice2", a.Workdir)
 	defer w.Close()
 
 	mx := newMapaXtice2(a.riadky, a.n, a.m)
@@ -323,5 +323,5 @@ func (a *Archiv) mapaXtice() error {
 			cell.SetStyle(style)
 		}
 	}
-	return xlsxFile.Save(filepath.Join(a.WorkingDir, "MapaXtice(farebna).xlsx"))
+	return xlsxFile.Save(filepath.Join(a.Workdir, "MapaXtice(farebna).xlsx"))
 }

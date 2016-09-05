@@ -133,7 +133,7 @@ func makeSkupiny(archiv *Archiv) (Skupiny, error) {
 
 	h.precompute()
 
-	h.w = csv.NewCsvMaxWriter("HrxHHrx", archiv.WorkingDir,
+	h.w = csv.NewCsvMaxWriter("HrxHHrx", archiv.Workdir,
 		csv.SetHeaders(h.header()),
 		csv.SetSuffixFunc(csv.IntSuffix()),
 	)

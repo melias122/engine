@@ -24,9 +24,9 @@ type Archiv struct {
 	Hrx  *H
 	HHrx *H
 
-	CsvPath    string
-	WorkingDir string
-	Suffix     string
+	Csvpath string
+	Workdir string
+	Suffix  string
 
 	origHeader []string
 	riadky     []Riadok
@@ -37,48 +37,25 @@ type Archiv struct {
 	PredictODDO Prediction
 }
 
-// NewArchiv funkcia vytvori archiv aj z vystupmi. V pripade ze currentWorkingDir
+// NewArchiv funkcia vytvori archiv aj z vystupmi. V pripade ze outdir
 // je "-" archiv nevytvori vystupy a len sa interne nacita.
-func NewArchiv(csvPath, currentWorkingDir string, n, m int) (*Archiv, error) {
-	// Cesta k suboru musi byt zadana
-	if csvPath == "" {
-		log.Println("Archiv: csvPath: ", csvPath)
-		return nil, fmt.Errorf("Archiv: Nebola zadana cesta k súboru!")
-	}
+func NewArchiv(csvpath, outdir string, n, m int) (*Archiv, error) {
 
-	// Aktualny pracovny priecinok musi byt zadany
-	if currentWorkingDir == "" {
-		log.Println("Archiv: cwd: ", currentWorkingDir)
-		return nil, fmt.Errorf("Archiv: Nebol zadany pracovny priecinok")
-	}
-
-	// Skontrolovanie minimalneho a maximalneho rozmeru databazy
-	if n < 2 || n >= m || m > 99 {
-		log.Println("Archiv: Zadany rozmer: ", n, "/", m)
+	if n < 2 || n >= m {
 		return nil, fmt.Errorf("Archiv: Nesprávny rozmer databázy: %d/%d", n, m)
 	}
 
-	var filename string
-	if s := strings.Split(filepath.Base(csvPath), ".csv"); len(s) != 2 {
-		log.Printf("Archiv: %s not a .csv", s)
-		return nil, fmt.Errorf("Archiv: Subor %s musi byt typu csv", csvPath)
-	} else {
-		filename = s[0]
+	if _, err := os.Stat(csvpath); os.IsNotExist(err) {
+		return nil, err
 	}
 
-	var (
-		WorkingDir string
-		CsvPath    string
-		Suffix     string
-	)
-	if currentWorkingDir == "-" {
-		WorkingDir = currentWorkingDir
-		CsvPath = csvPath
-	} else {
-		WorkingDir = filepath.Join(currentWorkingDir, filename)
-		CsvPath = filepath.Join(WorkingDir, filename+".csv")
-		Suffix = filepath.Base(WorkingDir)
+	if _, err := os.Stat(outdir); os.IsNotExist(err) {
+		return nil, err
 	}
+
+	basename := filepath.Base(csvpath)
+	suffix := strings.TrimSuffix(basename, filepath.Ext(basename))
+	workdir := filepath.Join(outdir, suffix)
 
 	archiv := &Archiv{
 		Riadok: Riadok{
@@ -89,26 +66,27 @@ func NewArchiv(csvPath, currentWorkingDir string, n, m int) (*Archiv, error) {
 		Hrx:       NewHrx(n, m),
 		HHrx:      NewHHrx(n, m),
 
-		CsvPath:    CsvPath,
-		WorkingDir: WorkingDir,
-		Suffix:     Suffix,
+		Csvpath: filepath.Join(workdir, basename),
+		Workdir: workdir,
+		Suffix:  suffix,
 	}
 
 	// Vytvorenie suboru
-	if archiv.WorkingDir != "-" {
-		if err := os.Mkdir(archiv.WorkingDir, 0755); err != nil {
-			log.Printf("Archiv: %s\n", err)
-		}
-		// Skopirovanie originalnej databazy (.csv)
-		if err := CopyFile(archiv.CsvPath, csvPath); err != nil {
-			log.Printf("Archiv: %s\n", err)
-			return nil, fmt.Errorf("Archiv: Nepodarilo sa skopirovat subor %s", csvPath)
-		}
+	if err := os.MkdirAll(archiv.Workdir, 0755); err != nil {
+		log.Printf("Archiv: %s\n", err)
 	}
+
+	// Skopirovanie originalnej databazy (.csv)
+	if err := CopyFile(archiv.Csvpath, csvpath); err != nil {
+		log.Printf("Archiv: %s\n", err)
+		return nil, fmt.Errorf("Archiv: Nepodarilo sa skopirovat subor %s", csvpath)
+	}
+
 	// vytvorenie archivu
-	if err := archiv.loadCsv(Parse(archiv.CsvPath, n, m)); err != nil {
+	if err := archiv.loadCsv(Parse(archiv.Csvpath, n, m)); err != nil {
 		return nil, err
 	}
+
 	// vystupy
 	if err := archiv.makeFiles(); err != nil {
 		return nil, err
@@ -120,7 +98,7 @@ func NewArchiv(csvPath, currentWorkingDir string, n, m int) (*Archiv, error) {
 
 	normalizePrediction(&archiv.Predict1DO, archiv.Skupiny)
 	normalizePrediction(&archiv.PredictODDO, archiv.Skupiny)
-	if err := savePredictions(archiv.WorkingDir, archiv.Predict1DO, archiv.PredictODDO); err != nil {
+	if err := savePredictions(archiv.Workdir, archiv.Predict1DO, archiv.PredictODDO); err != nil {
 		return nil, err
 	}
 
@@ -135,7 +113,7 @@ func (a *Archiv) skupiny() (err error) {
 
 func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 
-	writter := csv.NewCsvMaxWriter("Archiv", a.WorkingDir, csv.SetHeader(archivRiadokHeader))
+	writter := csv.NewCsvMaxWriter("Archiv", a.Workdir, csv.SetHeader(archivRiadokHeader))
 	defer func() {
 		e = writter.Close()
 	}()
@@ -228,7 +206,7 @@ func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 }
 
 func (a *Archiv) rPlus1() error {
-	writter := csv.NewCsvMaxWriter("ArchivR+1", a.WorkingDir, csv.SetHeader(archivRiadokHeader))
+	writter := csv.NewCsvMaxWriter("ArchivR+1", a.Workdir, csv.SetHeader(archivRiadokHeader))
 	defer func() {
 		writter.Close()
 	}()
@@ -252,7 +230,7 @@ func (a *Archiv) rPlus1() error {
 }
 
 func (a *Archiv) makeFiles() (err error) {
-	if a.WorkingDir == "-" {
+	if a.Workdir == "-" {
 		return
 	}
 	for _, f := range []func() error{
@@ -274,69 +252,6 @@ func (a *Archiv) makeFiles() (err error) {
 			return e
 		}
 	}
-	return
-}
-
-// CopyFile copies a file from src to dst. If src and dst files exist, and are
-// the same, then return success. Otherise, attempt to create a hard link
-// between the two files. If that fail, copy the file contents from src to dst.
-func CopyFile(dst, src string) (err error) {
-	sfi, err := os.Stat(src)
-	if err != nil {
-		return
-	}
-	if !sfi.Mode().IsRegular() {
-		// cannot copy non-regular files (e.g., directories,
-		// symlinks, devices, etc.)
-		return fmt.Errorf("CopyFile: non-regular source file %s (%q)", sfi.Name(), sfi.Mode().String())
-	}
-	dfi, err := os.Stat(dst)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return
-		}
-	} else {
-		if !(dfi.Mode().IsRegular()) {
-			return fmt.Errorf("CopyFile: non-regular destination file %s (%q)", dfi.Name(), dfi.Mode().String())
-		}
-		if os.SameFile(sfi, dfi) {
-			return
-		}
-	}
-	// Dont want to create hard link..
-	// if err = os.Link(src, dst); err == nil {
-	// 	return
-	// }
-
-	// instead we copy file
-	err = copyFileContents(src, dst)
-	return
-}
-
-// copyFileContents copies the contents of the file named src to the file named
-// by dst. The file will be created if it does not already exist. If the
-// destination file exists, all it's contents will be replaced by the contents
-// of the source file.
-func copyFileContents(src, dst string) (err error) {
-	in, err := os.Open(src)
-	if err != nil {
-		return
-	}
-	defer in.Close()
-	out, err := os.Create(dst)
-	if err != nil {
-		return
-	}
-	defer func() {
-		cerr := out.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-	if _, err = io.Copy(out, in); err != nil {
-		return
-	}
-	err = out.Sync()
 	return
 }
 

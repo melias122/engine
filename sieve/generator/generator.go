@@ -25,14 +25,14 @@ func New(archiv *engine.Archiv, filters filter.Filters) *Generator {
 	startTime := time.Now().Format("2006-1-2-15-4-5")
 	subdir := startTime + "_Generator"
 
-	csvw := csv.NewCsvMaxWriter(startTime, archiv.WorkingDir,
+	csvw := csv.NewCsvMaxWriter(startTime, archiv.Workdir,
 		csv.SetSubdir(subdir),
 		csv.SetSuffixFunc(csv.IntSuffix()),
 		csv.SetHeader(newResultFilter(nil, archiv).header),
 	)
 
-	os.Mkdir(filepath.Join(archiv.WorkingDir, subdir), 0755)
-	filename := filepath.Join(archiv.WorkingDir, subdir, "protokol.txt")
+	os.Mkdir(filepath.Join(archiv.Workdir, subdir), 0755)
+	filename := filepath.Join(archiv.Workdir, subdir, "protokol.txt")
 	ioutil.WriteFile(filename, []byte(filters.String()), 0755)
 
 	// fast filter
