@@ -11,7 +11,7 @@ import (
 
 func Test745(t *testing.T) {
 	n, m := 7, 45
-	a, err := engine.NewArchiv("../../test/745.csv", engine.DiscardCSV, n, m)
+	a, err := engine.NewArchiv("../../testdata/745.csv", "../../testdata", n, m)
 	if err != nil {
 		t.Fatal(err)
 	}
