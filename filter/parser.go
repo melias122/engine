@@ -20,7 +20,7 @@ type Parser struct {
 		lit string
 		n   int
 	}
-	Zhoda []byte
+	Zhoda []int
 	n, m  int
 }
 

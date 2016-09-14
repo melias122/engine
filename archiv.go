@@ -119,7 +119,7 @@ func (a *Archiv) loadCsv(chanErrKomb chan ErrKomb) (e error) {
 	}()
 
 	var (
-		kombinacie = make([][]byte, 0, 64)
+		kombinacie = make([][]int, 0, 64)
 	)
 	for errKomb := range chanErrKomb {
 		a.Pc++
@@ -264,7 +264,7 @@ type ErrKomb struct {
 
 func parse(record []string, n int) (Kombinacia, error) {
 	var (
-		komb  = make([]byte, n)
+		komb  = make([]int, n)
 		err   error
 		cislo int
 	)
@@ -282,7 +282,7 @@ func parse(record []string, n int) (Kombinacia, error) {
 				return nil, err
 			}
 		}
-		komb[i] = byte(cislo)
+		komb[i] = cislo
 	}
 	return komb, nil
 }

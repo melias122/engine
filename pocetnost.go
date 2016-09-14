@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"bytes"
 	"fmt"
 	"math/big"
 
@@ -33,7 +32,7 @@ func (a *Archiv) PocetnostR() (err error) {
 		riadok = append(riadok, N1.String())
 
 		// Zhoda s r
-		if bytes.Contains(a.K, []byte{byte(N1.Cislo())}) {
+		if a.K.Contains(N1.Cislo()) {
 			riadok = append(riadok, "1")
 		} else {
 			riadok = append(riadok, "0")

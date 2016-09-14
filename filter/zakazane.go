@@ -11,7 +11,7 @@ type filterZakazane struct {
 	cisla []bool
 }
 
-func NewFilterZakazaneFromString(s string, zhoda []byte, n, m int) (Filter, error) {
+func NewFilterZakazaneFromString(s string, zhoda []int, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
 	p.Zhoda = zhoda
 	ints, err := p.ParseInts()
@@ -60,7 +60,7 @@ type filterZakazaneSTL struct {
 	zakazane [][]bool
 }
 
-func NewFilterZakazaneSTLFromString(s string, zhoda []byte, n, m int) (Filter, error) {
+func NewFilterZakazaneSTLFromString(s string, zhoda []int, n, m int) (Filter, error) {
 	p := NewParser(strings.NewReader(s), n, m)
 	p.Zhoda = zhoda
 	mapInts, err := p.ParseMapInts()

@@ -6,23 +6,23 @@ import (
 
 func TestNtica(t *testing.T) {
 	tests := []struct {
-		t []byte
+		t Kombinacia
 		w string
 	}{
-		{[]byte{}, ""},
-		{[]byte{1}, "1"},
-		{[]byte{1, 3}, "2 0"},
-		{[]byte{1, 3, 5}, "3 0 0"},
-		{[]byte{1, 3, 5, 7}, "4 0 0 0"},
-		{[]byte{1, 3, 5, 7, 9}, "5 0 0 0 0"},
+		{Kombinacia{}, ""},
+		{Kombinacia{1}, "1"},
+		{Kombinacia{1, 3}, "2 0"},
+		{Kombinacia{1, 3, 5}, "3 0 0"},
+		{Kombinacia{1, 3, 5, 7}, "4 0 0 0"},
+		{Kombinacia{1, 3, 5, 7, 9}, "5 0 0 0 0"},
 
-		{[]byte{1, 2, 3, 4, 5}, "0 0 0 0 1"},
-		{[]byte{1, 2, 3, 4, 7}, "1 0 0 1 0"},
-		{[]byte{1, 2, 3, 5, 6}, "0 1 1 0 0"},
-		{[]byte{1, 3, 4, 5, 9}, "2 0 1 0 0"},
-		{[]byte{1, 3, 4, 6, 7}, "1 2 0 0 0"},
-		{[]byte{1, 3, 5, 7, 8}, "3 1 0 0 0"},
-		{[]byte{1, 3, 5, 7, 8, 10, 12, 13, 14, 15}, "4 1 0 1 0 0 0 0 0 0"},
+		{Kombinacia{1, 2, 3, 4, 5}, "0 0 0 0 1"},
+		{Kombinacia{1, 2, 3, 4, 7}, "1 0 0 1 0"},
+		{Kombinacia{1, 2, 3, 5, 6}, "0 1 1 0 0"},
+		{Kombinacia{1, 3, 4, 5, 9}, "2 0 1 0 0"},
+		{Kombinacia{1, 3, 4, 6, 7}, "1 2 0 0 0"},
+		{Kombinacia{1, 3, 5, 7, 8}, "3 1 0 0 0"},
+		{Kombinacia{1, 3, 5, 7, 8, 10, 12, 13, 14, 15}, "4 1 0 1 0 0 0 0 0 0"},
 	}
 	for _, test := range tests {
 		tica := Ntica(test.t)
@@ -54,8 +54,8 @@ func TestNticaPozicie(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		p := Kombinacia(NticaPozicie(test.t))
-		if p.String() != test.w {
+		p := NticaPozicie(test.t)
+		if bytesToString(p) != test.w {
 			t.Fatalf("Excepted: (%s), Have: (%s) Kombinacia: (%s)", test.w, p, test.t)
 		}
 	}

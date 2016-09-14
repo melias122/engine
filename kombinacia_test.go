@@ -12,11 +12,11 @@ func TestString(t *testing.T) {
 func TestContains(t *testing.T) {
 	tests := []struct {
 		k       Kombinacia
-		numbers []byte
+		numbers []int
 		w       []bool
 	}{
-		{Kombinacia{1, 2, 3, 4, 5}, []byte{0, 1, 2, 3, 4, 5, 6}, []bool{false, true, true, true, true, true, false}},
-		{Kombinacia{}, []byte{0, 1, 2}, []bool{false, false, false}},
+		{Kombinacia{1, 2, 3, 4, 5}, []int{0, 1, 2, 3, 4, 5, 6}, []bool{false, true, true, true, true, true, false}},
+		{Kombinacia{}, []int{0, 1, 2}, []bool{false, false, false}},
 	}
 	for _, test := range tests {
 		for i, n := range test.numbers {

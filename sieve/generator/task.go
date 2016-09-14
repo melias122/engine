@@ -98,7 +98,7 @@ func makeNums(hrxNums engine.Nums, xcisla engine.Xcisla) []num {
 		sk := Num.PocetR()
 		if total, ok := skMax[sk]; ok {
 			nums = append(nums, num{
-				num:   byte(Num.Cislo()),
+				num:   Num.Cislo(),
 				total: total,
 			})
 		}
@@ -107,7 +107,7 @@ func makeNums(hrxNums engine.Nums, xcisla engine.Xcisla) []num {
 }
 
 type num struct {
-	num   byte
+	num   int
 	total *int
 }
 

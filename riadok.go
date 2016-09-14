@@ -27,7 +27,7 @@ var archivRiadokHeader = []string{
 }
 
 type Uc struct {
-	Cislo  byte
+	Cislo  int
 	Riadok int
 }
 

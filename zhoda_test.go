@@ -28,7 +28,7 @@ func TestZhoda(t *testing.T) {
 func BenchmarkZhoda(b *testing.B) {
 	k := make(Kombinacia, 30)
 	for i := range k {
-		k[i] = byte(i + 1)
+		k[i] = i + 1
 	}
 	b.ResetTimer()
 	b.ReportAllocs()

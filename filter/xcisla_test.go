@@ -7,7 +7,7 @@ import (
 )
 
 var xcislaTest = []engine.Skupina{
-	{Xcisla: engine.Xcisla{{1, 5}}},
+	// {Xcisla: engine.Xcisla{{1, 5}}},
 	{Xcisla: engine.Xcisla{{1, 1}, {2, 1}, {3, 1}, {5, 2}}},
 	{Xcisla: engine.Xcisla{{1, 1}, {2, 1}, {3, 1}, {6, 2}}},
 	{Xcisla: engine.Xcisla{{1, 1}, {2, 1}, {3, 1}, {7, 2}}},

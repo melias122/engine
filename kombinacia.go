@@ -1,17 +1,17 @@
 package engine
 
 import (
-	"bytes"
+	"strconv"
 	"strings"
 )
 
-type Kombinacia []byte
+type Kombinacia []int
 
-func (k *Kombinacia) Append(b byte) {
+func (k *Kombinacia) Append(b int) {
 	*k = append(*k, b)
 }
 
-func (k *Kombinacia) Pop() byte {
+func (k *Kombinacia) Pop() int {
 	i := len(*k)
 	b := (*k)[i-1]
 	*k = (*k)[:i-1]
@@ -29,11 +29,23 @@ func (k Kombinacia) Copy() Kombinacia {
 }
 
 func (k Kombinacia) String() string {
-	return bytesToString(k)
+	buf := make([]byte, 0, len(k)*3)
+	space := ""
+	for _, n := range k {
+		buf = append(buf, space...)
+		space = " "
+		buf = strconv.AppendInt(buf, int64(n), 10)
+	}
+	return string(buf)
 }
 
-func (k Kombinacia) Contains(cislo byte) bool {
-	return bytes.IndexByte(k, cislo) > -1
+func (k Kombinacia) Contains(num int) bool {
+	for i := range k {
+		if k[i] == num {
+			return true
+		}
+	}
+	return false
 }
 
 func (k Kombinacia) Cislovacky() Cislovacky {

@@ -423,7 +423,7 @@ func (h *hrxHHrxTab) precompute() {
 		// navyssi mozny pocet zhod z poslednym riadkom v skupine
 		var zhodaK Kombinacia
 		for _, num := range skN {
-			zhodaK.Append(byte(num.Cislo()))
+			zhodaK.Append(num.Cislo())
 		}
 		zhodaMax := Zhoda(h.KombinaciaR, zhodaK)
 

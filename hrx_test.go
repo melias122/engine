@@ -28,7 +28,7 @@ func BenchmarkValueKombinacia(b *testing.B) {
 	n, m := 30, 90
 	k := make(Kombinacia, n)
 	for i := 1; i <= n; i++ {
-		k[i-1] = byte(i)
+		k[i-1] = i
 	}
 	hrx := NewHHrx(n, m)
 	for i := 0; i < 1000; i++ {
@@ -118,14 +118,14 @@ func TestHrxValueKombinacia(t *testing.T) {
 	}
 
 	tests := []struct {
-		k     []byte
+		k     Kombinacia
 		value string
 	}{
-		{[]byte{2}, "84.709009486369"},
-		{[]byte{2, 7}, "84.707220404804"},
-		{[]byte{2, 7, 13}, "84.707220377503"},
-		{[]byte{2, 7, 13, 32}, "84.705431182569"},
-		{[]byte{17, 21, 29, 32, 34}, "82.226978235840"},
+		{Kombinacia{2}, "84.709009486369"},
+		{Kombinacia{2, 7}, "84.707220404804"},
+		{Kombinacia{2, 7, 13}, "84.707220377503"},
+		{Kombinacia{2, 7, 13, 32}, "84.705431182569"},
+		{Kombinacia{17, 21, 29, 32, 34}, "82.226978235840"},
 	}
 	for _, test := range tests {
 		vk := hrx.ValueKombinacia(test.k)
