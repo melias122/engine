@@ -1,15 +1,17 @@
 package engine
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
-func Zhoda(k0, k1 Kombinacia) int {
+func Zhoda(k0, k1 Kombinacia) (zh int) {
 	if k0 == nil || k1 == nil {
-		return 0
+		return
 	}
-	var zhoda int
 	for i, j := 0, 0; i < len(k0) && j < len(k1); {
 		if k0[i] == k1[j] {
-			zhoda++
+			zh++
 			i++
 			j++
 		} else if k0[i] < k1[j] {
@@ -18,7 +20,7 @@ func Zhoda(k0, k1 Kombinacia) int {
 			j++
 		}
 	}
-	return zhoda
+	return
 }
 
 // ZhodaPresun urcuje poziciu presunu cisla
@@ -49,7 +51,7 @@ func NewZhodaPresun(k0, k1 Kombinacia) ZhodaPresun {
 func (zp ZhodaPresun) String() string {
 	s := make([]string, len(zp.p))
 	for i, p := range zp.p {
-		s[i] = itoa(int(p[0])) + "|" + itoa(int(p[1]))
+		s[i] = strconv.Itoa(int(p[0])) + "|" + strconv.Itoa(int(p[1]))
 	}
 	return strings.Join(s, ", ")
 }
