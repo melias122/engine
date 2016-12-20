@@ -1,0 +1,43 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "5st1JjQ7tXnyZTUN2NGAL4MPUlQ=",
+			"path": "github.com/andlabs/ui",
+			"revision": "2dde2a79e7020f065d94d9bc17e0191bf18a5bff",
+			"revisionTime": "2016-06-19T17:06:29Z"
+		},
+		{
+			"checksumSHA1": "Gxkaq3YMYg/RI6sL7JF9GsHiYyA=",
+			"path": "github.com/lxn/walk",
+			"revision": "765f1657380e994529d22000a97b046bba4f3291",
+			"revisionTime": "2016-08-08T07:52:30Z"
+		},
+		{
+			"checksumSHA1": "0LUjHb7sjo5d0mWOhAx0/e324PA=",
+			"path": "github.com/lxn/walk/declarative",
+			"revision": "765f1657380e994529d22000a97b046bba4f3291",
+			"revisionTime": "2016-08-08T07:52:30Z"
+		},
+		{
+			"checksumSHA1": "0V7CXfPbnM+PX59oKdKiYPIgPU8=",
+			"path": "github.com/lxn/win",
+			"revision": "8855eceee83ca086d647feb3d359a1d2ab6c7ccf",
+			"revisionTime": "2016-08-01T10:34:12Z"
+		},
+		{
+			"checksumSHA1": "3EE72oPk9MsIzoLUeB/RQNABd3c=",
+			"path": "github.com/montanaflynn/stats",
+			"revision": "60dcacf48f43d6dd654d0ed94120ff5806c5ca5c",
+			"revisionTime": "2016-05-05T08:52:09Z"
+		},
+		{
+			"checksumSHA1": "9ndAxkjLBVuEAlnDPBU/hjDEIe8=",
+			"path": "github.com/tealeg/xlsx",
+			"revision": "bd0ba13fd8a4fe9a529b18e09c23a886f08f7d9a",
+			"revisionTime": "2016-08-15T10:19:19Z"
+		}
+	],
+	"rootPath": "gitlab.com/melias122/engine"
+}
