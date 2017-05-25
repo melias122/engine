@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	. "gitlab.com/melias122/engine/sieve"
+	. "github.com/melias122/engine/sieve"
 )
 
 type task struct {

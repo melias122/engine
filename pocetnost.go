@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine/csv"
 )
 
 func (a *Archiv) PocetnostR() (err error) {

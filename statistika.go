@@ -3,7 +3,7 @@ package engine
 import (
 	"math/big"
 
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine/csv"
 )
 
 func (a *Archiv) statistikaZhoda() error {

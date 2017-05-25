@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine/csv"
 
 	"github.com/tealeg/xlsx"
 )

@@ -4,7 +4,7 @@ import (
 	"math/big"
 	"sort"
 
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine/csv"
 )
 
 // hlavicka suboru HrxHHrx

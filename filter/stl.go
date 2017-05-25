@@ -3,7 +3,7 @@ package filter
 import (
 	"fmt"
 
-	"gitlab.com/melias122/engine"
+	"github.com/melias122/engine"
 )
 
 func NewFilterSTL1(min, max float64, HHrxNums engine.Nums, n int) Filter {

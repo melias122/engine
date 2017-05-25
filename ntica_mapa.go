@@ -3,7 +3,7 @@ package engine
 import (
 	"bytes"
 
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine/csv"
 )
 
 func nticaPozicie(k Kombinacia) []string {

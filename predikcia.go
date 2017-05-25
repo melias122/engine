@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine/csv"
 
 	"github.com/montanaflynn/stats"
 )

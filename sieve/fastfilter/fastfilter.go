@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"gitlab.com/melias122/engine"
-	"gitlab.com/melias122/engine/csv"
-	"gitlab.com/melias122/engine/filter"
-	"gitlab.com/melias122/engine/sieve"
+	"github.com/melias122/engine"
+	"github.com/melias122/engine/csv"
+	"github.com/melias122/engine/filter"
+	"github.com/melias122/engine/sieve"
 )
 
 type FastFilter struct {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"gitlab.com/melias122/engine"
+	"github.com/melias122/engine"
 )
 
 type Ints []int

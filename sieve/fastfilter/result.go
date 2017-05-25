@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sync"
 
-	"gitlab.com/melias122/engine"
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine"
+	"github.com/melias122/engine/csv"
 )
 
 type syncWriter struct {

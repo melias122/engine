@@ -3,7 +3,7 @@ package filter
 import (
 	"fmt"
 
-	"gitlab.com/melias122/engine"
+	"github.com/melias122/engine"
 )
 
 type filterSmernica struct {

@@ -1,6 +1,6 @@
 package engine
 
-import "gitlab.com/melias122/engine/csv"
+import "github.com/melias122/engine/csv"
 
 func (a *Archiv) mapaZhoda2() error {
 	mz := newMapaZhoda(a.riadky, a.n)

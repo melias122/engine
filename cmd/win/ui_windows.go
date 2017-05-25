@@ -12,11 +12,11 @@ import (
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
-	"gitlab.com/melias122/engine"
-	"gitlab.com/melias122/engine/filter"
-	"gitlab.com/melias122/engine/sieve"
-	"gitlab.com/melias122/engine/sieve/fastfilter"
-	"gitlab.com/melias122/engine/sieve/generator"
+	"github.com/melias122/engine"
+	"github.com/melias122/engine/filter"
+	"github.com/melias122/engine/sieve"
+	"github.com/melias122/engine/sieve/fastfilter"
+	"github.com/melias122/engine/sieve/generator"
 )
 
 const (

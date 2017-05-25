@@ -10,7 +10,7 @@ import (
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
-	"gitlab.com/melias122/engine/filter"
+	"github.com/melias122/engine/filter"
 )
 
 type Line interface {

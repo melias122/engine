@@ -3,7 +3,7 @@ package filter
 import (
 	"testing"
 
-	"gitlab.com/melias122/engine"
+	"github.com/melias122/engine"
 )
 
 func TestFilterSTL(t *testing.T) {

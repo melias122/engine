@@ -3,7 +3,7 @@ package filter
 import (
 	"fmt"
 
-	"gitlab.com/melias122/engine"
+	"github.com/melias122/engine"
 )
 
 func NewFilterHrx(min, max float64, Hrx *engine.H, n int) Filter {

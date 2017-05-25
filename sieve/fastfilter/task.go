@@ -1,8 +1,8 @@
 package fastfilter
 
 import (
-	"gitlab.com/melias122/engine"
-	"gitlab.com/melias122/engine/filter"
+	"github.com/melias122/engine"
+	"github.com/melias122/engine/filter"
 )
 
 type task struct {

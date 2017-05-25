@@ -5,7 +5,7 @@ import (
 	"math"
 	"strconv"
 
-	"gitlab.com/melias122/engine/csv"
+	"github.com/melias122/engine/csv"
 )
 
 func aritmetickyPriemer(s []float64) float64 {
