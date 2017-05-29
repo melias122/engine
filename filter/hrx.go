@@ -4,14 +4,15 @@ import (
 	"fmt"
 
 	"github.com/melias122/engine/engine"
+	"github.com/melias122/engine/hrx"
 )
 
-func NewFilterHrx(min, max float64, Hrx *engine.H, n int) Filter {
+func NewFilterHrx(min, max float64, Hrx *hrx.H, n int) Filter {
 	f := &filterHrx{newFilterH("Hrx", min, max, Hrx, n)}
 	return f
 }
 
-func NewFilterHHrx(min, max float64, HHrx *engine.H, n int) Filter {
+func NewFilterHHrx(min, max float64, HHrx *hrx.H, n int) Filter {
 	f := &filterHHrx{newFilterH("HHrx", min, max, HHrx, n)}
 	return f
 }
@@ -33,11 +34,11 @@ func (f *filterHHrx) CheckSkupina(s engine.Skupina) bool {
 type filterH struct {
 	n        int
 	min, max float64
-	h        *engine.H
+	h        *hrx.H
 	fname    string
 }
 
-func newFilterH(fname string, min, max float64, h *engine.H, n int) filterH {
+func newFilterH(fname string, min, max float64, h *hrx.H, n int) filterH {
 	if min <= 0 {
 		min = 0.1
 	}

@@ -1,9 +1,11 @@
-package engine
+package hrx
 
 import (
 	"math"
 	"strconv"
 	"testing"
+
+	"github.com/melias122/engine/engine"
 )
 
 var (
@@ -26,7 +28,7 @@ func BenchmarkHrxValue(b *testing.B) {
 
 func BenchmarkValueKombinacia(b *testing.B) {
 	n, m := 30, 90
-	k := make(Kombinacia, n)
+	k := make(engine.Kombinacia, n)
 	for i := 1; i <= n; i++ {
 		k[i-1] = i
 	}
@@ -118,14 +120,14 @@ func TestHrxValueKombinacia(t *testing.T) {
 	}
 
 	tests := []struct {
-		k     Kombinacia
+		k     engine.Kombinacia
 		value string
 	}{
-		{Kombinacia{2}, "84.709009486369"},
-		{Kombinacia{2, 7}, "84.707220404804"},
-		{Kombinacia{2, 7, 13}, "84.707220377503"},
-		{Kombinacia{2, 7, 13, 32}, "84.705431182569"},
-		{Kombinacia{17, 21, 29, 32, 34}, "82.226978235840"},
+		{engine.Kombinacia{2}, "84.709009486369"},
+		{engine.Kombinacia{2, 7}, "84.707220404804"},
+		{engine.Kombinacia{2, 7, 13}, "84.707220377503"},
+		{engine.Kombinacia{2, 7, 13, 32}, "84.705431182569"},
+		{engine.Kombinacia{17, 21, 29, 32, 34}, "82.226978235840"},
 	}
 	for _, test := range tests {
 		vk := hrx.Value(test.k)

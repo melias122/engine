@@ -1,11 +1,15 @@
-package engine
+package hrx
 
-import "math"
+import (
+	"math"
+
+	"github.com/melias122/engine/engine"
+)
 
 type H struct {
 	n, m   int
-	xcisla Xcisla
-	Cisla  Nums
+	xcisla engine.Xcisla
+	Cisla  engine.Nums
 	max    int
 }
 
@@ -13,8 +17,8 @@ func NewHrx(n, m int) *H {
 	return &H{
 		n:      n,
 		m:      m,
-		xcisla: NewXcisla(m),
-		Cisla:  make(Nums, m),
+		xcisla: engine.NewXcisla(m),
+		Cisla:  make(engine.Nums, m),
 
 		max: 19,
 	}
@@ -24,8 +28,8 @@ func NewHHrx(n, m int) *H {
 	return &H{
 		n:      n,
 		m:      m,
-		xcisla: NewXcisla(m),
-		Cisla:  make(Nums, m),
+		xcisla: engine.NewXcisla(m),
+		Cisla:  make(engine.Nums, m),
 	}
 }
 
@@ -38,42 +42,42 @@ func (h *H) Add(x, y int) {
 	// Ak N nie je v vytvorene
 	N := h.Cisla[x-1]
 	if N == nil {
-		N = NewNum(x, h.n, h.m)
+		N = engine.NewNum(x, h.n, h.m)
 		h.Cisla[x-1] = N
 	}
 
 	// Presun Hrx/HHrx zo skupiny PocetR, do skupiny aktualnej pocetnosti cisla N
-	h.xcisla.move(1, N.PocetR(), N.PocetR()+1)
+	h.xcisla.Move(1, N.PocetR(), N.PocetR()+1)
 
 	// Incrementuj pocetnost cisla x
 	N.Inc(y)
 }
 
-func (h *H) GetNum(x int) *Num {
+func (h *H) GetNum(x int) *engine.Num {
 	N := h.Cisla[x-1]
 	if N == nil {
-		return NewNum(x, h.n, h.m)
+		return engine.NewNum(x, h.n, h.m)
 	} else {
 		return h.Cisla[x-1]
 	}
 }
 
-func (h *H) Value(k Kombinacia) float64 {
+func (h *H) Value(k engine.Kombinacia) float64 {
 	if k == nil {
 		return h.valuePresun(h.xcisla)
 	}
-	xcisla := h.xcisla.copy()
+	xcisla := h.xcisla.Copy()
 	// move
 	for _, cislo := range k {
 		sk := h.GetNum(int(cislo)).PocetR()
-		xcisla.move(1, sk, sk+1)
+		xcisla.Move(1, sk, sk+1)
 	}
 	// compute
 	return h.valuePresun(xcisla)
 }
 
 //Vypocita hodnotu Presun p
-func (h *H) valuePresun(p Xcisla) float64 {
+func (h *H) valuePresun(p engine.Xcisla) float64 {
 	if p.Max() == 0 {
 		return 100
 	}

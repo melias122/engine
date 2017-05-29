@@ -10,7 +10,7 @@ type Tab struct {
 	Max int
 }
 
-func newTab(sk, max int) Tab {
+func NewTab(sk, max int) Tab {
 	return Tab{Sk: sk, Max: max}
 }
 
@@ -22,7 +22,7 @@ func NewXcisla(m int) Xcisla {
 	return presun
 }
 
-func (p *Xcisla) move(n, from, to int) {
+func (p *Xcisla) Move(n, from, to int) {
 	if from > to {
 		from, to = to, from
 		n = -n
@@ -46,7 +46,7 @@ func (p *Xcisla) add(n, sk int) {
 	if !ok {
 		*p = append(*p, Tab{})
 		copy((*p)[i+1:], (*p)[i:])
-		(*p)[i] = newTab(sk, 0)
+		(*p)[i] = NewTab(sk, 0)
 	}
 	// pridanie odcitanie z danej skupiny
 	(*p)[i].Max += n
@@ -60,7 +60,7 @@ func (p Xcisla) Max() int {
 	return p[len(p)-1].Sk
 }
 
-func (x Xcisla) copy() Xcisla {
+func (x Xcisla) Copy() Xcisla {
 	xcisla := make(Xcisla, len(x))
 	copy(xcisla, x)
 	return xcisla

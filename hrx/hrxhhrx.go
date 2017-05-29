@@ -1,10 +1,12 @@
-package engine
+package hrx
 
 import (
 	"math/big"
 	"sort"
+	"strconv"
 
 	"github.com/melias122/engine/csv"
+	"github.com/melias122/engine/engine"
 )
 
 // hlavicka suboru HrxHHrx
@@ -44,13 +46,13 @@ type hrxHHrxCacheItem struct {
 	mm         [2]int
 	rod        float64
 	r          [2]float64
-	cislovacky [2]Cislovacky
+	cislovacky [2]engine.Cislovacky
 	zhoda      [2]int
 }
 
-type hrxHHrxCache map[Tab]*hrxHHrxCacheItem
+type hrxHHrxCache map[engine.Tab]*hrxHHrxCacheItem
 
-func (c *hrxHHrxCache) get(t Tab) *hrxHHrxCacheItem {
+func (c *hrxHHrxCache) get(t engine.Tab) *hrxHHrxCacheItem {
 	v, ok := (*c)[t]
 	if !ok {
 		v = &hrxHHrxCacheItem{}
@@ -61,18 +63,18 @@ func (c *hrxHHrxCache) get(t Tab) *hrxHHrxCacheItem {
 
 type hrxHHrxTab struct {
 	n, m        int
-	HrxXcisla   Xcisla
-	Xcisla      Xcisla
+	HrxXcisla   engine.Xcisla
+	Xcisla      engine.Xcisla
 	Hrx         *H
 	HHrx        *H
-	KombinaciaR Kombinacia
+	KombinaciaR engine.Kombinacia
 
-	hhrxMin, hhrxMax Xcisla
+	hhrxMin, hhrxMax engine.Xcisla
 
-	skupiny Skupiny
+	skupiny engine.Skupiny
 
-	HrxNums  map[int]Nums
-	HHrxNums map[int]Nums
+	HrxNums  map[int]engine.Nums
+	HHrxNums map[int]engine.Nums
 
 	riadokHrx     float64
 	riadokHHrx    float64
@@ -81,8 +83,8 @@ type hrxHHrxTab struct {
 	rod           float64
 	r1Min, r1Max  float64
 	hhrxR0, hrxR0 float64
-	cislovackyMin Cislovacky
-	cislovackyMax Cislovacky
+	cislovackyMin engine.Cislovacky
+	cislovackyMax engine.Cislovacky
 	zhMin, zhMax  int
 
 	w *csv.CsvMaxWriter
@@ -92,26 +94,26 @@ type hrxHHrxTab struct {
 	headerLen int
 }
 
-func makeSkupiny(archiv *Archiv) (Skupiny, error) {
+func makeSkupiny(workingdir string, k engine.Kombinacia, hrx, hhrx *H, n, m int) (engine.Skupiny, error) {
 
 	h := hrxHHrxTab{
-		n:          archiv.n,
-		m:          archiv.m,
-		HrxXcisla:  archiv.Hrx.xcisla.copy(),
-		Xcisla:     make(Xcisla, 0, archiv.n),
-		Hrx:        archiv.Hrx,
-		HHrx:       archiv.HHrx,
-		riadokHrx:  archiv.Hrx.Value(nil),
-		riadokHHrx: archiv.HHrx.Value(nil),
+		n:          n,
+		m:          m,
+		HrxXcisla:  hrx.xcisla.Copy(),
+		Xcisla:     make(engine.Xcisla, 0, n),
+		Hrx:        hrx,
+		HHrx:       hhrx,
+		riadokHrx:  hrx.Value(nil),
+		riadokHHrx: hhrx.Value(nil),
 		pocetSucet: *big.NewInt(1),
 
-		KombinaciaR: archiv.K,
+		KombinaciaR: k,
 
-		hhrxMin: archiv.HHrx.xcisla.copy(),
-		hhrxMax: archiv.HHrx.xcisla.copy(),
+		hhrxMin: hhrx.xcisla.Copy(),
+		hhrxMax: hhrx.xcisla.Copy(),
 
-		HrxNums:  make(map[int]Nums),
-		HHrxNums: make(map[int]Nums),
+		HrxNums:  make(map[int]engine.Nums),
+		HHrxNums: make(map[int]engine.Nums),
 
 		cache: make(hrxHHrxCache),
 	}
@@ -128,18 +130,18 @@ func makeSkupiny(archiv *Archiv) (Skupiny, error) {
 	}
 
 	for _, hhrxNums := range h.HHrxNums {
-		sort.Sort(ByPocetR{hhrxNums})
+		sort.Sort(engine.ByPocetR{hhrxNums})
 	}
 
 	h.precompute()
 
-	h.w = csv.NewCsvMaxWriter("HrxHHrx", archiv.Workdir,
+	h.w = csv.NewCsvMaxWriter("HrxHHrx", workingdir,
 		csv.SetHeaders(h.header()),
 		csv.SetSuffixFunc(csv.IntSuffix()),
 	)
 	defer h.w.Close()
 
-	if err := h.make(h.HrxXcisla.copy(), h.n); err != nil {
+	if err := h.make(h.HrxXcisla.Copy(), h.n); err != nil {
 		return nil, err
 	}
 	return h.skupiny, nil
@@ -151,7 +153,7 @@ func (h *hrxHHrxTab) sMinMax() (float64, float64, float64, float64) {
 	var (
 		sums [4]float64
 
-		nums          = make(Nums, 0, h.m)
+		nums          = make(engine.Nums, 0, h.m)
 		kombinaciaMin = make([]int, h.n)
 		kombinaciaMax = make([]int, h.n)
 
@@ -226,10 +228,10 @@ func (h *hrxHHrxTab) record() []string {
 	hhrxMin := h.HHrx.valuePresun(h.hhrxMin)
 	hhrxMax := h.HHrx.valuePresun(h.hhrxMax)
 
-	s := Skupina{
+	s := engine.Skupina{
 		Hrx:        hrx,
 		HrxDelta:   hrx - h.riadokHrx,
-		Xcisla:     h.Xcisla.copy(),
+		Xcisla:     h.Xcisla.Copy(),
 		R2:         h.rod,
 		S2:         [2]float64{s2min, s2max},
 		Sucet:      [2]int{h.min, h.max},
@@ -238,7 +240,7 @@ func (h *hrxHHrxTab) record() []string {
 		HHrxDelta:  [2]float64{h.riadokHHrx - hhrxMin, h.riadokHHrx - hhrxMax},
 		R1:         [2]float64{h.r1Min, h.r1Max},
 		S1:         [2]float64{s1min, s1max},
-		Cislovacky: [2]Cislovacky{h.cislovackyMin, h.cislovackyMax},
+		Cislovacky: [2]engine.Cislovacky{h.cislovackyMin, h.cislovackyMax},
 		Zh:         [2]int{h.zhMin, h.zhMax},
 	}
 
@@ -247,19 +249,19 @@ func (h *hrxHHrxTab) record() []string {
 	return s.Record()
 }
 
-func (h *hrxHHrxTab) append(t Tab) {
+func (h *hrxHHrxTab) append(t engine.Tab) {
 	// presun retazec
 	h.Xcisla = append(h.Xcisla, t)
 
 	// presun v Hrx
-	h.HrxXcisla.move(t.Max, t.Sk, t.Sk+1)
+	h.HrxXcisla.Move(t.Max, t.Sk, t.Sk+1)
 
 	// presun v HHrx min, max
 	N2 := h.HHrxNums[t.Sk]
 	N2LastIndex := len(N2) - 1
 	for i := 0; i < t.Max; i++ {
-		h.hhrxMin.move(1, N2[i].PocetR(), N2[i].PocetR()+1)
-		h.hhrxMax.move(1, N2[N2LastIndex-i].PocetR(), N2[N2LastIndex-i].PocetR()+1)
+		h.hhrxMin.Move(1, N2[i].PocetR(), N2[i].PocetR()+1)
+		h.hhrxMax.Move(1, N2[N2LastIndex-i].PocetR(), N2[N2LastIndex-i].PocetR()+1)
 	}
 
 	// vyber cache
@@ -297,14 +299,14 @@ func (h *hrxHHrxTab) delete() {
 	h.Xcisla = h.Xcisla[:len(h.Xcisla)-1]
 
 	// presun v Hrx
-	h.HrxXcisla.move(t.Max, t.Sk+1, t.Sk)
+	h.HrxXcisla.Move(t.Max, t.Sk+1, t.Sk)
 
 	// presun v HHrx min, max
 	N2 := h.HHrxNums[t.Sk]
 	N2LastIndex := len(N2) - 1
 	for i := 0; i < t.Max; i++ {
-		h.hhrxMin.move(1, N2[i].PocetR()+1, N2[i].PocetR())
-		h.hhrxMax.move(1, N2[N2LastIndex-i].PocetR()+1, N2[N2LastIndex-i].PocetR())
+		h.hhrxMin.Move(1, N2[i].PocetR()+1, N2[i].PocetR())
+		h.hhrxMax.Move(1, N2[N2LastIndex-i].PocetR()+1, N2[N2LastIndex-i].PocetR())
 	}
 
 	// vyber cache
@@ -333,7 +335,7 @@ func (h *hrxHHrxTab) delete() {
 	h.zhMax -= c.zhoda[1]
 }
 
-func (h *hrxHHrxTab) make(HrxXcisla Xcisla, n int) error {
+func (h *hrxHHrxTab) make(HrxXcisla engine.Xcisla, n int) error {
 	if len(HrxXcisla) == 0 {
 		return nil
 	}
@@ -342,7 +344,7 @@ func (h *hrxHHrxTab) make(HrxXcisla Xcisla, n int) error {
 		max = n
 	}
 	for max > 0 {
-		h.append(newTab(HrxXcisla[0].Sk, max))
+		h.append(engine.NewTab(HrxXcisla[0].Sk, max))
 		if n-max > 0 {
 			if err := h.make(HrxXcisla[1:], n-max); err != nil {
 				return err
@@ -383,16 +385,16 @@ func (h *hrxHHrxTab) minimum(n, smax, ssize int) int {
 	return min
 }
 
-func (h *hrxHHrxTab) maxCislovacky(smax int, cislovacky Cislovacky) Cislovacky {
-	var c Cislovacky
+func (h *hrxHHrxTab) maxCislovacky(smax int, cislovacky engine.Cislovacky) engine.Cislovacky {
+	var c engine.Cislovacky
 	for i, j := range cislovacky {
 		c[i] = byte(h.maximum(int(j), smax))
 	}
 	return c
 }
 
-func (h *hrxHHrxTab) minCislovacky(smax int, ssize int, cislovacky Cislovacky) Cislovacky {
-	var c Cislovacky
+func (h *hrxHHrxTab) minCislovacky(smax int, ssize int, cislovacky engine.Cislovacky) engine.Cislovacky {
+	var c engine.Cislovacky
 	for i, j := range cislovacky {
 		c[i] = byte(h.minimum(int(j), smax, ssize))
 	}
@@ -409,28 +411,28 @@ func (h *hrxHHrxTab) precompute() {
 		var (
 			i, smin, smax int
 			rmin, rmax    float64
-			cislovacky    Cislovacky
+			cislovacky    engine.Cislovacky
 		)
 		skN := h.HrxNums[t.Sk]
 		skN2 := h.HHrxNums[t.Sk]
 
 		// navyssi mozny pocet danej cislovacky v skupine
 		for _, num := range skN {
-			c2 := NewCislovacky(num.Cislo())
+			c2 := engine.NewCislovacky(num.Cislo())
 			cislovacky.Plus(c2)
 		}
 
 		// navyssi mozny pocet zhod z poslednym riadkom v skupine
-		var zhodaK Kombinacia
+		var zhodaK engine.Kombinacia
 		for _, num := range skN {
 			zhodaK = append(zhodaK, num.Cislo())
 		}
-		zhodaMax := Zhoda(h.KombinaciaR, zhodaK)
+		zhodaMax := engine.Zhoda(h.KombinaciaR, zhodaK)
 
 		for ; max > 0; max-- {
 
-			cache0 := h.cache.get(newTab(t.Sk, max))
-			cache1 := h.cache.get(newTab(t.Sk, i+1))
+			cache0 := h.cache.get(engine.NewTab(t.Sk, max))
+			cache1 := h.cache.get(engine.NewTab(t.Sk, i+1))
 
 			// min, max zhoda v skupine
 			// h.zhodaCache[newTab(t.Sk, max)] = [2]int{
@@ -441,7 +443,7 @@ func (h *hrxHHrxTab) precompute() {
 
 			// min, max cislovacky v skupine
 			// h.cislovackyCache[newTab(t.Sk, max)] = [2]Cislovacky{
-			cache0.cislovacky = [2]Cislovacky{
+			cache0.cislovacky = [2]engine.Cislovacky{
 				h.minCislovacky(max, len(skN), cislovacky),
 				h.maxCislovacky(max, cislovacky),
 			}
@@ -487,8 +489,8 @@ func (h *hrxHHrxTab) header() [][]string {
 		r3 = append(r3, "Pocet R OD-DO")
 		for _, num := range h.HrxNums[sk] {
 			r1 = append(r1, num.String())
-			r2 = append(r2, itoa(h.HHrx.GetNum(num.Cislo()).PocetR()))
-			r3 = append(r3, itoa(num.PocetR()))
+			r2 = append(r2, strconv.Itoa(h.HHrx.GetNum(num.Cislo()).PocetR()))
+			r3 = append(r3, strconv.Itoa(num.PocetR()))
 		}
 		header = append(header, r1, r2, r3, []string{""})
 	}
@@ -496,4 +498,11 @@ func (h *hrxHHrxTab) header() [][]string {
 	h.headerLen = len(HeaderHrxHHrx)
 
 	return header
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

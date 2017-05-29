@@ -1,11 +1,15 @@
-package engine
+package hrx
 
-import "fmt"
+import (
+	"fmt"
 
-func maker(xcisla Xcisla, n int) {
+	"github.com/melias122/engine/engine"
+)
+
+func maker(xcisla engine.Xcisla, n int) {
 	var (
 		sum     int
-		x       Xcisla
+		x       engine.Xcisla
 		indices = make([]int, 1, xcisla.Len())
 	)
 	for len(indices) > 0 {
