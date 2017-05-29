@@ -7,17 +7,6 @@ import (
 
 type Kombinacia []int
 
-func (k *Kombinacia) Append(b int) {
-	*k = append(*k, b)
-}
-
-func (k *Kombinacia) Pop() int {
-	i := len(*k)
-	b := (*k)[i-1]
-	*k = (*k)[:i-1]
-	return b
-}
-
 func (k Kombinacia) Len() int {
 	return len(k)
 }
