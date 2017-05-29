@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 )
 
 // idea: {skupina1:[pocet1, pocet2, ...], skupina1:[pocet1, pocet2, ...], ...}

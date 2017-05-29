@@ -7,7 +7,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/csv"
 	"github.com/melias122/engine/filter"
 )

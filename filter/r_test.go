@@ -3,7 +3,7 @@ package filter
 import (
 	"testing"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 )
 
 func TestFilterR(t *testing.T) {

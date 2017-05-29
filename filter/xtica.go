@@ -3,7 +3,7 @@ package filter
 import (
 	"bytes"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 )
 
 type filterXtica struct {

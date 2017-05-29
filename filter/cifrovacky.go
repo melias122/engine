@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 )
 
 type cifrovacky struct {

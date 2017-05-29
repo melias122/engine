@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/csv"
 	"github.com/melias122/engine/filter"
 	"github.com/melias122/engine/sieve"

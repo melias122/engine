@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 )
 
 // Cislovacky implementuju Filter pre P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC

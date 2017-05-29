@@ -1,6 +1,6 @@
 package filter
 
-import "github.com/melias122/engine"
+import "github.com/melias122/engine/engine"
 
 type Delta int
 

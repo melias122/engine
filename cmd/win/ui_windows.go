@@ -12,7 +12,7 @@ import (
 
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/filter"
 	"github.com/melias122/engine/sieve"
 	"github.com/melias122/engine/sieve/fastfilter"

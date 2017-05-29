@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 )
 
 type filterZakazane struct {

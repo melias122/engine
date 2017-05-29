@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/csv"
 )
 

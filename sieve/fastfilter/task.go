@@ -1,7 +1,7 @@
 package fastfilter
 
 import (
-	"github.com/melias122/engine"
+	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/filter"
 )
 
