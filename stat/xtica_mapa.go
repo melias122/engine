@@ -1,4 +1,6 @@
-package engine
+// +build ignore
+
+package stat
 
 import (
 	"fmt"
@@ -225,7 +227,7 @@ func (m *mapaXtice2) strings() [][]string {
 	for _, k := range m.k {
 		addRow()
 		addCol(k.String())
-		xtica := Xtica(m.m, k)
+		xtica := NewXtica(k, m.m)
 		for i, j := range xtica {
 			for k := 0; k < int(j); k++ {
 				addCol("X" + itoa(i+1))

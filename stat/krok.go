@@ -1,9 +1,10 @@
-package engine
+// +build ignore
+
+package stat
 
 import (
 	"fmt"
 	"math"
-	"strconv"
 
 	"github.com/melias122/engine/csv"
 )
@@ -214,11 +215,7 @@ func statCifrovackyStrings(n, m, lenOrigHeader int, sc []*statCifrovacky, tmax f
 }
 
 func (a *Archiv) statistikaCifrovacky() error {
-	header := a.origHeader
-	for i := 1; i <= 10; i++ {
-		header = append(header, "Cifra ("+strconv.Itoa(i%10)+")")
-	}
-	w := csv.NewCsvMaxWriter("KrokCifrovacky", a.Workdir, csv.SetHeader(header))
+	w := csv.NewCsvMaxWriter("KrokCifrovacky", a.Workdir)
 	defer w.Close()
 
 	// dokumentacia

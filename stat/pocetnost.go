@@ -1,4 +1,6 @@
-package engine
+// +build ignore
+
+package stat
 
 import (
 	"fmt"
@@ -32,7 +34,14 @@ func (a *Archiv) PocetnostR() (err error) {
 		riadok = append(riadok, N1.String())
 
 		// Zhoda s r
-		if a.K.Contains(N1.Cislo()) {
+		var contains bool
+		for _, num := range a.K {
+			if num == N1.Cislo() {
+				contains = true
+			}
+		}
+
+		if contains {
 			riadok = append(riadok, "1")
 		} else {
 			riadok = append(riadok, "0")

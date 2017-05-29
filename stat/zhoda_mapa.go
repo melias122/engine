@@ -1,4 +1,6 @@
-package engine
+// +build ignore
+
+package stat
 
 import "github.com/melias122/engine/csv"
 
@@ -181,8 +183,8 @@ func newMapaZhodaRiadok(pred, akt Kombinacia) *mapaZhodaRiadok {
 	return &mapaZhodaRiadok{
 		k:    akt,
 		zh:   Zhoda(pred, akt),
-		poz0: make([]int, akt.Len()),
-		poz:  make([]int, akt.Len()),
+		poz0: make([]int, len(akt)),
+		poz:  make([]int, len(akt)),
 		zp:   NewZhodaPresun(pred, akt),
 	}
 }
@@ -233,7 +235,7 @@ func (m *mapaZhodaRiadok) strings() []string {
 		s = append(s, "")
 	}
 
-	presun := make([]string, m.k.Len())
+	presun := make([]string, len(m.k))
 	for _, p := range m.zp.p {
 		i := p[1] - 1
 		presun[i] = itoa(p[0]) + "|" + itoa(p[1])

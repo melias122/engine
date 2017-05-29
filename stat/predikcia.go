@@ -1,4 +1,6 @@
-package engine
+// +build ignore
+
+package stat
 
 import (
 	"errors"
