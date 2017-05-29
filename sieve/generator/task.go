@@ -44,7 +44,7 @@ func (t *task) Run() error {
 		// v predchadzajucom kroku sme nasli kombinaciu
 		// skusime dalsie cislo na tomto leveli
 		if k.Len() == j && num.num == k[k.Len()-1] {
-			k.Pop()
+			k = k[:k.Len()-1]
 			num.inc()
 			indices[j-1]++
 			continue
@@ -58,7 +58,7 @@ func (t *task) Run() error {
 			continue
 		}
 
-		k.Append(num.num)
+		k = append(k, num.num)
 		num.dec()
 
 		// ak kombinacia nevyhovuje filtru
