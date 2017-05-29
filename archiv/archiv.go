@@ -1,4 +1,4 @@
-package engine
+package archiv
 
 import (
 	"fmt"
@@ -8,21 +8,23 @@ import (
 	"strings"
 
 	"github.com/melias122/engine/csv"
+	"github.com/melias122/engine/engine"
+	"github.com/melias122/engine/hrx"
 	"github.com/pkg/errors"
 )
 
 // Archiv
 type Archiv struct {
-	Riadok
+	engine.Riadok
 
-	Hrx  *H
-	HHrx *H
+	Hrx  *hrx.H
+	HHrx *hrx.H
 
 	Csvpath string
 	Workdir string
 	Suffix  string
 
-	riadky []Riadok
+	riadky []engine.Riadok
 }
 
 // NewArchiv funkcia vytvori archiv aj z vystupmi. V pripade ze outdir
@@ -46,12 +48,12 @@ func NewArchiv(csvpath, outdir string, n, m int) (*Archiv, error) {
 	workdir := filepath.Join(outdir, suffix)
 
 	archiv := &Archiv{
-		Riadok: Riadok{
-			n: n,
-			m: m,
+		Riadok: engine.Riadok{
+		//n: n,
+		//m: m,
 		},
-		Hrx:  NewHrx(n, m),
-		HHrx: NewHHrx(n, m),
+		Hrx:  hrx.NewHrx(n, m),
+		HHrx: hrx.NewHHrx(n, m),
 
 		Csvpath: filepath.Join(workdir, basename),
 		Workdir: workdir,
@@ -64,7 +66,7 @@ func NewArchiv(csvpath, outdir string, n, m int) (*Archiv, error) {
 	}
 
 	// Skopirovanie originalnej databazy (.csv)
-	if err := CopyFile(archiv.Csvpath, csvpath); err != nil {
+	if err := copyFile(archiv.Csvpath, csvpath); err != nil {
 		log.Printf("Archiv: %s\n", err)
 		return nil, fmt.Errorf("Archiv: Nepodarilo sa skopirovat subor %s", csvpath)
 	}
@@ -82,16 +84,17 @@ func NewArchiv(csvpath, outdir string, n, m int) (*Archiv, error) {
 		return nil, errors.Wrap(err, "could not parse")
 	}
 
-	if err := archiv.create([][]int(kombinacie)); err != nil {
+	if err := archiv.create([][]int(kombinacie), n, m); err != nil {
 		return nil, err
 	}
 
 	return archiv, nil
 }
 
-func (a *Archiv) create(kombinacie [][]int) (e error) {
+func (a *Archiv) create(kombinacie [][]int, n, m int) (e error) {
 
-	writter := csv.NewCsvMaxWriter("Archiv", a.Workdir, csv.SetHeader(archivRiadokHeader))
+	writter := csv.NewCsvMaxWriter("Archiv", a.Workdir, csv.SetHeader(engine.ArchivRiadokHeader))
+
 	defer func() {
 		e = writter.Close()
 	}()
@@ -128,8 +131,8 @@ func (a *Archiv) create(kombinacie [][]int) (e error) {
 			// Spatne dohladanie Uc cisla a riadku a inrementovanie cisiel Roddo
 			if reverse {
 				// Nova hrx zostava a resetovanie cisiel Roddo
-				a.Hrx = NewHrx(a.n, a.m)
-				uc := Uc{Riadok: r}
+				a.Hrx = hrx.NewHrx(n, m)
+				uc := engine.Uc{Riadok: r}
 				// Spatne nacitava kombinacie a incremtuje Roddo
 				// a Hrx az pokial nenastane udalost 101
 				// udalost 101 nastava ked sa kazde cislo vyskytne aspon 1
@@ -157,7 +160,7 @@ func (a *Archiv) create(kombinacie [][]int) (e error) {
 		}
 		a.riadky = append(a.riadky, a.Riadok)
 
-		if err := writter.Write(a.Riadok.record()); err != nil {
+		if err := writter.Write(a.Riadok.Record()); err != nil {
 			log.Println(err)
 			return err
 		}

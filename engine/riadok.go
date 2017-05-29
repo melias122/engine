@@ -1,6 +1,6 @@
 package engine
 
-var archivRiadokHeader = []string{
+var ArchivRiadokHeader = []string{
 	"Poradové číslo",
 	"Kombinacie",
 	"P", "N", "Sled PN",
@@ -104,8 +104,8 @@ func (r *Riadok) Add(k Kombinacia, n1, n2 Nums, hrx, hhrx float64) {
 	r.Cifrovacky = NewCifrovacky(k)
 }
 
-func (r Riadok) record() []string {
-	rec := make([]string, 0, len(archivRiadokHeader))
+func (r Riadok) Record() []string {
+	rec := make([]string, 0, len(ArchivRiadokHeader))
 	rec = append(rec, itoa(int(r.Pc)), r.K.String())
 	cislovacky := r.C.Strings()
 	rec = append(rec, cislovacky[0:2]...)

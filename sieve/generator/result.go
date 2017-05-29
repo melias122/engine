@@ -7,9 +7,11 @@ import (
 	"sync"
 	"unicode/utf8"
 
+	"github.com/melias122/engine/archiv"
 	"github.com/melias122/engine/csv"
 	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/filter"
+	"github.com/melias122/engine/hrx"
 )
 
 type syncWriter struct {
@@ -41,13 +43,13 @@ type result struct {
 	filter.Filter
 
 	n, m      int
-	hrx, hhrx *engine.H
+	hrx, hhrx *hrx.H
 	riadok    engine.Riadok
 	header    []string
 	w         *syncWriter
 }
 
-func newResultFilter(w *csv.CsvMaxWriter, a *engine.Archiv, n, m int) *result {
+func newResultFilter(w *csv.CsvMaxWriter, a *archiv.Archiv, n, m int) *result {
 	var header []string
 	for i := 1; i <= n; i++ {
 		header = append(header, strconv.Itoa(i))

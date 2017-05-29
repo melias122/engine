@@ -8,9 +8,11 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/melias122/engine/archiv"
 	"github.com/melias122/engine/csv"
 	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/filter"
+	"github.com/melias122/engine/hrx"
 	"github.com/melias122/engine/sieve"
 )
 
@@ -23,14 +25,14 @@ type FastFilter struct {
 	r *result
 }
 
-func New(archiv *engine.Archiv, sk engine.Skupiny, filters filter.Filters) *FastFilter {
+func New(archiv *archiv.Archiv, sk engine.Skupiny, filters filter.Filters) *FastFilter {
 	startTime := time.Now().Format("2006-1-2-15-4-5")
 	subdir := startTime + "_FastFilter"
 
 	csvw := csv.NewCsvMaxWriter(startTime, archiv.Workdir,
 		csv.SetSubdir(subdir),
 		csv.SetSuffixFunc(csv.IntSuffix()),
-		csv.SetHeader(engine.HeaderHrxHHrx),
+		csv.SetHeader(hrx.HeaderHrxHHrx),
 	)
 
 	os.Mkdir(filepath.Join(archiv.Workdir, subdir), 0755)

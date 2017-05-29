@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/melias122/engine/engine"
+	"github.com/melias122/engine/archiv"
 	"github.com/melias122/engine/csv"
+	"github.com/melias122/engine/engine"
 )
 
 type syncWriter struct {
@@ -36,7 +37,7 @@ type result struct {
 	err error
 }
 
-func newResultFilter(w *csv.CsvMaxWriter, a *engine.Archiv) *result {
+func newResultFilter(w *csv.CsvMaxWriter, a *archiv.Archiv) *result {
 	return &result{
 		w: newSyncWriter(w),
 	}

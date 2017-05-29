@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/melias122/engine/archiv"
 	"github.com/melias122/engine/csv"
 	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/filter"
@@ -14,7 +15,7 @@ import (
 )
 
 type Generator struct {
-	archiv  *engine.Archiv
+	archiv  *archiv.Archiv
 	filters filter.Filters
 	skupiny engine.Skupiny
 
@@ -22,7 +23,7 @@ type Generator struct {
 	n int
 }
 
-func New(archiv *engine.Archiv, sk engine.Skupiny, filters filter.Filters, n, m int) *Generator {
+func New(archiv *archiv.Archiv, sk engine.Skupiny, filters filter.Filters, n, m int) *Generator {
 	startTime := time.Now().Format("2006-1-2-15-4-5")
 	subdir := startTime + "_Generator"
 
