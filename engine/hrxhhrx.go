@@ -97,18 +97,18 @@ func makeSkupiny(archiv *Archiv) (Skupiny, error) {
 	h := hrxHHrxTab{
 		n:          archiv.n,
 		m:          archiv.m,
-		HrxXcisla:  archiv.Hrx.Xcisla(),
+		HrxXcisla:  archiv.Hrx.xcisla.copy(),
 		Xcisla:     make(Xcisla, 0, archiv.n),
 		Hrx:        archiv.Hrx,
 		HHrx:       archiv.HHrx,
-		riadokHrx:  archiv.Hrx.Value(),
-		riadokHHrx: archiv.HHrx.Value(),
+		riadokHrx:  archiv.Hrx.Value(nil),
+		riadokHHrx: archiv.HHrx.Value(nil),
 		pocetSucet: *big.NewInt(1),
 
 		KombinaciaR: archiv.K,
 
-		hhrxMin: archiv.HHrx.Xcisla(),
-		hhrxMax: archiv.HHrx.Xcisla(),
+		hhrxMin: archiv.HHrx.xcisla.copy(),
+		hhrxMax: archiv.HHrx.xcisla.copy(),
 
 		HrxNums:  make(map[int]Nums),
 		HHrxNums: make(map[int]Nums),

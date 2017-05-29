@@ -58,25 +58,10 @@ func (h *H) GetNum(x int) *Num {
 	}
 }
 
-// Squaring je asi 10x rychlejsi ako math.Pow ...
-func (h *H) value(skupina, pocet, max float64) float64 {
-	var (
-		m = float64(h.m)
-	)
-	x := (max - skupina) / max
-	x *= x // x^2
-	x *= x // x^4
-	x *= x // x^8
-	x *= x // x^16
-	return (pocet / m) * x
-}
-
-// Hodnota aktualnej zostavy Hrx
-func (h *H) Value() float64 {
-	return h.valuePresun(h.xcisla)
-}
-
-func (h *H) ValueKombinacia(k Kombinacia) float64 {
+func (h *H) Value(k Kombinacia) float64 {
+	if k == nil {
+		return h.valuePresun(h.xcisla)
+	}
 	xcisla := h.xcisla.copy()
 	// move
 	for _, cislo := range k {
@@ -102,11 +87,15 @@ func (h *H) valuePresun(p Xcisla) float64 {
 		max = float64(h.max)
 	}
 	for _, p := range p {
-		hrx += h.value(float64(p.Sk), float64(p.Max), max)
+
+		x := (max - float64(p.Sk)) / max
+		x *= x // x^2
+		x *= x // x^4
+		x *= x // x^8
+		x *= x // x^16
+		x *= (float64(p.Max) / float64(h.m))
+
+		hrx += x
 	}
 	return math.Sqrt(math.Sqrt(hrx)) * 100
-}
-
-func (h *H) Xcisla() Xcisla {
-	return h.xcisla.copy()
 }

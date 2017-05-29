@@ -19,7 +19,7 @@ func BenchmarkHrxValue(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		hrx.Value()
+		hrx.Value(nil)
 	}
 	b.ReportAllocs()
 }
@@ -36,7 +36,7 @@ func BenchmarkValueKombinacia(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		hrx.ValueKombinacia(k)
+		hrx.Value(k)
 	}
 	b.ReportAllocs()
 }
@@ -78,8 +78,8 @@ func TestHrxValue(t *testing.T) {
 	const n, m = 5, 35
 	hrx := NewHHrx(n, m)
 
-	if strconv.FormatFloat(hrx.Value(), 'f', 2, 64) != "100.00" {
-		t.Errorf("Excepted: (%s), Got: (%.2f)", "100.00", hrx.Value())
+	if strconv.FormatFloat(hrx.Value(nil), 'f', 2, 64) != "100.00" {
+		t.Errorf("Excepted: (%s), Got: (%.2f)", "100.00", hrx.Value(nil))
 	}
 
 	tests := []struct {
@@ -96,8 +96,8 @@ func TestHrxValue(t *testing.T) {
 		for y, x := range test.k {
 			hrx.Add(x, y)
 		}
-		if strconv.FormatFloat(hrx.Value(), 'f', 12, 64) != test.value {
-			t.Errorf("Excepted: (%s), Got: (%.12f)", test.value, hrx.Value())
+		if strconv.FormatFloat(hrx.Value(nil), 'f', 12, 64) != test.value {
+			t.Errorf("Excepted: (%s), Got: (%.12f)", test.value, hrx.Value(nil))
 		}
 	}
 }
@@ -128,7 +128,7 @@ func TestHrxValueKombinacia(t *testing.T) {
 		{Kombinacia{17, 21, 29, 32, 34}, "82.226978235840"},
 	}
 	for _, test := range tests {
-		vk := hrx.ValueKombinacia(test.k)
+		vk := hrx.Value(test.k)
 		if strconv.FormatFloat(vk, 'f', 12, 64) != test.value {
 			t.Errorf("Excepted: (%s), Got: (%.12f)", test.value, vk)
 		}

@@ -113,8 +113,8 @@ func (r *result) Check(k engine.Kombinacia) bool {
 		line   = make([]string, 0, len(r.header)+r.n)
 		r1, s1 = k.SucetRSNext(r.hhrx.Cisla)
 		r2, s2 = k.SucetRSNext(r.hrx.Cisla)
-		hrx    = r.hrx.ValueKombinacia(k)
-		hhrx   = r.hhrx.ValueKombinacia(k)
+		hrx    = r.hrx.Value(k)
+		hhrx   = r.hhrx.Value(k)
 	)
 	for _, cislo := range k {
 		line = append(line, strconv.Itoa(int(cislo)))

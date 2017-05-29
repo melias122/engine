@@ -50,7 +50,7 @@ func Test745(t *testing.T) {
 		NewFilterXtica(n, m, engine.Tica{2, 1, 3, 0, 1}),
 	}
 
-	g := New(a, filters)
+	g := New(a, nil, filters, m, m)
 	s, err := sieve.New(g, nil)
 	if err != nil {
 		t.Fatal(err)

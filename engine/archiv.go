@@ -150,7 +150,7 @@ func (a *Archiv) create(kombinacie [][]int) (e error) {
 		// Zostavenie Riadkov pre Archiv
 		// pre 2 a viac riadkov robime rozdiel(diff) vybranych hodnot
 		if a.Pc > 1 {
-			a.Add(k, a.HHrx.Cisla, a.Hrx.Cisla, a.Hrx.Value(), a.HHrx.Value())
+			a.Add(k, a.HHrx.Cisla, a.Hrx.Cisla, a.Hrx.Value(nil), a.HHrx.Value(nil))
 		} else {
 			a.Uc.Riadok++                                 // TODO: nespravne ukazovanie uc predtym nez nastane 101
 			a.Add(k, a.HHrx.Cisla, a.Hrx.Cisla, 100, 100) // V prvom riadku hodnoty hrx a hhrx su nastavene natvrdo 100

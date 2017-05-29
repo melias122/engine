@@ -54,7 +54,7 @@ func newFilterH(fname string, min, max float64, h *engine.H, n int) filterH {
 }
 
 func (h *filterH) Check(k engine.Kombinacia) bool {
-	value := h.h.ValueKombinacia(k)
+	value := h.h.Value(k)
 	if len(k) == h.n {
 		if value < h.min || value > h.max {
 			return false
