@@ -5,8 +5,6 @@ import (
 	"strconv"
 )
 
-type Cislovacka byte
-
 const (
 	P Cislovacka = iota
 	N
@@ -31,20 +29,20 @@ func (i Cislovacka) String() string {
 	return _Cislovacka_name[_Cislovacka_index[i]:_Cislovacka_index[i+1]]
 }
 
-var CislovackyFuncs = [...]CislovackaFunc{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC}
+var cislovackyFuncs = [...]cislovackaFunc{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC}
 
-func (i Cislovacka) Func() CislovackaFunc {
-	if i > Cislovacka(len(CislovackyFuncs)-1) {
+func (i Cislovacka) Func() cislovackaFunc {
+	if i > Cislovacka(len(cislovackyFuncs)-1) {
 		return nil
 	}
-	return CislovackyFuncs[i]
+	return cislovackyFuncs[i]
 }
 
 // Cislovacky su P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
 type Cislovacky [10]byte
 
 // FunCislovacky su funkcie, ktore vyhodnocuju ci je cislo danou cislovackou
-type CislovackaFunc func(int) bool
+type cislovackaFunc func(int) bool
 
 func CislovackyMax(n, m int) Cislovacky {
 	var c Cislovacky
@@ -62,11 +60,22 @@ func CislovackyMax(n, m int) Cislovacky {
 
 // NewCislovacky vytvori Cislovacky pre cislo n. Cislovacky maju zmysel pre n z intervalu <1, 99>
 func NewCislovacky(n int) Cislovacky {
+	if n < 1 || n > 99 {
+		panic("could not create Cislovacky")
+	}
 	var c Cislovacky
-	for i, f := range CislovackyFuncs {
+	for i, f := range cislovackyFuncs {
 		if f(n) {
 			c[i]++
 		}
+	}
+	return c
+}
+
+func NewKCislovacky(k Kombinacia) Cislovacky {
+	var c Cislovacky
+	for _, cislo := range k {
+		c.Plus(NewCislovacky(int(cislo)))
 	}
 	return c
 }

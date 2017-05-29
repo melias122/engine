@@ -97,11 +97,11 @@ func (r *Riadok) Add(k Kombinacia, n1, n2 Nums, hrx, hhrx float64) {
 	r.Sucet = k.Sucet()
 
 	r.K = k
-	r.C = k.Cislovacky()
-	r.Ntica = Ntica(k)
-	r.Xtica = Xtica(r.m, k)
+	r.C = NewKCislovacky(k)
+	r.Ntica = NewNtica(k)
+	r.Xtica = NewXtica(k, r.m)
 
-	r.Cifrovacky = k.Cifrovacky()
+	r.Cifrovacky = NewCifrovacky(k)
 }
 
 func (r Riadok) record() []string {

@@ -25,7 +25,7 @@ func TestNtica(t *testing.T) {
 		{Kombinacia{1, 3, 5, 7, 8, 10, 12, 13, 14, 15}, "4 1 0 1 0 0 0 0 0 0"},
 	}
 	for _, test := range tests {
-		tica := Ntica(test.t)
+		tica := NewNtica(test.t)
 		if tica.String() != test.w {
 			t.Fatalf("Excepted: (%s), Have: (%s)", test.w, tica)
 		}

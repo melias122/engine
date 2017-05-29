@@ -30,7 +30,7 @@ func NewFilterCifrovacky(c engine.Cifrovacky, n, m int) (Filter, error) {
 }
 
 func (c *cifrovacky) Check(k engine.Kombinacia) bool {
-	cifrovacky := k.Cifrovacky()
+	cifrovacky := engine.NewCifrovacky(k)
 	cmp := bytes.Compare(cifrovacky[:], c.c[:])
 	if cmp > 0 || (len(k) == c.n && cmp != 0) {
 		return false

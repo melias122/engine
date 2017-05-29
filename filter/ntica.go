@@ -21,7 +21,7 @@ func NewFilterNtica(n int, tica engine.Tica) Filter {
 }
 
 func (n *filterNtica) Check(k engine.Kombinacia) bool {
-	nticaK := engine.Ntica(k)
+	nticaK := engine.NewNtica(k)
 	if len(k) == n.n {
 		return bytes.Equal(nticaK, n.ntica)
 	}

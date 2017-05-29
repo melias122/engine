@@ -48,7 +48,7 @@ func TestXtica(t *testing.T) {
 		{90, Kombinacia{11, 21, 31, 41, 51, 61, 71, 81}, "0 1 1 1 1 1 1 1 1"},
 	}
 	for _, test := range tests {
-		tica := Xtica(test.m, test.t)
+		tica := NewXtica(test.t, test.m)
 		if tica.String() != test.w {
 			t.Fatalf("Excepted: (%s), Have: (%s)", test.w, tica)
 		}

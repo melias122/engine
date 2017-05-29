@@ -106,7 +106,7 @@ func NewFilterCislovackyExact(ints []int, c engine.Cislovacka, n int) (Filter, e
 
 func (f *cislovackyExact) Check(k engine.Kombinacia) bool {
 	count, ok := f.cislovacky.check(k)
-	if k.Len() < f.n {
+	if len(k) < f.n {
 		return ok
 	}
 	return ok && f.exact[count]

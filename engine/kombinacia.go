@@ -5,18 +5,6 @@ import (
 	"strings"
 )
 
-type Kombinacia []int
-
-func (k Kombinacia) Len() int {
-	return len(k)
-}
-
-func (k Kombinacia) Copy() Kombinacia {
-	cp := make(Kombinacia, len(k))
-	copy(cp, k)
-	return cp
-}
-
 func (k Kombinacia) String() string {
 	buf := make([]byte, 0, len(k)*3)
 	space := ""
@@ -26,23 +14,6 @@ func (k Kombinacia) String() string {
 		buf = strconv.AppendInt(buf, int64(n), 10)
 	}
 	return string(buf)
-}
-
-func (k Kombinacia) Contains(num int) bool {
-	for i := range k {
-		if k[i] == num {
-			return true
-		}
-	}
-	return false
-}
-
-func (k Kombinacia) Cislovacky() Cislovacky {
-	var c Cislovacky
-	for _, cislo := range k {
-		c.Plus(NewCislovacky(int(cislo)))
-	}
-	return c
 }
 
 func (k Kombinacia) Sucet() int {

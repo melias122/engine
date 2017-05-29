@@ -119,7 +119,7 @@ func (r *result) Check(k engine.Kombinacia) bool {
 	for _, cislo := range k {
 		line = append(line, strconv.Itoa(int(cislo)))
 	}
-	c := k.Cislovacky()
+	c := engine.NewKCislovacky(k)
 	cislovacky := c.Strings()
 	line = append(line, cislovacky[0:2]...)
 	line = append(line, k.SledPN())
@@ -134,10 +134,10 @@ func (r *result) Check(k engine.Kombinacia) bool {
 		engine.NewZhodaPresun(r.riadok.K, k).String(),
 		ftoa(engine.Smernica(k, r.n, r.m)),
 		ftoa(engine.Korelacia(r.riadok.K, k, r.n, r.m)),
-		engine.Ntica(k).String(),
+		engine.NewNtica(k).String(),
 		engine.NticaSucet(k).String(),
 		engine.NticaSucin(k).String(),
-		engine.Xtica(r.m, k).String(),
+		engine.NewXtica(k, r.m).String(),
 
 		ftoa(r1),
 		ftoa(r1-r.riadok.R1), //dt
@@ -157,7 +157,7 @@ func (r *result) Check(k engine.Kombinacia) bool {
 
 		itoa(k.Sucet()),
 	)
-	line = append(line, k.Cifrovacky().Strings()...)
+	line = append(line, engine.NewCifrovacky(k).Strings()...)
 
 	// TODO: err
 	if err := r.w.Write(line); err != nil {

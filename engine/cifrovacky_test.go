@@ -21,7 +21,7 @@ func TestCifrovackyTeorMax(t *testing.T) {
 	}
 }
 
-func TestMakeCifrovacky(t *testing.T) {
+func TestNewCifrovacky(t *testing.T) {
 	tests := []struct {
 		k Kombinacia
 		w Cifrovacky
@@ -32,7 +32,7 @@ func TestMakeCifrovacky(t *testing.T) {
 		{k: Kombinacia{11, 12, 13, 14, 15, 16, 17, 18, 19, 20}, w: Cifrovacky{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}},
 	}
 	for _, test := range tests {
-		c := MakeCifrovacky(test.k)
+		c := NewCifrovacky(test.k)
 		if bytes.Compare(c[:], test.w[:]) != 0 {
 			t.Errorf("Expected %v, got: %v", test.w, c)
 		}

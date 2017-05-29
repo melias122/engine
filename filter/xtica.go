@@ -24,7 +24,7 @@ func (f *filterXtica) String() string {
 }
 
 func (f *filterXtica) Check(k engine.Kombinacia) bool {
-	cmp := bytes.Compare(engine.Xtica(f.m, k), f.xtica)
+	cmp := bytes.Compare(engine.NewXtica(k, f.m), f.xtica)
 	if (len(k) == f.n && cmp != 0) || cmp > 0 {
 		return false
 	}

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func Ntica(k Kombinacia) Tica {
+func NewNtica(k Kombinacia) Tica {
 	tica, _ := ntica(k)
 	return tica
 }

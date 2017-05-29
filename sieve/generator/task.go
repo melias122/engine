@@ -43,8 +43,8 @@ func (t *task) Run() error {
 
 		// v predchadzajucom kroku sme nasli kombinaciu
 		// skusime dalsie cislo na tomto leveli
-		if k.Len() == j && num.num == k[k.Len()-1] {
-			k = k[:k.Len()-1]
+		if len(k) == j && num.num == k[len(k)-1] {
+			k = k[:len(k)-1]
 			num.inc()
 			indices[j-1]++
 			continue
@@ -69,7 +69,7 @@ func (t *task) Run() error {
 
 		// cisel v kombinacii este nie je n
 		// skusime dalsie cislo
-		if k.Len() < n {
+		if len(k) < n {
 			indices = append(indices, i+1)
 			continue
 		}

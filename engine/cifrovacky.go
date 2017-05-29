@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-type Cifrovacky [10]byte
-
 func CifrovackyTeorMax(n, m int) Cifrovacky {
 	var c Cifrovacky
 	for i := 1; i <= m; i++ {
@@ -15,7 +13,7 @@ func CifrovackyTeorMax(n, m int) Cifrovacky {
 	return c
 }
 
-func MakeCifrovacky(k Kombinacia) Cifrovacky {
+func NewCifrovacky(k Kombinacia) Cifrovacky {
 	var c Cifrovacky
 	for _, n := range k {
 		c.set(int(n))
@@ -43,8 +41,4 @@ func (c Cifrovacky) Strings() []string {
 
 func (c Cifrovacky) String() string {
 	return strings.Join(c.Strings(), " ")
-}
-
-func (k Kombinacia) Cifrovacky() Cifrovacky {
-	return MakeCifrovacky(k)
 }
