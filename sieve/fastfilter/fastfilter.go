@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/csv"
+	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/filter"
 	"github.com/melias122/engine/sieve"
 )
@@ -23,7 +23,7 @@ type FastFilter struct {
 	r *result
 }
 
-func New(archiv *engine.Archiv, filters filter.Filters) *FastFilter {
+func New(archiv *engine.Archiv, sk engine.Skupiny, filters filter.Filters) *FastFilter {
 	startTime := time.Now().Format("2006-1-2-15-4-5")
 	subdir := startTime + "_FastFilter"
 
@@ -38,8 +38,8 @@ func New(archiv *engine.Archiv, filters filter.Filters) *FastFilter {
 	ioutil.WriteFile(filename, []byte(filters.String()), 0755)
 
 	// fast filter
-	skupiny := make(engine.Skupiny, 0, len(archiv.Skupiny))
-	for _, s := range archiv.Skupiny {
+	var skupiny engine.Skupiny
+	for _, s := range sk {
 		if !filters.CheckSkupina(s) {
 			continue
 		}

@@ -7,8 +7,8 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/csv"
+	"github.com/melias122/engine/engine"
 	"github.com/melias122/engine/filter"
 )
 
@@ -47,9 +47,9 @@ type result struct {
 	w         *syncWriter
 }
 
-func newResultFilter(w *csv.CsvMaxWriter, a *engine.Archiv) *result {
+func newResultFilter(w *csv.CsvMaxWriter, a *engine.Archiv, n, m int) *result {
 	var header []string
-	for i := 1; i <= a.Dimension.N; i++ {
+	for i := 1; i <= n; i++ {
 		header = append(header, strconv.Itoa(i))
 	}
 	header = append(header,
@@ -94,8 +94,8 @@ func newResultFilter(w *csv.CsvMaxWriter, a *engine.Archiv) *result {
 		"Cifra 6", "Cifra 7", "Cifra 8", "Cifra 9", "Cifra 0",
 	)
 	return &result{
-		n:      a.Dimension.N,
-		m:      a.Dimension.M,
+		n:      n,
+		m:      m,
 		hrx:    a.Hrx,
 		hhrx:   a.HHrx,
 		riadok: a.Riadok,
