@@ -4,64 +4,26 @@ import (
 	"testing"
 )
 
-func BenchmarkPlus(b *testing.B) {
-	c0 := Cislovacky{0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-	c1 := Cislovacky{1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-	for i := 0; i < b.N; i++ {
-		c0.Plus(c1)
-	}
-}
-
-func BenchmarkXP(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		IsPr(90)
-	}
-}
-
-func TestNewCsilovacky(t *testing.T) {
+func TestNewCislovacka(t *testing.T) {
 	tests := []struct {
 		x int
-		w string
+		c Cislovacka
 	}{
 		// P N PR MC VC c19 c0 cC Cc CC
 		// {0, "0 0 0 0 0 0 0 0 0 0"},
-		{1, "0 1 0 1 0 1 0 0 0 0"},
-		{2, "1 0 1 1 0 1 0 0 0 0"},
-		{9, "0 1 0 0 1 1 0 0 0 0"},
-		{10, "1 0 0 0 1 0 1 0 0 0"},
-		{11, "0 1 1 1 0 0 0 0 0 1"},
-		{12, "1 0 0 1 0 0 0 1 0 0"},
-		{21, "0 1 0 1 0 0 0 0 1 0"},
+		{1, Cislovacka{0, 1, 0, 1, 0, 1, 0, 0, 0, 0}},
+		{2, Cislovacka{1, 0, 1, 1, 0, 1, 0, 0, 0, 0}},
+		{9, Cislovacka{0, 1, 0, 0, 1, 1, 0, 0, 0, 0}},
+		{10, Cislovacka{1, 0, 0, 0, 1, 0, 1, 0, 0, 0}},
+		{11, Cislovacka{0, 1, 1, 1, 0, 0, 0, 0, 0, 1}},
+		{12, Cislovacka{1, 0, 0, 1, 0, 0, 0, 1, 0, 0}},
+		{21, Cislovacka{0, 1, 0, 1, 0, 0, 0, 0, 1, 0}},
 	}
 	for _, test := range tests {
-		r := NewCislovacky(test.x)
-		rs := r.String()
-		if rs != test.w {
-			t.Fatalf("Expected: (%s), Have: (%s)", test.w, rs)
+		c := NewCislovacka(Kombinacia{test.x})
+		if c != test.c {
+			t.Fatalf("expected %v, got: %v", test.c, c)
 		}
-	}
-}
-
-func TestPlus(t *testing.T) {
-	var test struct {
-		in      []Cislovacky
-		result  Cislovacky
-		exepted Cislovacky
-	}
-	test.in = []Cislovacky{
-		{0, 1, 2, 3, 4, 5, 6, 7, 8, 9},
-		{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	}
-	test.exepted = Cislovacky{1, 3, 5, 7, 9, 11, 13, 15, 17, 20}
-
-	for _, i := range test.in {
-		test.result.Plus(i)
-	}
-
-	if test.result != test.exepted {
-		t.Log("got: ", test.result, "expected: ", test.exepted)
-		t.Fail()
 	}
 }
 

@@ -1,113 +1,93 @@
 package engine
 
-import (
-	"fmt"
-	"strconv"
-)
-
-const (
-	P Cislovacka = iota
-	N
-	Pr
-	Mc
-	Vc
-	C19
-	C0
-	XcC
-	Cc
-	CC
-)
-
-const _Cislovacka_name = "PNPrMcVcC19C0cCCcCC"
-
-var _Cislovacka_index = [...]uint8{0, 1, 2, 4, 6, 8, 11, 13, 15, 17, 19}
-
-func (i Cislovacka) String() string {
-	if i >= Cislovacka(len(_Cislovacka_index)-1) {
-		return fmt.Sprintf("Cislovacka(%d)", i)
-	}
-	return _Cislovacka_name[_Cislovacka_index[i]:_Cislovacka_index[i+1]]
-}
-
-var cislovackyFuncs = [...]cislovackaFunc{IsP, IsN, IsPr, IsMc, IsVc, IsC19, IsC0, IscC, IsCc, IsCC}
-
-func (i Cislovacka) Func() cislovackaFunc {
-	if i > Cislovacka(len(cislovackyFuncs)-1) {
-		return nil
-	}
-	return cislovackyFuncs[i]
-}
-
 // Cislovacky su P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
-type Cislovacky [10]byte
-
-// FunCislovacky su funkcie, ktore vyhodnocuju ci je cislo danou cislovackou
-type cislovackaFunc func(int) bool
-
-func CislovackyMax(n, m int) Cislovacky {
-	var c Cislovacky
-	for i := 1; i <= m; i++ {
-		c2 := NewCislovacky(i)
-		c.Plus(c2)
-	}
-	for i := range c {
-		if c[i] > byte(n) {
-			c[i] = byte(n)
-		}
-	}
-	return c
+type Cislovacka struct {
+	P   byte
+	N   byte
+	Pr  byte
+	Mc  byte
+	Vc  byte
+	C19 byte
+	C0  byte
+	McC byte `csv:"cC"`
+	VCc byte `csv:"Cc"`
+	CC  byte `csv:"CC"`
 }
 
 // NewCislovacky vytvori Cislovacky pre cislo n. Cislovacky maju zmysel pre n z intervalu <1, 99>
-func NewCislovacky(n int) Cislovacky {
-	if n < 1 || n > 99 {
-		panic("could not create Cislovacky")
-	}
-	var c Cislovacky
-	for i, f := range cislovackyFuncs {
-		if f(n) {
-			c[i]++
+func NewCislovacka(k Kombinacia) Cislovacka {
+	var c Cislovacka
+	for _, n := range k {
+		if IsP(n) {
+			c.P++
+		} else {
+			c.N++
+		}
+		if IsPr(n) {
+			c.Pr++
+		}
+		if IsMc(n) {
+			c.Mc++
+		} else {
+			c.Vc++
+		}
+		if IsC19(n) {
+			c.C19++
+		}
+		if IsC0(n) {
+			c.C0++
+		}
+		if IscC(n) {
+			c.McC++
+		}
+		if IsCc(n) {
+			c.VCc++
+		}
+		if IsCC(n) {
+			c.CC++
 		}
 	}
 	return c
 }
 
-func NewKCislovacky(k Kombinacia) Cislovacky {
-	var c Cislovacky
-	for _, cislo := range k {
-		c.Plus(NewCislovacky(int(cislo)))
+func NewCislovackaMax(n, m int) Cislovacka {
+	k := make(Kombinacia, m)
+	for i := range k {
+		k[i] = i + 1
+	}
+	c := NewCislovacka(k)
+	nb := byte(n)
+	if c.P > nb {
+		c.P = nb
+	}
+	if c.N > nb {
+		c.N = nb
+	}
+	if c.Pr > nb {
+		c.Pr = nb
+	}
+	if c.Mc > nb {
+		c.Mc = nb
+	}
+	if c.Vc > nb {
+		c.Vc = nb
+	}
+	if c.C19 > nb {
+		c.C19 = nb
+	}
+	if c.C0 > nb {
+		c.C0 = nb
+	}
+	if c.McC > nb {
+		c.McC = nb
+	}
+	if c.VCc > nb {
+		c.VCc = nb
+	}
+	if c.CC > nb {
+		c.CC = nb
 	}
 	return c
-}
-
-// Plus pricita k c c2. Teda c = c + c2.
-// W: Moze prist k preteceniu!
-func (c *Cislovacky) Plus(c2 Cislovacky) {
-	for i, j := range c2 {
-		c[i] += j
-	}
-}
-
-// Minus odcita z c c2. Teda c = c - c2.
-// W: Moze prist k preteceniu!
-func (c *Cislovacky) Minus(c2 Cislovacky) {
-	for i, j := range c2 {
-		c[i] -= j
-	}
-}
-
-// String implementuje interface Stringer
-func (c *Cislovacky) String() string {
-	return bytesToString(c[0:len(c)])
-}
-
-// Strings je pomocna funkcia pre vypis jednotlivych cislovacie
-func (c *Cislovacky) Strings() []string {
-	s := make([]string, len(c))
-	for i, c := range c {
-		s[i] = strconv.Itoa(int(c))
-	}
-	return s
 }
 
 // IsP kontroluje ci je cislo parne
