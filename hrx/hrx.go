@@ -1,105 +1,90 @@
 package hrx
 
 import (
-	"math"
-
 	"github.com/melias122/engine/engine"
 )
 
-type H struct {
-	n, m   int
-	xcisla engine.Xcisla
-	Cisla  engine.Nums
-	max    int
+type Hrx struct {
+	*Cislo
+
+	n, m  int
+	cache *hCache
+	Uc    engine.Uc
 }
 
-func NewHrx(n, m int) *H {
-	return &H{
-		n:      n,
-		m:      m,
-		xcisla: engine.NewXcisla(m),
-		Cisla:  make(engine.Nums, m),
-
-		max: 19,
-	}
-}
-
-func NewHHrx(n, m int) *H {
-	return &H{
-		n:      n,
-		m:      m,
-		xcisla: engine.NewXcisla(m),
-		Cisla:  make(engine.Nums, m),
+func NewHrx(n, m int) *Hrx {
+	cache := newHCache(n, m)
+	return &Hrx{
+		Cislo: newCislo(cache, n, m),
+		n:     n,
+		m:     m,
+		cache: cache,
 	}
 }
 
-func (h *H) Add(x, y int) {
-
-	if x <= 0 || y < 0 {
-		panic("hrx.Add: x <= 0")
-	}
-
-	// Ak N nie je v vytvorene
-	N := h.Cisla[x-1]
-	if N == nil {
-		N = engine.NewNum(x, h.n, h.m)
-		h.Cisla[x-1] = N
-	}
-
-	// Presun Hrx/HHrx zo skupiny PocetR, do skupiny aktualnej pocetnosti cisla N
-	h.xcisla.Move(1, N.PocetR(), N.PocetR()+1)
-
-	// Incrementuj pocetnost cisla x
-	N.Inc(y)
-}
-
-func (h *H) GetNum(x int) *engine.Num {
-	N := h.Cisla[x-1]
-	if N == nil {
-		return engine.NewNum(x, h.n, h.m)
-	} else {
-		return h.Cisla[x-1]
-	}
-}
-
-func (h *H) Value(k engine.Kombinacia) float64 {
-	if k == nil {
-		return h.valuePresun(h.xcisla)
-	}
-	xcisla := h.xcisla.Copy()
-	// move
-	for _, cislo := range k {
-		sk := h.GetNum(int(cislo)).PocetR()
-		xcisla.Move(1, sk, sk+1)
-	}
-	// compute
-	return h.valuePresun(xcisla)
-}
-
-//Vypocita hodnotu Presun p
-func (h *H) valuePresun(p engine.Xcisla) float64 {
-	if p.Max() == 0 {
-		return 100
-	}
+func (h *Hrx) Add(kombs []engine.Kombinacia) {
 	var (
-		max float64
-		hrx float64
+		is101 = make(map[int]bool)
 	)
-	if h.max == 0 {
-		max = float64(p.Max())
-	} else {
-		max = float64(h.max)
+	for _, k := range kombs {
+		for _, c := range k {
+			is101[c] = true
+		}
+		if len(is101) == h.m {
+			break
+		}
 	}
-	for _, p := range p {
 
-		x := (max - float64(p.Sk)) / max
-		x *= x // x^2
-		x *= x // x^4
-		x *= x // x^8
-		x *= x // x^16
-		x *= (float64(p.Max) / float64(h.m))
+	// Ak sa v hhrx vyskytli vsetky cisla 1..m
+	// nastala udalost 101
+	if len(is101) == h.m {
 
-		hrx += x
+		var reverse bool
+		if h.Uc.Cislo == 0 {
+			reverse = true
+		} else {
+			last := kombs[len(kombs)-1]
+			for _, num := range last {
+				// Ak na riadku narazime na Uc Cislo
+				// porebujeme ho spatne dohladat
+				if num == h.Uc.Cislo {
+					reverse = true
+				}
+			}
+			if !reverse {
+				h.Cislo.add(last)
+			}
+		}
+
+		// Uc cislo je 0 len raz po udalosti 101.
+		// Spatne dohladanie Uc cisla a riadku a inrementovanie cisiel Roddo
+		if reverse {
+			// Nova hrx zostava a resetovanie cisiel Roddo
+			h.Cislo = newCislo(h.cache, h.n, h.m)
+			is101 := make(map[int]bool)
+			newUc := engine.Uc{Riadok: len(kombs)}
+			// Spatne nacitava kombinacie a incremtuje Roddo
+			// a Hrx az pokial nenastane udalost 101
+			// udalost 101 nastava ked sa kazde cislo vyskytne aspon 1
+
+			for len(is101) < h.m {
+				newUc.Riadok--
+				k := kombs[newUc.Riadok]
+				h.Cislo.add(k)
+				for _, num := range k {
+					is101[num] = true
+					if len(is101) == h.m {
+						newUc.Cislo = num
+						break
+					}
+				}
+			}
+			// Nastavenie noveho Uc cisla a riadku pre archiv
+			h.Uc = newUc
+		}
 	}
-	return math.Sqrt(math.Sqrt(hrx)) * 100
+}
+
+func (h *Hrx) X(k engine.Kombinacia) float64 {
+	return h.Cislo.x(19, k)
 }
