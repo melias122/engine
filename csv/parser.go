@@ -3,10 +3,21 @@ package csv
 import (
 	"fmt"
 	"io"
+	"os"
 	"strconv"
 
+	"github.com/melias122/engine/engine"
 	"github.com/pkg/errors"
 )
+
+func ParsePath(path string, n, m int) ([]engine.Kombinacia, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	return NewParser(f, n, m).Parse()
+}
 
 type Parser struct {
 	r          *Reader
@@ -27,11 +38,11 @@ func NewParser(r io.Reader, n, m int) *Parser {
 	}
 }
 
-func (p *Parser) Parse() ([][]int, error) {
+func (p *Parser) Parse() ([]engine.Kombinacia, error) {
 
 	var (
-		combs [][]int
-		line  = 1
+		k    []engine.Kombinacia
+		line = 1
 	)
 
 	for ; ; line++ {
@@ -53,19 +64,22 @@ func (p *Parser) Parse() ([][]int, error) {
 			return nil, fmt.Errorf("not enough fields on line %d", line)
 		}
 
-		comb := make([]int, p.n)
+		new := make(engine.Kombinacia, p.n)
 		for i, field := range row[3 : p.n+3] {
 			num, err := strconv.Atoi(field)
 			if err != nil {
 				return nil, errors.Wrapf(err, "on line %v", line)
 			}
-			comb[i] = num
+			if num < 1 || num > p.m {
+				return nil, fmt.Errorf("on line %v: %v is not valid number", line, num)
+			}
+			new[i] = num
 		}
-		combs = append(combs, comb)
+		k = append(k, new)
 	}
 
-	if len(combs) > 0 {
-		return combs, nil
+	if len(k) > 0 {
+		return k, nil
 	}
 
 	return nil, fmt.Errorf("could not parse file")
