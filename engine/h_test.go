@@ -5,19 +5,19 @@ import (
 	"testing"
 )
 
-func BenchmarkValue(b *testing.B) {
+func BenchmarkH(b *testing.B) {
 	x := 1
 	y := 1
 	n := 30
 	m := 90
 	pocet := 1500
 	for i := 0; i < b.N; i++ {
-		Value(pocet, x, y, n, m)
+		H(x, y, pocet, n, m)
 	}
 	b.ReportAllocs()
 }
 
-func TestValueR_STL(t *testing.T) {
+func TestH(t *testing.T) {
 	tests := []struct {
 		x, y, n, m, pocet int
 		w                 string
@@ -33,7 +33,7 @@ func TestValueR_STL(t *testing.T) {
 		{35, 1, 5, 35, 43, "0.0000000000"},
 	}
 	for i, x := range tests {
-		r := fmt.Sprintf("%.10f", Value(x.pocet, x.x, x.y, x.n, x.m))
+		r := fmt.Sprintf("%.10f", H(x.x, x.y, x.pocet, x.n, x.m))
 		if r != x.w {
 			t.Errorf("Expected: (%s), Have: (%s) (test %d)", x.w, r, i+1)
 		}
