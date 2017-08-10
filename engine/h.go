@@ -23,10 +23,3 @@ func H(cislo, pozicia, pocet, n, m int) float64 {
 	hodnota, _ := r.SetFrac(&b, &a).Float64()
 	return hodnota
 }
-
-// func vrati maximalnu teoreticku
-// pocetnost cisla v stlpci
-// func Max(x, y, n, m int) *big.Int {
-// 	var a, b big.Int
-// 	return a.Mul(a.Binomial(int64(m-x), int64(n-y)), b.Binomial(int64(x-1), int64(y-1)))
-// }
