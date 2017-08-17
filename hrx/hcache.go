@@ -22,10 +22,6 @@ func newHCache(n, m int) *hCache {
 }
 
 func (h *hCache) H(cislo, pozicia, pocet int) float64 {
-	//	if cislo > (h.m/2)+h.m%2 {
-	//		cislo = (cislo - (h.m + 1)) * (-1)
-	//		pozicia = h.n - pozicia + 1
-	//	}
 	k := hkey{int16(cislo), int16(pozicia), int32(pocet)}
 	v, ok := h.cache[k]
 	if ok {
