@@ -12,6 +12,7 @@ type cislo struct {
 }
 
 type Cislo struct {
+	n, m  int
 	r     []cislo
 	stl   [][]cislo
 	cache *hCache
@@ -29,6 +30,8 @@ func newCislo(cache *hCache, n, m int) *Cislo {
 		cache = newHCache(n, m)
 	}
 	return &Cislo{
+		n:       n,
+		m:       m,
 		r:       make([]cislo, m),
 		stl:     stl,
 		cache:   cache,
@@ -38,18 +41,30 @@ func newCislo(cache *hCache, n, m int) *Cislo {
 }
 
 func (c *Cislo) Rp(cislo int) int {
+	if cislo < 1 || cislo > c.m {
+		panic("Rp: out of bounds")
+	}
 	return c.r[cislo-1].pocet
 }
 
 func (c *Cislo) Rh(cislo int) float64 {
+	if cislo < 1 || cislo > c.m {
+		panic("Rh: out of bounds")
+	}
 	return c.r[cislo-1].hodnota
 }
 
 func (c *Cislo) STLp(cislo, pozicia int) int {
+	if cislo < 1 || cislo > c.m || pozicia < 1 || pozicia > c.n {
+		panic("STLp: out of bounds")
+	}
 	return c.stl[cislo-1][pozicia-1].pocet
 }
 
 func (c *Cislo) STLh(cislo, pozicia int) float64 {
+	if cislo < 1 || cislo > c.m || pozicia < 1 || pozicia > c.n {
+		panic("STLh: out of bounds")
+	}
 	return c.stl[cislo-1][pozicia-1].hodnota
 }
 
@@ -97,7 +112,6 @@ func (n *Cislo) x(max int, k engine.Kombinacia) float64 {
 		return 100
 	}
 	hrx := .0
-	m := len(n.stl)
 	for i, j := range n.skupina {
 		for _, c := range k {
 			s := n.Rp(c)
@@ -107,13 +121,12 @@ func (n *Cislo) x(max int, k engine.Kombinacia) float64 {
 				j++
 			}
 		}
-
 		x := float64(max-i) / float64(max)
 		x *= x // x^2
 		x *= x // x^4
 		x *= x // x^8
 		x *= x // x^16
-		x *= (float64(j) / float64(m))
+		x *= (float64(j) / float64(n.m))
 
 		hrx += x
 	}
