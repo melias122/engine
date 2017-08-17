@@ -5,14 +5,15 @@ import (
 	"fmt"
 
 	"github.com/melias122/engine/engine"
+	"github.com/melias122/engine/hrx"
 )
 
 type cifrovacky struct {
 	n int
-	c engine.Cifrovacky
+	c engine.Cifrovacka
 }
 
-func NewFilterCifrovacky(c engine.Cifrovacky, n, m int) (Filter, error) {
+func NewFilterCifrovacky(c engine.Cifrovacka, n, m int) (Filter, error) {
 	var sum int
 	for i := range c {
 		sum += int(c[i])
@@ -38,7 +39,7 @@ func (c *cifrovacky) Check(k engine.Kombinacia) bool {
 	return true
 }
 
-func (c *cifrovacky) CheckSkupina(s engine.Skupina) bool {
+func (c *cifrovacky) CheckSkupina(s hrx.Skupina) bool {
 	return true
 }
 

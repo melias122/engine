@@ -87,22 +87,22 @@ func (t *task) done() bool {
 
 func makeNums(hrxNums engine.Nums, xcisla engine.Xcisla) []num {
 	var (
-		nums  []num
-		skMax = make(map[int]*int, xcisla.Len())
+		nums []num
+		//skMax = make(map[int]*int, xcisla.Len())
 	)
-	for _, tab := range xcisla {
-		total := tab.Max
-		skMax[tab.Sk] = &total
-	}
-	for _, Num := range hrxNums {
-		sk := Num.PocetR()
-		if total, ok := skMax[sk]; ok {
-			nums = append(nums, num{
-				num:   Num.Cislo(),
-				total: total,
-			})
-		}
-	}
+	// for _, tab := range xcisla {
+	// 	total := tab.Max
+	// 	skMax[tab.Sk] = &total
+	// }
+	// for _, Num := range hrxNums {
+	// 	sk := Num.PocetR()
+	// 	if total, ok := skMax[sk]; ok {
+	// 		nums = append(nums, num{
+	// 			num:   Num.Num(),
+	// 			total: total,
+	// 		})
+	// 	}
+	// }
 	return nums
 }
 

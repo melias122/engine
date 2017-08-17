@@ -7,11 +7,12 @@ import (
 )
 
 func TestFilterR(t *testing.T) {
-	cisla := engine.Nums{
-		engine.NewNum(1, 5, 35),
-		engine.NewNum(2, 5, 35),
-		engine.NewNum(3, 5, 35),
-	}
+	var cisla engine.Nums
+	//cisla := engine.Nums{
+	//engine.NewNum(1, 5, 35),
+	//engine.NewNum(2, 5, 35),
+	//engine.NewNum(3, 5, 35),
+	//}
 	tests := []struct {
 		k engine.Kombinacia
 		f Filter

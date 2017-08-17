@@ -1,6 +1,9 @@
 package filter
 
-import "github.com/melias122/engine/engine"
+import (
+	"github.com/melias122/engine/engine"
+	"github.com/melias122/engine/hrx"
+)
 
 type Delta int
 
@@ -11,24 +14,24 @@ const (
 
 type filterRMinusSTL struct {
 	n     int
-	nums  engine.Nums
+	sum   engine.RSTLk
 	delta Delta
 	fname string
 }
 
-func NewFilterR1MinusSTL1(d Delta, nums engine.Nums, n int) Filter {
+func NewFilterR1MinusSTL1(d Delta, sum engine.RSTLk, n int) Filter {
 	return &filterRMinusSTL{
 		n:     n,
-		nums:  nums,
+		sum:   sum,
 		delta: d,
 		fname: "Δ(ƩR1-DO-ƩSTL1-DO)",
 	}
 }
 
-func NewFilterR2MinusSTL2(d Delta, nums engine.Nums, n int) Filter {
+func NewFilterR2MinusSTL2(d Delta, sum engine.RSTLk, n int) Filter {
 	return &filterRMinusSTL{
 		n:     n,
-		nums:  nums,
+		sum:   sum,
 		delta: d,
 		fname: "Δ(ƩROD-DO-ƩSTLOD-DO)",
 	}
@@ -36,7 +39,8 @@ func NewFilterR2MinusSTL2(d Delta, nums engine.Nums, n int) Filter {
 
 func (r *filterRMinusSTL) Check(k engine.Kombinacia) bool {
 	if len(k) == r.n {
-		sum1, sum2 := k.SucetRSNext(r.nums)
+		sum1 := r.rssum.R(k)
+		sum2 := r.rssum.S(k)
 		switch r.delta {
 		case POSSITIVE:
 			return sum1 >= sum2
@@ -47,7 +51,7 @@ func (r *filterRMinusSTL) Check(k engine.Kombinacia) bool {
 	return true
 }
 
-func (r *filterRMinusSTL) CheckSkupina(s engine.Skupina) bool {
+func (r *filterRMinusSTL) CheckSkupina(s hrx.Skupina) bool {
 	return true
 }
 

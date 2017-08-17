@@ -6,12 +6,12 @@ import (
 	"github.com/melias122/engine/engine"
 )
 
-func NewFilterR1(min, max float64, HHrxCisla engine.Nums, n int) Filter {
-	return &filterR1{newFilterR("ƩR 1-DO", min, max, HHrxCisla, n)}
+func NewFilterR1(min, max float64, hhrxNums engine.RSum, n int) Filter {
+	return &filterR1{newFilterR("ƩR 1-DO", min, max, hhrxNums, n)}
 }
 
-func NewFilterR2(min, max float64, HrxCisla engine.Nums, n int) Filter {
-	return &filterR2{newFilterR("ƩR OD-DO", min, max, HrxCisla, n)}
+func NewFilterR2(min, max float64, hrxNums engine.RSum, n int) Filter {
+	return &filterR2{newFilterR("ƩR OD-DO", min, max, hrxNums, n)}
 }
 
 type filterR1 struct{ *filterR }
@@ -31,11 +31,11 @@ func (f *filterR2) CheckSkupina(s engine.Skupina) bool {
 type filterR struct {
 	n        int
 	min, max float64
-	cisla    engine.Nums
+	rsum     engine.RSum
 	fname    string
 }
 
-func newFilterR(fname string, min, max float64, cisla engine.Nums, n int) *filterR {
+func newFilterR(fname string, min, max float64, rsum engine.RSum, n int) *filterR {
 	if min <= 0 {
 		min = 0.1
 	}
@@ -44,16 +44,13 @@ func newFilterR(fname string, min, max float64, cisla engine.Nums, n int) *filte
 		n:     n,
 		min:   nextLSS(min),
 		max:   nextGRT(max),
-		cisla: cisla,
+		rsum:  rsum,
 		fname: fname,
 	}
 }
 
 func (r *filterR) Check(k engine.Kombinacia) bool {
-	var sum float64
-	for _, cislo := range k {
-		sum += r.cisla[cislo-1].RNext()
-	}
+	sum := r.rsum.R(k)
 	if (len(k) == r.n && sum < r.min) || sum > r.max {
 		return false
 	}

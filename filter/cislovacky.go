@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/melias122/engine/engine"
+	"github.com/melias122/engine/hrx"
 )
 
 // Cislovacky implementuju Filter pre P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
@@ -57,7 +58,7 @@ func (c *cislovacky) check(k engine.Kombinacia) (int, bool) {
 	return count, true
 }
 
-func (f *cislovacky) CheckSkupina(s engine.Skupina) bool {
+func (f *cislovacky) CheckSkupina(s hrx.Skupina) bool {
 	min := int(s.Cislovacky[0][f.c])
 	max := int(s.Cislovacky[1][f.c])
 	if min > f.max || max < f.min {

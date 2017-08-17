@@ -44,12 +44,12 @@ type result struct {
 
 	n, m      int
 	hrx, hhrx *hrx.H
-	riadok    engine.Riadok
+	riadok    *archiv.Riadok
 	header    []string
 	w         *syncWriter
 }
 
-func newResultFilter(w *csv.CsvMaxWriter, a *archiv.Archiv, n, m int) *result {
+func newResultFilter(w *csv.CsvMaxWriter, hrx, hhrx *hrx.H, riadok *archiv.Riadok, n, m int) *result {
 	var header []string
 	for i := 1; i <= n; i++ {
 		header = append(header, strconv.Itoa(i))
@@ -98,9 +98,9 @@ func newResultFilter(w *csv.CsvMaxWriter, a *archiv.Archiv, n, m int) *result {
 	return &result{
 		n:      n,
 		m:      m,
-		hrx:    a.Hrx,
-		hhrx:   a.HHrx,
-		riadok: a.Riadok,
+		hrx:    hrx,
+		hhrx:   hhrx,
+		riadok: riadok,
 		header: header,
 		w:      newSyncWriter(w),
 	}
@@ -113,8 +113,8 @@ func (r *result) Check(k engine.Kombinacia) bool {
 	}
 	var (
 		line   = make([]string, 0, len(r.header)+r.n)
-		r1, s1 = k.SucetRSNext(r.hhrx.Cisla)
-		r2, s2 = k.SucetRSNext(r.hrx.Cisla)
+		r1, s1 float64 //= k.SucetRSNext(r.hhrx.Cisla)
+		r2, s2 float64 //= k.SucetRSNext(r.hrx.Cisla)
 		hrx    = r.hrx.Value(k)
 		hhrx   = r.hhrx.Value(k)
 	)

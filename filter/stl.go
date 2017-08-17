@@ -6,12 +6,12 @@ import (
 	"github.com/melias122/engine/engine"
 )
 
-func NewFilterSTL1(min, max float64, HHrxNums engine.Nums, n int) Filter {
-	return &filterSTL1{newFilterSTL("ƩSTL 1-DO", min, max, HHrxNums, n)}
+func NewFilterSTL1(min, max float64, hhrxNums engine.SSum, n int) Filter {
+	return &filterSTL1{newFilterSTL("ƩSTL 1-DO", min, max, hhrxNums, n)}
 }
 
-func NewFilterSTL2(min, max float64, HrxNums engine.Nums, n int) Filter {
-	return &filterSTL2{newFilterSTL("ƩSTL OD-DO", min, max, HrxNums, n)}
+func NewFilterSTL2(min, max float64, hrxNums engine.SSum, n int) Filter {
+	return &filterSTL2{newFilterSTL("ƩSTL OD-DO", min, max, hrxNums, n)}
 }
 
 type filterSTL1 struct{ *filterSTL }
@@ -29,11 +29,11 @@ func (f *filterSTL2) CheckSkupina(s engine.Skupina) bool {
 type filterSTL struct {
 	n        int
 	min, max float64
-	nums     engine.Nums
+	ssum     engine.SSum
 	fname    string
 }
 
-func newFilterSTL(fname string, min, max float64, nums engine.Nums, n int) *filterSTL {
+func newFilterSTL(fname string, min, max float64, ssum engine.SSum, n int) *filterSTL {
 	if min <= 0 {
 		min = 0.1
 	}
@@ -41,16 +41,13 @@ func newFilterSTL(fname string, min, max float64, nums engine.Nums, n int) *filt
 		n:     n,
 		min:   nextLSS(min),
 		max:   nextGRT(max),
-		nums:  nums,
+		ssum:  ssum,
 		fname: fname,
 	}
 }
 
 func (s *filterSTL) Check(k engine.Kombinacia) bool {
-	var sum float64
-	for i, c := range k {
-		sum += s.nums[c-1].SNext(i + 1)
-	}
+	sum := s.ssum.S(k) // next
 	if (len(k) == s.n && sum < s.min) || sum > s.max {
 		return false
 	}
