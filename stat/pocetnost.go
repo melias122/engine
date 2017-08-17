@@ -1,140 +1,95 @@
-// +build ignore
-
 package stat
 
 import (
-	"fmt"
 	"math/big"
 
-	"github.com/melias122/engine/csv"
+	"github.com/melias122/engine/engine"
 )
 
-func (a *Archiv) PocetnostR() (err error) {
-	var header = []string{
-		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "C19", "C0", "cC", "Cc", "CC",
-		"Cislo", "Teor. pocet", "Teor. max Ʃ",
-		"Pocet R 1-DO", "R 1-DO", "Pocet R 1-DO (r+1)", "R 1-DO (r+1)",
-		"Pocet R OD-DO", "R OD-DO", "Pocet R OD-DO (r+1)", "R OD-DO (r+1)",
-	}
-	w := csv.NewCsvMaxWriter("PocetnostR", a.Workdir, csv.SetHeader(header))
-	defer func() {
-		err = w.Close()
-	}()
-	var (
-		max    = big.NewInt(0).Binomial(int64(a.m-1), int64(a.n-1)).String()
-		riadok = make([]string, 0, len(header))
-	)
-	for i := 1; i <= a.m; i++ {
-		riadok = riadok[:0]
-
-		N1 := a.HHrx.GetNum(i)
-		N2 := a.Hrx.GetNum(i)
-
-		// Cislo
-		riadok = append(riadok, N1.String())
-
-		// Zhoda s r
-		var contains bool
-		for _, num := range a.K {
-			if num == N1.Cislo() {
-				contains = true
-			}
-		}
-
-		if contains {
-			riadok = append(riadok, "1")
-		} else {
-			riadok = append(riadok, "0")
-		}
-
-		// Cislovacky
-		cislovacky := NewCislovacky(i)
-		riadok = append(riadok, cislovacky.Strings()...)
-		riadok = append(riadok,
-			N1.String(), max, "1",
-			itoa(N1.PocetR()),
-			ftoa(N1.R()),
-			itoa(N1.PocetR()+1),
-			ftoa(Value(N1.PocetR()+1, 1, 1, a.n, a.m)),
-
-			itoa(N2.PocetR()),
-			ftoa(N2.R()),
-			itoa(N2.PocetR()+1),
-			ftoa(Value(N2.PocetR()+1, 1, 1, a.n, a.m)),
-		)
-		if err = w.Write(riadok); err != nil {
-			return
-		}
-	}
-	return
+type ph struct {
+	Pocet   int
+	Hodnota float64
 }
 
-func (a *Archiv) PocetnostS() (err error) {
-	var header = []string{
-		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "C19", "C0", "cC", "Cc", "CC", "Stlpec/Cislo",
-		"Teor. pocet", "Teor. max Ʃ", "Pocet STL 1-DO", "STL 1-DO", "Pocet STL 1-DO (r+1)", "STL 1-DO (r+1)",
-		"Pocet STL OD-DO", "STL OD-DO", "Pocet STL OD-DO (r+1)", "STL OD-DO (r+1)",
-	}
+type RiadokR struct {
+	Cislo int
+	Zhoda int
+	engine.Cislovacka
+	MaxPocet *big.Int
+	R1       ph
+	R2       ph
+}
 
-	w := csv.NewCsvMaxWriter("PocetnostSTL", a.Workdir, csv.SetHeader(header))
-	defer func() {
-		err = w.Close()
-	}()
+//	var header = []string{
+//		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "C19", "C0", "cC", "Cc", "CC",
+//		"Cislo", "Teor. pocet", "Teor. max Ʃ",
+//		"Pocet R 1-DO", "R 1-DO", "Pocet R 1-DO (r+1)", "R 1-DO (r+1)",
+//		"Pocet R OD-DO", "R OD-DO", "Pocet R OD-DO (r+1)", "R OD-DO (r+1)",
+//	}
 
+func PocetnostR(last engine.Kombinacia, hhrx engine.Rc, hrx engine.Rc, n, m int) []RiadokR {
 	var (
-		teorPocet, bi big.Int
+		maxPocet = big.NewInt(0).Binomial(int64(m-1), int64(n-1))
+		r        []RiadokR
 	)
-	for i := 1; i <= a.m; i++ {
-		N1 := a.HHrx.GetNum(i)
-		N2 := a.Hrx.GetNum(i)
-		for j := 1; j <= a.n; j++ {
+	for i := 1; i <= m; i++ {
+		r = append(r, RiadokR{
+			Cislo:      i,
+			Zhoda:      engine.Zhoda(last, engine.Kombinacia{i}),
+			Cislovacka: engine.NewCislovacka(engine.Kombinacia{i}),
+			MaxPocet:   maxPocet,
+			R1: ph{
+				Pocet:   hhrx.Rp(i),
+				Hodnota: hhrx.Rh(i),
+			},
+			R2: ph{
+				Pocet:   hrx.Rp(i),
+				Hodnota: hrx.Rh(i),
+			},
+		})
+	}
+	return r
+}
 
-			r := make([]string, 0, len(header))
+type RiadokS struct {
+	Cislo  int
+	Stlpec int
+	Zhoda  int
+	engine.Cislovacka
+	MaxPocet *big.Int
+	MaxSucet float64
+	S1       ph
+	S2       ph
+}
 
-			// Cislo
-			r = append(r, N1.String())
+// 	var header = []string{
+// 		"Cislo", "ZH \"r\"", "P", "N", "PR", "Mc", "Vc", "C19", "C0", "cC", "Cc", "CC", "Stlpec/Cislo",
+// 		"Teor. pocet", "Teor. max Ʃ", "Pocet STL 1-DO", "STL 1-DO", "Pocet STL 1-DO (r+1)", "STL 1-DO (r+1)",
+// 		"Pocet STL OD-DO", "STL OD-DO", "Pocet STL OD-DO (r+1)", "STL OD-DO (r+1)",
+// 	}
 
-			// Zhoda s r
-			if int(a.K[j-1]) == i {
-				r = append(r, "1")
-			} else {
-				r = append(r, "0")
-			}
-
-			// Cislovacky
-			cislovacky := NewCislovacky(i)
-			r = append(r, cislovacky.Strings()...)
-
-			teorPocet.Mul(teorPocet.Binomial(int64(a.m-i), int64(a.n-j)), bi.Binomial(int64(i-1), int64(j-1)))
-			r = append(r,
-				fmt.Sprintf("stlchce(%d):%d", j, i),
-				teorPocet.String(),
-			)
-
-			var s1, s2, pocS1, pocS2 string
-			if teorPocet.String() == "0" {
-				r = append(r, "0")
-				s1, s2, pocS1, pocS2 = ftoa(0.0), ftoa(0.0), "0", "0"
-			} else {
-				r = append(r, "1")
-				s1, pocS1 = ftoa(Value(N1.PocetS(j)+1, i, j, a.n, a.m)), itoa(N1.PocetS(j)+1)
-				s2, pocS2 = ftoa(Value(N2.PocetS(j)+1, i, j, a.n, a.m)), itoa(N2.PocetS(j)+1)
-			}
-			r = append(r,
-				itoa(N1.PocetS(j)),
-				ftoa(N1.S(j)),
-				pocS1,
-				s1,
-
-				itoa(N2.PocetS(j)),
-				ftoa(N2.S(j)),
-				pocS2,
-				s2,
-			)
-			if err = w.Write(r); err != nil {
-				return
-			}
+func PocetnostS(last engine.Kombinacia, hhrx engine.STLc, hrx engine.STLc, n, m int) []RiadokS {
+	var r []RiadokS
+	for i := 1; i <= m; i++ {
+		for j := 1; j <= n; j++ {
+			//			var a, maxp big.Int
+			r = append(r, RiadokS{
+				Cislo:      i,
+				Stlpec:     j,
+				Zhoda:      engine.Zhoda(last, engine.Kombinacia{i}),
+				Cislovacka: engine.NewCislovacka(engine.Kombinacia{i}),
+				//				MaxPocet:   maxp.Mul(maxp.Binomial(int64(m-i), int64(n-j)), a.Binomial(int64(i-1), int64(j-1))),
+				//				MaxSucet:   engine.CalculateRS(i,j,),
+				S1: ph{
+					Pocet:   hhrx.STLp(i, j),
+					Hodnota: hhrx.STLh(i, j),
+				},
+				S2: ph{
+					Pocet:   hrx.STLp(i, j),
+					Hodnota: hrx.STLh(i, j),
+				},
+			})
 		}
 	}
-	return
+	return r
 }
