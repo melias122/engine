@@ -4,6 +4,9 @@ import (
 	"github.com/melias122/engine/engine"
 )
 
+// Maximalny pocet riadkov nez nastane udalost 101.
+const max101 = 19
+
 type Hrx struct {
 	*Cislo
 
@@ -86,5 +89,5 @@ func (h *Hrx) Add(kombs []engine.Kombinacia) {
 }
 
 func (h *Hrx) X(k engine.Kombinacia) float64 {
-	return h.Cislo.x(19, k)
+	return h.Cislo.x(max101, k)
 }
