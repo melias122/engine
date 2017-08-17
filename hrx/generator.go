@@ -1,8 +1,6 @@
 package hrx
 
 import (
-	"context"
-	"fmt"
 	"sort"
 
 	"github.com/melias122/engine/engine"
@@ -118,62 +116,4 @@ func min(a, b int) int {
 		return a
 	}
 	return b
-}
-
-type RecursiveGenerator struct {
-	n     int
-	x     engine.Xcisla
-	count int
-}
-
-func NewRecursiveGenerator(hrx engine.Rc, n, m int) *RecursiveGenerator {
-	group := make(map[int]int)
-	for c := 1; c <= m; c++ {
-		group[hrx.Rp(c)]++
-	}
-
-	//	fmt.Println(group)
-
-	idx := make([]int, 0, len(group))
-	for sk := range group {
-		idx = append(idx, sk)
-	}
-	sort.Ints(idx)
-
-	//	fmt.Println(idx)
-
-	xcisla := make(engine.Xcisla, 0, len(idx))
-	for _, sk := range idx {
-		//		fmt.Println(sk, group[sk])
-		xcisla = append(xcisla, engine.Tab{Sk: sk, Max: group[sk]})
-	}
-
-	return &RecursiveGenerator{
-		n: n,
-		x: xcisla,
-	}
-}
-
-func (g *RecursiveGenerator) Generate(ctx context.Context, ch chan<- engine.Xcisla) {
-	g.generate(g.x, nil, g.n)
-}
-
-func (g *RecursiveGenerator) generate(in, out engine.Xcisla, n int) {
-	for ; len(in) > 0; in = in[1:] {
-		max := in[0].Max
-		if max > n {
-			max = n
-		}
-		for ; max > 0; max-- {
-			t := engine.Tab{Sk: in[0].Sk, Max: max}
-			out = append(out, t)
-			if n-max > 0 {
-				g.generate(in[1:], out, n-max)
-			} else {
-				g.count++
-				fmt.Println(out)
-			}
-			out = out[:len(out)-1]
-		}
-	}
 }
