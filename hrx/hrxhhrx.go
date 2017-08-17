@@ -499,10 +499,3 @@ func (h *hrxHHrxTab) header() [][]string {
 
 	return header
 }
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}
