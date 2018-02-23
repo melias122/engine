@@ -9,9 +9,9 @@ type Cislovacka struct {
 	Vc  byte
 	C19 byte
 	C0  byte
-	McC byte `csv:"cC"`
-	VCc byte `csv:"Cc"`
-	CC  byte `csv:"CC"`
+	McC byte
+	VCc byte
+	CC  byte
 }
 
 // NewCislovacky vytvori Cislovacky pre cislo n. Cislovacky maju zmysel pre n z intervalu <1, 99>
