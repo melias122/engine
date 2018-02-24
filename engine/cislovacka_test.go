@@ -11,17 +11,17 @@ func TestNewCislovacka(t *testing.T) {
 	}{
 		// P N PR MC VC c19 c0 cC Cc CC
 		// {0, "0 0 0 0 0 0 0 0 0 0"},
-		{1, Cislovacka{0, 1, 0, 1, 0, 1, 0, 0, 0, 0}},
-		{2, Cislovacka{1, 0, 1, 1, 0, 1, 0, 0, 0, 0}},
-		{9, Cislovacka{0, 1, 0, 0, 1, 1, 0, 0, 0, 0}},
-		{10, Cislovacka{1, 0, 0, 0, 1, 0, 1, 0, 0, 0}},
-		{11, Cislovacka{0, 1, 1, 1, 0, 0, 0, 0, 0, 1}},
-		{12, Cislovacka{1, 0, 0, 1, 0, 0, 0, 1, 0, 0}},
-		{21, Cislovacka{0, 1, 0, 1, 0, 0, 0, 0, 1, 0}},
+		{1, Cislovacka{c: [10]byte{0, 1, 0, 1, 0, 1, 0, 0, 0, 0}}},
+		{2, Cislovacka{c: [10]byte{1, 0, 1, 1, 0, 1, 0, 0, 0, 0}}},
+		{9, Cislovacka{c: [10]byte{0, 1, 0, 0, 1, 1, 0, 0, 0, 0}}},
+		{10, Cislovacka{c: [10]byte{1, 0, 0, 0, 1, 0, 1, 0, 0, 0}}},
+		{11, Cislovacka{c: [10]byte{0, 1, 1, 1, 0, 0, 0, 0, 0, 1}}},
+		{12, Cislovacka{c: [10]byte{1, 0, 0, 1, 0, 0, 0, 1, 0, 0}}},
+		{21, Cislovacka{c: [10]byte{0, 1, 0, 1, 0, 0, 0, 0, 1, 0}}},
 	}
 	for _, test := range tests {
 		c := NewCislovacka(Kombinacia{test.x})
-		if c != test.c {
+		if *c != test.c {
 			t.Fatalf("expected %v, got: %v", test.c, c)
 		}
 	}

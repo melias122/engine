@@ -1,91 +1,102 @@
+//go:generate stringer -type Cxx -trimprefix Cxx
 package engine
+
+type Cxx byte
+
+const (
+	CxxP Cxx = iota
+	CxxN
+	CxxPr
+	CxxMc
+	CxxVc
+	CxxC19
+	CxxC0
+	CxxcC
+	CxxCc
+	CxxCC
+)
 
 // Cislovacky su P, N, Pr, Mc, Vc, C19, C0, cC, Cc, CC
 type Cislovacka struct {
-	P   byte
-	N   byte
-	Pr  byte
-	Mc  byte
-	Vc  byte
-	C19 byte
-	C0  byte
-	McC byte
-	VCc byte
-	CC  byte
+	c [10]byte
+}
+
+func (c *Cislovacka) Get(i Cxx) int {
+	return int(c.c[i])
 }
 
 // NewCislovacky vytvori Cislovacky pre cislo n. Cislovacky maju zmysel pre n z intervalu <1, 99>
-func NewCislovacka(k Kombinacia) Cislovacka {
+func NewCislovacka(k Kombinacia) *Cislovacka {
 	var c Cislovacka
 	for _, n := range k {
 		if IsP(n) {
-			c.P++
+			c.c[CxxP]++
 		} else {
-			c.N++
+			c.c[CxxN]++
 		}
 		if IsPr(n) {
-			c.Pr++
+			c.c[CxxPr]++
 		}
 		if IsMc(n) {
-			c.Mc++
+			c.c[CxxMc]++
 		} else {
-			c.Vc++
+			c.c[CxxVc]++
 		}
 		if IsC19(n) {
-			c.C19++
+			c.c[CxxC19]++
 		}
 		if IsC0(n) {
-			c.C0++
+			c.c[CxxC0]++
 		}
 		if IscC(n) {
-			c.McC++
+			c.c[CxxcC]++
 		}
 		if IsCc(n) {
-			c.VCc++
+			c.c[CxxCc]++
 		}
 		if IsCC(n) {
-			c.CC++
+			c.c[CxxCC]++
 		}
 	}
-	return c
+	return &c
 }
 
-func NewCislovackaMax(n, m int) Cislovacka {
+func NewCislovackaMax(n, m int) *Cislovacka {
 	k := make(Kombinacia, m)
 	for i := range k {
 		k[i] = i + 1
 	}
 	c := NewCislovacka(k)
 	nb := byte(n)
-	if c.P > nb {
-		c.P = nb
+	if c.c[CxxP] > nb {
+		c.c[CxxP] = nb
 	}
-	if c.N > nb {
-		c.N = nb
+	if c.c[CxxN] > nb {
+		c.c[CxxN] = nb
 	}
-	if c.Pr > nb {
-		c.Pr = nb
+	if c.c[CxxPr] > nb {
+		c.c[CxxPr] = nb
 	}
-	if c.Mc > nb {
-		c.Mc = nb
+	if c.c[CxxMc] > nb {
+		c.c[CxxMc] = nb
 	}
-	if c.Vc > nb {
-		c.Vc = nb
+	if c.c[CxxVc] > nb {
+		c.c[CxxVc] = nb
 	}
-	if c.C19 > nb {
-		c.C19 = nb
+	if c.c[CxxC19] > nb {
+		c.c[CxxC19] = nb
 	}
-	if c.C0 > nb {
-		c.C0 = nb
+	if c.c[CxxC0] > nb {
+		c.c[CxxC0] = nb
 	}
-	if c.McC > nb {
-		c.McC = nb
+	if c.c[CxxcC] > nb {
+		c.c[CxxcC] = nb
 	}
-	if c.VCc > nb {
-		c.VCc = nb
+	if c.c[CxxCc] > nb {
+		c.c[CxxCc] = nb
 	}
-	if c.CC > nb {
-		c.CC = nb
+	if c.c[CxxCC] > nb {
+		c.c[CxxCC] = nb
 	}
 	return c
 }
@@ -118,7 +129,7 @@ func IsMc(n int) bool {
 }
 
 // IsVc kontroluje ci je cislo velke cislo.
-// Velke cisla su 6..0, 16..20, ..., 86..90
+// Velke cisla su 6..10, 16..20, ..., 86..90
 func IsVc(n int) bool {
 	n %= 10
 	return n >= 6 || n == 0
