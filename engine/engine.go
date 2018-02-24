@@ -1,4 +1,4 @@
-package engine
+package engine // import "github.com/melias122/engine/engine"
 
 // Kombinacia reprezentuje kombinaciu cisiel.
 // Cisla musia byt vacsie ako 1 a mensie ako 'm'. Velkost kombinacie musi byt 'n'
@@ -59,10 +59,12 @@ type Hrx interface {
 	Cislo
 	RSTLk
 	Xk
+
+	Uc() (riadok, cislo int)
 }
 
-// Uc je uzatvaracie cislo pre OD-DO.
-type Uc struct {
-	Riadok int
-	Cislo  int
+type HHrx interface {
+	Cislo
+	RSTLk
+	Xk
 }
