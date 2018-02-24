@@ -1,55 +1,41 @@
-package engine
+//go:generate stringer -type Cif -trimprefix Cif
+package engine // import "github.com/melias122/engine/engine"
+
+type Cif byte
+
+const (
+	CifC0 Cif = iota
+	CifC1
+	CifC2
+	CifC3
+	CifC4
+	CifC5
+	CifC6
+	CifC7
+	CifC8
+	CifC9
+)
 
 type Cifrovacka struct {
-	C1 byte
-	C2 byte
-	C3 byte
-	C4 byte
-	C5 byte
-	C6 byte
-	C7 byte
-	C8 byte
-	C9 byte
-	C0 byte
+	c [10]byte
 }
 
-func NewCifrovacka(k Kombinacia) Cifrovacka {
+func (c *Cifrovacka) Get(i Cif) int {
+	return int(c.c[i])
+}
+
+func NewCifrovacka(k Kombinacia) *Cifrovacka {
 	var c Cifrovacka
 	for _, n := range k {
-		c.set(n)
+		c.c[n%10]++
 	}
-	return c
+	return &c
 }
 
-func NewCifrovackaMax(n, m int) Cifrovacka {
+func NewCifrovackaMax(n, m int) *Cifrovacka {
 	var c Cifrovacka
 	for i := 1; i <= m; i++ {
-		c.set(i)
+		c.c[i%10]++
 	}
-	return c
-}
-
-func (c *Cifrovacka) set(n int) {
-	switch n % 10 {
-	case 1:
-		c.C1++
-	case 2:
-		c.C2++
-	case 3:
-		c.C3++
-	case 4:
-		c.C4++
-	case 5:
-		c.C5++
-	case 6:
-		c.C6++
-	case 7:
-		c.C7++
-	case 8:
-		c.C8++
-	case 9:
-		c.C9++
-	case 0:
-		c.C0++
-	}
+	return &c
 }
